@@ -1,0 +1,5 @@
+bundle.js*
+package-lock.json
+styles.css*
+*.db
+dist/

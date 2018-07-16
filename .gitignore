@@ -1,0 +1,5 @@
+node_modules/
+*.crx
+*.pem
+.DS_Store
+package-lock.json

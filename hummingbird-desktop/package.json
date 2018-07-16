@@ -1,0 +1,47 @@
+{
+  "name": "hycon-wallet-desktop",
+  "productName": "Hycon lite wallet",
+  "version": "1.0.0-beta.0",
+  "description": "Hycon lite wallet - Desktop",
+  "main": "index.js",
+  "scripts": {
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder -mlw",
+    "start": "electron .",
+    "build": "webpack --config webpack.config.js && electron-rebuild",
+    "test": "mocha",
+    "postinstall": "electron-builder install-app-deps",
+    "watch": "webpack --config webpack.config.js --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/glosfer/hycon-ui.git"
+  },
+  "author": {
+    "name": "Glosfer",
+    "email": "security@glosfer.com"
+  },
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/glosfer/hycon-ui#readme",
+  "devDependencies": {
+    "electron": "^2.0.3",
+    "electron-builder": "^20.19.2",
+    "electron-rebuild": "^1.8.1",
+    "electron-reload": "^1.2.5",
+    "mocha": "^5.2.0",
+    "spectron": "^3.8.0",
+    "webpack": "^4.15.1"
+  },
+  "dependencies": {
+    "@glosfer/hw-app-hycon": "0.0.8",
+    "@ledgerhq/hw-transport-node-hid": "^4.16.0",
+    "babel-runtime": "^6.26.0",
+    "base-58": "0.0.1",
+    "blake2b": "^2.1.2",
+    "crypto": "^1.0.1",
+    "electron-updater": "^2.23.3",
+    "nedb": "^1.8.0",
+    "protobufjs": "^6.8.6",
+    "secp256k1": "^3.5.0"
+  }
+}
