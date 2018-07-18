@@ -7,7 +7,7 @@
   "scripts": {
     "pack": "electron-builder --dir",
     "dist": "electron-builder -mlw",
-    "start": "electron .",
+    "start": "NODE_ENV=development electron .",
     "build": "webpack --config webpack.config.js && electron-rebuild",
     "test": "mocha",
     "postinstall": "electron-builder install-app-deps",
