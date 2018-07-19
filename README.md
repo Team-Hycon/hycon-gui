@@ -18,6 +18,8 @@ You can [download](https://github.com/Team-Hycon/hycon-gui/releases/tag/v1.0.0-b
 
 * Support for <a href="https://trezor.io" target="_blank">Trezor</a> hardware wallet
 * Automatic updates
+* More remote node choices
+* UI/UX changes
 
 ## FAQ
 
