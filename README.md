@@ -7,6 +7,8 @@
 * Create and recover wallets
 * Check wallet balance
 * Supports <a href="https://www.ledgerwallet.com/products/ledger-nano-s" target="_blank">Ledger Nano S</a> hardware wallet - *only for 64-bit operating systems*
+* 2 Factor Authentication
+* 8 languages support (English, Korean, Chinese, French, Vietnam, Japan, Mongolian and Russian)
 
 ## Download
 
