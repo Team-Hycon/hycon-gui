@@ -1,4 +1,6 @@
-<h4 align="center">Hycon Wallet - Desktop app </h4>
+<h4 align="center">Hycon Wallet - Desktop app</h4>
+
+[![Build Status](https://travis-ci.org/Team-Hycon/hycon-gui.svg?branch=master)](https://travis-ci.org/Team-Hycon/hycon-gui)
 
 ## Key Features
 
