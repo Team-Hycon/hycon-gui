@@ -8,7 +8,6 @@ matrix:
 
     - os: linux
       services: docker
-      language: generic
 
 language: node_js
 node_js:
@@ -32,8 +31,6 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       sudo apt-get install libusb-1.0-0-dev;
       sudo apt-get install libudev-dev;
-      rm -rf ./node_modules/electron;
-      rm -rf ./hummingbird-desktop/node_modules/electron;
     fi
   - npm i -g npm@6.1.0
 
