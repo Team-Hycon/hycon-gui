@@ -1,3 +1,6 @@
+<h1 align="center">
+  <img src="https://github.com/Team-Hycon/hycon-gui/blob/e7ecaec870f78e7c01c9ea6acef32987a512275b/hummingbird-desktop/build/icon.png" alt="Hycon Wallet" width="200">
+</h1>
 <h4 align="center">Hycon Wallet - Desktop app</h4>
 
 [![Build Status](https://travis-ci.org/Team-Hycon/hycon-gui.svg?branch=master)](https://travis-ci.org/Team-Hycon/hycon-gui)
