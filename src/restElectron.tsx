@@ -550,7 +550,7 @@ export class RestElectron implements IRest {
     public async saveTOTP(secret: string, totpPw: string): Promise<boolean> {
         try {
             const iv = crypto.randomBytes(16)
-            const key = Buffer.from(utils.blake2bHash(totpPw))
+            const key = Buffer.from(utils.blake2bHash(totpPw).buffer)
             const cipher = crypto.createCipheriv("aes-256-cbc", key, iv)
             const encryptedData = Buffer.concat([cipher.update(Buffer.from(secret)), cipher.final()])
             const store: {iv: string, data: string} = {
@@ -580,7 +580,7 @@ export class RestElectron implements IRest {
                 return Promise.resolve({ res: false, case: 1 })
             }
 
-            const key = Buffer.from(utils.blake2bHash(totpPw))
+            const key = Buffer.from(utils.blake2bHash(totpPw).buffer)
             const iv = Buffer.from(totp.iv, "hex")
             const cipher = crypto.createCipheriv("aes-256-cbc", key, iv)
             const encryptedData = Buffer.concat([cipher.update(Buffer.from(secret)), cipher.final()])
@@ -711,7 +711,7 @@ export class RestElectron implements IRest {
 
     private decryptTOTP(totpPw: string, iv: string, data: string): Buffer | boolean {
         try {
-            const key = Buffer.from(utils.blake2bHash(totpPw))
+            const key = Buffer.from(utils.blake2bHash(totpPw).buffer)
             const ivBuffer = Buffer.from(iv, "hex")
             const dataBuffer = Buffer.from(data, "hex")
             const decipher = crypto.createDecipheriv("aes-256-cbc", key, ivBuffer)
