@@ -3,6 +3,7 @@ import * as bip39 from "bip39"
 import * as crypto from "crypto"
 import HDKey = require("hdkey")
 import * as datastore from "nedb"
+import * as tfa from "node-2fa"
 import * as secp256k1 from "secp256k1"
 import { chinese_simplified } from "../mnemonic/chinese_simplified"
 import { chinese_traditional } from "../mnemonic/chinese_traditional"
@@ -17,6 +18,7 @@ import * as proto from "./serialization/proto"
 // tslint:disable-next-line:no-var-requires
 const { ipcRenderer } = require("electron")
 
+import { isValidElement } from "../node_modules/@types/react"
 import {
     IBlock,
     IHyconWallet,
@@ -91,6 +93,7 @@ export class RestElectron implements IRest {
     public osArch: string = ipcRenderer.sendSync("getOSArch")
     public walletsDB = new datastore({ filename: this.userPath + "/wallets.db", autoload: true })
     public favoritesDB = new datastore({ filename: this.userPath + "/favorites.db", autoload: true })
+    public totpDB = new datastore({ filename: this.userPath + "/totp.db", autoload: true })
 
     public loadingListener(callback: (loading: boolean) => void): void {
         this.callback = callback
@@ -313,7 +316,7 @@ export class RestElectron implements IRest {
         })
     }
     public deleteFavorite(alias: string) {
-        return new Promise<boolean>((resolve, reject) => {
+        return new Promise<boolean>((resolve, _) => {
             this.favoritesDB.remove({ alias }, {}, (err: Error, n: number) => {
                 if (err) {
                     console.error(err)
@@ -530,7 +533,95 @@ export class RestElectron implements IRest {
         }
         return Promise.resolve(hyconWallet)
     }
+    public getTOTP(): Promise<{iv: string, data: string}> {
+        return new Promise((resolve, _) => {
+            this.totpDB.find({}, (err: Error, docs: Array<{iv: string, data: string}>) => {
+                if (err) {
+                    console.error(err)
+                    return false
+                }
+                if (docs.length === 0) {
+                    return false
+                }
+                resolve({iv: docs[0].iv, data: docs[0].data})
+            })
+        })
+    }
+    public async saveTOTP(secret: string, totpPw: string): Promise<boolean> {
+        try {
+            const iv = crypto.randomBytes(16)
+            const key = Buffer.from(utils.blake2bHash(totpPw))
+            const cipher = crypto.createCipheriv("aes-256-cbc", key, iv)
+            const encryptedData = Buffer.concat([cipher.update(Buffer.from(secret)), cipher.final()])
+            const store: {iv: string, data: string} = {
+                iv: iv.toString("hex"),
+                data: encryptedData.toString("hex"),
+            }
+            return new Promise<boolean>((resolve, _) => {
+                this.totpDB.insert(store, (err: Error, doc: {iv: string, data: string}) => {
+                    if (err) {
+                        console.error(err)
+                        resolve(false)
+                    }
+                    resolve(true)
+                })
+            })
+        } catch (e) {
+            console.error(e)
+            return Promise.resolve(false)
+        }
+    }
+    public async deleteTOTP(totpPw: string): Promise<{ res: boolean, case?: number }> {
+        try {
+            const totp = await this.getTOTP()
 
+            const secret = this.decryptTOTP(totpPw, totp.iv, totp.data).toString()
+            if (secret === "false") {
+                return Promise.resolve({ res: false, case: 1 })
+            }
+
+            const key = Buffer.from(utils.blake2bHash(totpPw))
+            const iv = Buffer.from(totp.iv, "hex")
+            const cipher = crypto.createCipheriv("aes-256-cbc", key, iv)
+            const encryptedData = Buffer.concat([cipher.update(Buffer.from(secret)), cipher.final()])
+
+            if (totp.data === encryptedData.toString("hex")) {
+                return new Promise<{ res: boolean, case?: number }>((resolve, _) => {
+                    this.totpDB.remove({ iv: totp.iv }, {}, (err: Error, n: number) => {
+                        if (err) {
+                            console.error(err)
+                            resolve({ res: false, case: 2 })
+                        }
+                        resolve({ res: true })
+                    })
+                })
+            }
+            return Promise.resolve({ res: false, case: 3 })
+        } catch (e) {
+            return Promise.resolve({ res: false, case: 3 })
+        }
+    }
+    public async verifyTOTP(token: string, totpPw: string, secret?: string) {
+        if (secret) {
+            return new Promise<boolean>((resolve, _) => {
+                const res = tfa.verifyToken(secret, token)
+                if (res === null || res.delta !== 0) { resolve(false) }
+                resolve(true)
+            })
+        }
+
+        const totp = await this.getTOTP()
+        return new Promise<boolean>((resolve, _) => {
+            if (!totp) {
+                console.error(`Fail to get Transaction OTP`)
+                resolve(false)
+            }
+            const s = this.decryptTOTP(totpPw, totp.iv, totp.data).toString()
+            const res = tfa.verifyToken(s, token)
+            if (res === null || res.delta !== 0) { resolve(false) }
+            resolve(true)
+        })
+    }
     public getWalletBalance(address: string): Promise<{ balance: string } | IResponseError> {
         throw new Error("getWalletBalance: Not Implemented")
     }
@@ -616,5 +707,18 @@ export class RestElectron implements IRest {
         const decipher = crypto.createDecipheriv("aes-256-cbc", key, ivBuffer)
         const originalData = Buffer.concat([decipher.update(dataBuffer), decipher.final()])
         return originalData
+    }
+
+    private decryptTOTP(totpPw: string, iv: string, data: string): Buffer | boolean {
+        try {
+            const key = Buffer.from(utils.blake2bHash(totpPw))
+            const ivBuffer = Buffer.from(iv, "hex")
+            const dataBuffer = Buffer.from(data, "hex")
+            const decipher = crypto.createDecipheriv("aes-256-cbc", key, ivBuffer)
+            const originalData = Buffer.concat([decipher.update(dataBuffer), decipher.final()])
+            return originalData
+        } catch (e) {
+            return false
+        }
     }
 }

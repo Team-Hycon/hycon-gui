@@ -442,4 +442,45 @@ export class RestClient implements IRest {
                 }),
         )
     }
+
+    public getTOTP(): Promise<boolean> {
+        return Promise.resolve(
+            fetch(`/api/${this.apiVersion}/getTOTP`)
+                .then((response) => response.json())
+                .catch((err: Error) => {
+                    console.log(`Error when getTOTP`)
+                    console.log(err)
+                }),
+        )
+    }
+    public saveTOTP(secret: string, totpPw: string): Promise<boolean> {
+        return Promise.resolve(
+            fetch(`/api/${this.apiVersion}/saveTOTP/${secret}/${totpPw}`)
+                .then((response) => response.json())
+                .catch((err: Error) => {
+                    console.log(`Error when saveTOTP`)
+                    console.log(err)
+                }),
+        )
+    }
+    public deleteTOTP(totpPw: string): Promise<{ res: boolean, case?: number }> {
+        return Promise.resolve(
+            fetch(`/api/${this.apiVersion}/deleteTOTP/${totpPw}`)
+                .then((response) => response.json())
+                .catch((err: Error) => {
+                    console.log(`Error when deleteTOTP`)
+                    console.log(err)
+                }),
+        )
+    }
+    public verifyTOTP(token: string, totpPw: string, secret?: string) {
+        return Promise.resolve(
+            fetch(`/api/${this.apiVersion}/verifyTOTP/${token}/${totpPw}/${secret}`)
+                .then((response) => response.json())
+                .catch((err: Error) => {
+                    console.log(`Error when verifyTOTP`)
+                    console.log(err)
+                }),
+        )
+    }
 }
