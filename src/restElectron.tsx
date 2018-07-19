@@ -129,7 +129,7 @@ export class RestElectron implements IRest {
             const protoTx: Uint8Array = proto.Tx.encode(iTx).finish()
             const txHash: Uint8Array = utils.blake2bHash(protoTx)
             const privateKey = this.decryptWallet(tx.password, wallet.iv, wallet.data).toString()
-            const { signature, recovery } = secp256k1.sign(Buffer.from(txHash), Buffer.from(privateKey, "hex"))
+            const { signature, recovery } = secp256k1.sign(Buffer.from(txHash.buffer), Buffer.from(privateKey, "hex"))
             status = 3
 
             const signedTx = {
@@ -236,7 +236,7 @@ export class RestElectron implements IRest {
             const wallet = masterKey.derive(`m/44'/${this.coinNumber}'/0'/0/0`)
 
             const iv = crypto.randomBytes(16)
-            const key = Buffer.from(utils.blake2bHash(Hwallet.password))
+            const key = Buffer.from(utils.blake2bHash(Hwallet.password).buffer)
             const cipher = crypto.createCipheriv("aes-256-cbc", key, iv)
             const encryptedData = Buffer.concat([cipher.update(Buffer.from(wallet.privateKey.toString("hex"))), cipher.final()])
             const address = utils.publicKeyToAddress(wallet.publicKey)
