@@ -4,7 +4,6 @@ import * as tfa from "node-2fa"
 import * as React from "react"
 import { Link, Redirect } from "react-router-dom"
 import { AddressBook } from "./addressBook"
-import { IBlock, IHyconWallet, IRest } from "./rest"
 import { WalletList } from "./walletList"
 
 export class WalletView extends React.Component<any, any> {
@@ -123,6 +122,11 @@ export class WalletView extends React.Component<any, any> {
                     </button>
                     <button onClick={() => { this.generateTOTP() }} className="mdl-button"><i className="material-icons">vpn_key</i> {this.props.language.totp}</button>
                     {(this.state.possibilityLedger ? (<button onClick={() => { this.setState({ dialog4: true }) }} className="mdl-button"><i className="material-icons">send</i> {this.props.language["button-transfer"]}</button>) : (<div></div>))}
+                    {(this.state.possibilityLedger ? (
+                        <button className="mdl-button">
+                            <Link to="/ledgerView" className="coloredBlack"><i className="material-icons">account_balance_wallet</i> {this.props.language["ledger-view"]}</Link>
+                        </button>
+                    ) : (<div></div>))}
                 </div>
                 <div>
                     <WalletList rest={this.state.rest} language={this.props.language} />

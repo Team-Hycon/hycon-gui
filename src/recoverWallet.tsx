@@ -71,6 +71,7 @@ export class RecoverWallet extends React.Component<any, any> {
         this.setState({ passphrase1: data.target.value })
     }
     public handleCheckbox(event: any) {
+        if (event.target.checked === false) { this.setState({ passphrase1: "" }) }
         this.setState({ advanced: event.target.checked })
     }
     public recoverWallet() {
@@ -143,7 +144,7 @@ export class RecoverWallet extends React.Component<any, any> {
                         onChange={(data) => { this.handleConfirmPassword(data) }}
                         onKeyPress={(event) => { if (event.key === "Enter") { event.preventDefault(); this.recoverWallet() } }}
                     /><br /><br /><br />
-                    <span style={{ display: "inline-flex", verticalAlign: "middle" }}>
+                    <span style={{ display: "inline-flex" }}>
                         <FormControlLabel style={{ margin: "auto" }}
                             label={this.props.language["advanced-option"]}
                             control={<Checkbox color="primary" checked={this.state.advanced} onChange={(event) => this.handleCheckbox(event)} />}

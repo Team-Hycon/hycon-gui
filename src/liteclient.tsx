@@ -8,6 +8,7 @@ import { AddressInfo } from "./addressInfo"
 import { AddWallet } from "./addWallet"
 import { BlockView } from "./blockView"
 import { Home } from "./home"
+import { LedgerView } from "./ledgerView"
 import { MakeTransaction } from "./makeTransaction"
 import { MinerView } from "./minerView"
 // import { PeersList } from "./peersList"
@@ -38,8 +39,12 @@ export const routes: RouteConfig[] = [
     { exact: true, path: "/wallet/recoverWallet" },
     { exact: true, path: "/wallet/detail/:name" },
     { exact: true, path: "/transaction/:name" },
+    { exact: true, path: "/maketransaction/:isLedger" },
+    { exact: true, path: "/maketransaction/:isLedger/:selectedLedger" },
     { exact: true, path: "/peersView" },
     { exact: true, path: "/minerView" },
+    { exact: true, path: "/ledgerView" },
+    { exact: true, path: "/address/:hash/:selectedLedger" },
     // { exact: true, path: "/peer/:hash" },
 ]
 
@@ -58,6 +63,7 @@ export class LiteClient extends React.Component<{ rest: IRest }, any> {
 
     public transaction: ({ match }: RouteComponentProps<{ name: string }>) => JSX.Element
     public maketransaction: ({ match }: RouteComponentProps<{ isLedger: boolean }>) => JSX.Element
+    public maketransactionWithIndex: ({ match }: RouteComponentProps<{ isLedger: boolean, selectedLedger: number }>) => JSX.Element
     public peersView: ({ match }: RouteComponentProps<{}>) => JSX.Element
     // public peerDetails: (
     //     { match }: RouteComponentProps<{ hash: string }>,
@@ -68,13 +74,14 @@ export class LiteClient extends React.Component<{ rest: IRest }, any> {
     public recoverWallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
     public walletDetail: ({ match }: RouteComponentProps<{ name: string }>) => JSX.Element
     public minerView: ({ match }: RouteComponentProps<{ name: string }>) => JSX.Element
+    public ledgerView: ({ match }: RouteComponentProps<{}>) => JSX.Element
+    public ledgerAddressView: ({ match }: RouteComponentProps<{ hash: string, selectedLedger: number }>) => JSX.Element
     public notFound: boolean
 
     constructor(props: any) {
         super(props)
         this.state = {
             block: "block",
-            homeUrl: location.origin + "/index.html#/wallet",
             isParity: false,
             languageSelect: navigator.language.split("-")[0],
             loading: false,
@@ -105,7 +112,10 @@ export class LiteClient extends React.Component<{ rest: IRest }, any> {
             <Transaction name={match.params.name} rest={this.rest} language={this.language} />
         )
         this.maketransaction = ({ match }: RouteComponentProps<{ isLedger: boolean }>) => (
-            <MakeTransaction isLedger={match.params.isLedger} rest={this.rest} language={this.language}/>
+            <MakeTransaction isLedger={match.params.isLedger} rest={this.rest} language={this.language} />
+        )
+        this.maketransactionWithIndex = ({ match }: RouteComponentProps<{ isLedger: boolean, selectedLedger: number }>) => (
+            <MakeTransaction isLedger={match.params.isLedger} rest={this.rest} selectedLedger={match.params.selectedLedger} language={this.language} />
         )
         this.peersView = ({ match }: RouteComponentProps<{}>) => (
             <PeersView rest={props.rest} />
@@ -129,6 +139,12 @@ export class LiteClient extends React.Component<{ rest: IRest }, any> {
         this.minerView = ({ match }: RouteComponentProps<{}>) => (
             <MinerView rest={this.rest} />
         )
+        this.ledgerView = ({ match }: RouteComponentProps<{}>) => (
+            <LedgerView rest={this.rest} language={this.language} />
+        )
+        this.ledgerAddressView = ({ match }: RouteComponentProps<{ hash: string, selectedLedger: number }>) => (
+            <AddressInfo hash={match.params.hash} rest={this.rest} selectedLedger={match.params.selectedLedger} language={this.language} />
+        )
     }
     public languageChange = (event: any) => {
         this.language = getLocale(event.target.value)
@@ -139,11 +155,7 @@ export class LiteClient extends React.Component<{ rest: IRest }, any> {
             <div className="mdl-layout mdl-js-layout mdl-layout--fixed-header">
                 <header className="mdl-layout__header" >
                     <div className="mdl-layout__header-row" style={{ padding: "0 16px 0 10px" }}>
-                        <div>
-                            {this.state.homeUrl === location.href || this.state.homeUrl + "/" === location.href
-                            ? (<div style={{ marginLeft: "4.35em" }}/>)
-                            : (<Icon onClick={() => { history.back() }} style={{ color: "white", float: "left", margin: "0 1em 0 0.5em", cursor: "pointer" }}>chevron_left</Icon>)}
-                        </div>
+                        <Icon onClick={() => { history.back() }} style={{ color: "white", float: "left", margin: "0 1em 0 0.5em", cursor: "pointer" }}>chevron_left</Icon>
                         <Link to="/wallet">
                             <img style={{ maxHeight: 40, paddingRight: 10 }} src="./hycon_logo1.png" />
                         </Link>
@@ -187,10 +199,13 @@ export class LiteClient extends React.Component<{ rest: IRest }, any> {
                             <Route exact path="/address/:hash" component={this.addressInfo} />
                             <Route exact path="/transaction/:name" component={this.transaction} /> {/* send tx */}
                             <Route exact path="/maketransaction/:isLedger" component={this.maketransaction} />
+                            <Route exact path="/maketransaction/:isLedger/:selectedLedger" component={this.maketransactionWithIndex} />
                             <Route exact path="/wallet/addWallet" component={this.addWallet} />
                             <Route exact path="/wallet" component={this.wallet} />
                             <Route exact path="/wallet/recoverWallet" component={this.recoverWallet} />
                             <Route exact path="/wallet/detail/:name" component={this.walletDetail} />
+                            <Route exact path="/ledgerView" component={this.ledgerView} />
+                            <Route exact path="/address/:hash/:selectedLedger" component={this.ledgerAddressView} />
                         </Switch>
                     </div>
                 </main>

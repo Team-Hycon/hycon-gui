@@ -8,11 +8,11 @@ import * as React from "react"
 import update = require("react-addons-update")
 import { Redirect } from "react-router"
 import { AddressBook } from "./addressBook"
+import { MultipleLedgerView } from "./multipleLedgerView"
 import { IHyconWallet, IRest } from "./rest"
 import { hyconfromString } from "./stringUtil"
 
 export class MakeTransaction extends React.Component<any, any> {
-    public ledgerTimer: any // NodeJS.Timer
     public mounted = false
     public mapWallets: Map<string, IHyconWallet>
 
@@ -22,21 +22,21 @@ export class MakeTransaction extends React.Component<any, any> {
         this.state = {
             address: "",
             amount: 0,
+            cancelRedirect: false,
             dialog: false,
             favorites: [],
             fromAddress: "",
+            initialSelected: props.selectedLedger,
             isLedger: props.isLedger,
-            isLoad: false,
             isLoading: false,
+            isMultiple: true,
             isSelect: false,
-            ledgerAccounts: [],
-            ledgerStartIndex: 0,
             minerFee: 1,
             name: "",
             pendingAmount: "0",
             piggyBank: "0",
             rest: props.rest,
-            selectedLedger: "",
+            selectedLedger: props.selectedLedger,
             txStep: false,
             wallets: [],
         }
@@ -44,19 +44,36 @@ export class MakeTransaction extends React.Component<any, any> {
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleCancel = this.handleCancel.bind(this)
         this.prevPage = this.prevPage.bind(this)
-        this.handleLedgerAccount = this.handleLedgerAccount.bind(this)
-        this.getLedgerAccounts = this.getLedgerAccounts.bind(this)
         this.mapWallets = new Map<string, IHyconWallet>()
     }
     public componentWillUnmount() {
         this.mounted = false
-        window.clearTimeout(this.ledgerTimer)
     }
     public componentDidMount() {
         this.mounted = true
         this.state.rest.setLoading(true)
         if (this.state.isLedger === true || this.state.isLedger === "true") {
-            this.getLedgerAccounts()
+            this.setState({ isLedger: true })
+            if (this.state.selectedLedger !== undefined) {
+                this.state.rest.getLedgerWallet(Number(this.state.selectedLedger), 1).then((result: IHyconWallet[] | number) => {
+                    if (this.mounted) {
+                        if (typeof (result) !== "number") {
+                            this.setState({
+                                fromAddress: result[0].address,
+                                isLoad: true,
+                                name: "ledgerWallet",
+                                pendingAmount: result[0].pendingAmount,
+                                piggyBank: result[0].balance,
+                                txStep: true,
+                            })
+                        } else {
+                            alert(`${this.props.language["alert-ledger-connect-failed"]}`)
+                            this.setState({ isLoad: true, cancelRedirect: true })
+                            window.location.reload()
+                        }
+                    }
+                })
+            }
         } else {
             this.state.rest.getWalletList().then((data: { walletList: IHyconWallet[], length: number }) => {
                 for (const wallet of data.walletList) {
@@ -65,10 +82,10 @@ export class MakeTransaction extends React.Component<any, any> {
                 if (this.mounted) {
                     this.setState({ wallets: data.walletList, isLedger: false, isSelect: true, isLoad: true, txStep: true })
                 }
-                this.getFavorite()
                 this.state.rest.setLoading(false)
             })
         }
+        this.getFavorite()
     }
 
     public handlePassword(data: any) {
@@ -89,31 +106,31 @@ export class MakeTransaction extends React.Component<any, any> {
     public async handleSubmit(event: any) {
         const pattern1 = /(^[0-9]*)([.]{0,1}[0-9]{0,9})$/
         if (this.state.amount <= 0) {
-            alert("Enter a valid transaction amount")
+            alert(`${this.props.language["alert-enter-valid-amount"]}`)
             return
         }
         if (this.state.amount.match(pattern1) == null) {
-            alert("Please enter a number with up to 9 decimal places")
+            alert(`${this.props.language["alert-decimal-overflow"]}`)
             return
         }
-        if (hyconfromString(event.target.value).add(hyconfromString(this.state.minerFee)).greaterThan(hyconfromString(this.state.piggyBank).sub(hyconfromString(this.state.pendingAmount)))) {
-            alert("You can't spend the money you don't have")
+        if (hyconfromString(this.state.amount).add(hyconfromString(this.state.minerFee)).greaterThan(hyconfromString(this.state.piggyBank).sub(hyconfromString(this.state.pendingAmount)))) {
+            alert(`${this.props.language["alert-insufficient-funds"]}`)
             return
         }
         if (hyconfromString(this.state.minerFee).compare(hyconfromString("0")) === 0) {
-            alert("Enter a valid miner fee")
+            alert(`${this.props.language["alert-miner-fee"]}`)
             return
         }
         if (this.state.fromAddress === this.state.address) {
-            alert("You cannot send HYCON to yourself")
+            alert(`${this.props.language["alert-cannot-send-self"]}`)
             return
         }
         if (this.state.address === "" || this.state.address === undefined) {
-            alert("Enter a to address")
+            alert(`${this.props.language["alert-address-empty"]}`)
             return
         }
         if (this.state.name === "" || this.state.fromAddress === "") {
-            alert("Please check your from account.")
+            alert(`${this.props.language["alert-invalid-from-addr"]}`)
             return
         }
 
@@ -126,7 +143,7 @@ export class MakeTransaction extends React.Component<any, any> {
         } else {
             const namecheck = this.mapWallets.get(this.state.fromAddress)
             if (this.state.name !== namecheck.name) {
-                alert(`Please try again.`)
+                alert(`${this.props.language["alert-try-again"]}`)
                 return
             }
             this.state.rest.sendTx({ name: this.state.name, password: this.state.password, address: this.state.address, amount: this.state.amount.toString(), minerFee: this.state.minerFee.toString() })
@@ -137,73 +154,42 @@ export class MakeTransaction extends React.Component<any, any> {
         event.preventDefault()
     }
     public handleCancel(event: any) {
-        this.setState({ redirect: true })
+        if (this.state.initialSelected !== undefined && this.state.initialSelected !== "") {
+            this.setState({ redirect: true })
+        } else {
+            this.setState({ cancelRedirect: true })
+        }
+    }
+
+    public selectedLedgerFunction(selectedLedger: string, account: IHyconWallet) {
+        this.setState({
+            fromAddress: account.address,
+            name: "ledgerWallet",
+            pendingAmount: account.pendingAmount,
+            piggyBank: account.balance,
+            selectedLedger,
+            txStep: true,
+        })
     }
 
     public render() {
         let walletIndex = 0
         if (this.state.redirect) {
-            return <Redirect to={`/wallet`} />
+            if (this.state.isLedger === true || this.state.isLedger === "true") {
+                return <Redirect to={`/address/${this.state.fromAddress}/${this.state.selectedLedger}`} />
+            } else {
+                return <Redirect to={`/wallet/detail/${this.state.name}`} />
+            }
         }
-        if (!this.state.isLoad) {
-            return (
-                <div style={{ textAlign: "center", marginTop: "11%" }}>
-                    <CircularProgress style={{ marginRight: "5px" }} size={50} thickness={2} /> LOADING
-                </div>
-            )
+        if (this.state.cancelRedirect) {
+            return <Redirect to={`/wallet`} />
         }
         return (
             <div style={{ width: "80%", margin: "auto" }}>
                 <Card>
                     <h3 style={{ color: "grey", textAlign: "center" }}><Icon style={{ transform: "rotate(-25deg)", marginRight: "10px", color: "grey" }}>send</Icon>{this.props.language["send-transaction"]}</h3><br />
                     <CardContent style={{ display: `${this.state.txStep ? ("none") : ("block")}` }}>
-                        <div style={{ textAlign: "center" }}>
-                            <div style={{ overflow: "scroll", height: "19em", margin: "1%" }}>
-                                <table className="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style={{ width: "100%", border: "0" }}>
-                                    <thead>
-                                        <tr>
-                                            <th className="mdl-data-table__cell--non-numeric"> </th>
-                                            <th className="mdl-data-table__cell--non-numeric">{this.props.language["wallet-address"]}</th>
-                                            <th className="mdl-data-table__cell--numeric" style={{ paddingRight: "10%" }}>{this.props.language["wallet-balance"]}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {this.state.ledgerAccounts.map((account: IHyconWallet, idx: number) => {
-                                            return (
-                                                <tr key={idx}>
-                                                    <td className="mdl-data-table__cell--non-numeric" style={{ padding: "0 0 0 0" }}>
-                                                        <Radio
-                                                            checked={this.state.selectedLedger === String(idx)}
-                                                            onChange={this.handleInputChange}
-                                                            value={String(idx)}
-                                                            name="selectedLedger"
-                                                        />
-                                                    </td>
-                                                    <td className="mdl-data-table__cell--non-numeric">{account.address}</td>
-                                                    <td className="mdl-data-table__cell--numeric" style={{ paddingRight: "10%" }}>{account.balance} HYCON</td>
-                                                </tr>
-                                            )
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
-                            {/* <FormLabel component="legend">Select account to use</FormLabel>
-                            <div style={{ overflow: "scroll", height: "17em", margin: "1%" }}>
-                                <RadioGroup style={{ marginBottom: "5%", display: "inline-block" }} aria-label="selectedLedger" name="selectedLedger" value={this.state.selectedLedger} onChange={this.handleInputChange}>
-                                    {this.state.ledgerAccounts.map((account: IHyconWallet, idx: number) => {
-                                        const addresesBalance = account.address + " / " + account.balance + "HYCON"
-                                        return <FormControlLabel style={{ width: "49%" }} key={idx} value={String(idx)} control={<Radio />} label={addresesBalance} />
-                                    })}
-                                </RadioGroup>
-                            </div> */}
-                            <Grid container direction={"row"} justify={"flex-end"} alignItems={"flex-end"}>
-                                <Button variant="outlined" onClick={this.getLedgerAccounts}>{this.props.language["load-more"]}</Button>
-                            </Grid>
-                            <Grid container direction={"row"} justify={"center"} alignItems={"center"}>
-                                <Button onClick={this.handleCancel}>{this.props.language["button-cancel"]}</Button>
-                                <Button onClick={this.handleLedgerAccount}>{this.props.language["button-next"]}</Button>
-                            </Grid>
-                        </div>
+                        <MultipleLedgerView isLedgerPossibility={this.state.isLedger} selectFunction={(index: string, account: IHyconWallet) => { this.selectedLedgerFunction(index, account) }} rest={this.state.rest} selectedLedger={this.state.selectedLedger} language={this.props.language} />
                     </CardContent>
                     <CardContent style={{ display: `${this.state.txStep ? ("block") : ("none")}` }}>
                         <div style={{ textAlign: "center" }}>
@@ -237,7 +223,7 @@ export class MakeTransaction extends React.Component<any, any> {
                             {/* {this.state.isHint ? (<span style={{ fontSize: "12px" }}>(Password Hint: {this.state.hint})</span>) : (<Button onClick={(e) => this.showHint(e)}>Hint</Button>)} */}
                             <br /><br />
                             <Grid container direction={"row"} justify={"center"} alignItems={"center"}>
-                                {(this.state.isLedger ?
+                                {(this.state.isLedger && (this.state.initialSelected === undefined || this.state.initialSelected === "") ?
                                     (<Button onClick={this.prevPage}>{this.props.language["button-previous"]}</Button>)
                                     : (<Button onClick={this.handleCancel}>{this.props.language["button-cancel"]}</Button>))}
                                 <Button onClick={this.handleSubmit}>{this.props.language["button-transfer"]}</Button>
@@ -273,58 +259,44 @@ export class MakeTransaction extends React.Component<any, any> {
 
     private alertResult(result: { res: boolean, case?: number }) {
         if (result.res === true) {
-            alert(`A transaction of ${this.state.amount} HYCON has been submitted to ${this.state.address} with ${this.state.minerFee} HYCON as miner fees.`)
+            alert(`${this.props.language["alert-send-success"]}\n- ${this.props.language["send-amount"]}: ${this.state.amount}\n- ${this.props.language.fees}: ${this.state.minerFee}\n- ${this.props.language["to-address"]}: ${this.state.address}`)
             this.setState({ redirect: true })
             return
         }
-        if (result.case === 1) {
-            alert("Invalid address: Please check 'To Address' input")
-            this.setState({ isLoading: false })
-        } else if (result.case === 2) {
-            if (this.state.isLedger) {
-                alert("Fail to sign: Please check connection with Ledger")
-                this.setState({ isLoading: false })
-            } else {
-                alert("Invalid password: Please check your password")
-                this.setState({ isLoading: false, password: "" })
+        this.setState({ isLoading: false })
+        if (this.state.isLedger === true || this.state.isLedger === "true") {
+            switch (result.case) {
+                case 0:
+                    alert(`${this.props.language["alert-invalid-address-from"]}`)
+                    break
+                case 1:
+                    alert(`${this.props.language["alert-invalid-address-to"]}`)
+                    break
+                case 2:
+                    alert(`${this.props.language["alert-load-address-failed"]}`)
+                    break
+                case 3:
+                    alert(`${this.props.language["alert-ledger-sign-failed"]}`)
+                    break
+                case 4:
+                    alert(`${this.props.language["alert-send-failed"]}`)
+                    this.setState({ redirect: true })
+                    break
             }
-        } else if (result.case === 3) {
-            alert("Fail to transfer hycon")
-            this.setState({ redirect: true })
-            window.location.reload()
-        }
-    }
-
-    private getLedgerAccounts() {
-        this.state.rest.getLedgerWallet(this.state.ledgerStartIndex).then((result: IHyconWallet[] | number) => {
-            window.clearTimeout(this.ledgerTimer)
-            if (this.mounted) {
-                if (typeof (result) !== "number") {
-                    this.setState({ isLedger: true, isLoad: true, ledgerStartIndex: this.state.ledgerStartIndex + result.length })
-                    this.setState({ ledgerAccounts: update(this.state.ledgerAccounts, { $push: result }) })
-                } else {
-                    alert(`Please check connection and launch Hycon app.`)
-                    this.setState({ isLoad: true, isLedger: true, redirect: true })
-                    window.location.reload()
-                }
+        } else {
+            switch (result.case) {
+                case 1:
+                    alert(`${this.props.language["alert-invalid-address-to"]}`)
+                    break
+                case 2:
+                    alert(`${this.props.language["alert-invalid-password"]}`)
+                    break
+                case 3:
+                    alert(`${this.props.language["alert-send-failed"]}`)
+                    this.setState({ redirect: true })
+                    break
             }
-            this.getFavorite()
-            this.state.rest.setLoading(false)
-        })
-        this.ledgerTimer = setTimeout(() => {
-            alert(`Fail to load Ledger wallet. Please check connection and launch Hycon app.`)
-            this.setState({ isLoad: true, isLedger: true, redirect: true })
-            window.location.reload()
-        }, 20000)
-    }
-
-    private handleLedgerAccount() {
-        if (this.state.selectedLedger === "") {
-            alert(`Please select account to use`)
-            return
         }
-        const account = this.state.ledgerAccounts[Number(this.state.selectedLedger)]
-        this.setState({ name: "ledgerWallet", txStep: true, isLedger: true, fromAddress: account.address, piggyBank: account.balance, pendingAmount: account.pendingAmount })
     }
 
     private prevPage() {

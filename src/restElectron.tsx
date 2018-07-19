@@ -474,12 +474,18 @@ export class RestElectron implements IRest {
                 throw new Error("Nonce is not valid.")
             }
             status = 2
+            let nonce: number
+            if (addressInfo.pendings.length > 0) {
+                nonce = addressInfo.pendings[addressInfo.pendings.length - 1].nonce + 1
+            } else {
+                nonce = addressInfo.nonce + 1
+            }
             const iTx: proto.ITx = {
                 from: fromAddress,
                 to: toAddress,
                 amount: utils.hyconfromString(amount),
                 fee: utils.hyconfromString(fee),
-                nonce: addressInfo.nonce + 1,
+                nonce,
             }
             const protoTx: Uint8Array = proto.Tx.encode(iTx).finish()
             const rawTxHex = bytesToHex(protoTx)
@@ -494,7 +500,7 @@ export class RestElectron implements IRest {
                 to,
                 amount,
                 fee,
-                nonce: addressInfo.nonce + 1,
+                nonce,
                 recovery: singed.recovery,
             }
 

@@ -21,16 +21,26 @@ async function getAddresses(start, count) {
 }
 
 async function _getAddress(hycon, index = 0) {
-	const result = await hycon.getAddress(`44'/1397'/0'/0/${index}`)
-	return result.stringAddress
+	try {
+		const result = await hycon.getAddress(`44'/1397'/0'/0/${index}`)
+		return result.stringAddress
+	} catch (e) {
+		console.log(`Fail to getAddress from Hycon App : ${e}`)
+		throw e
+	}
 }
 
 async function sign(rawTxHex, index = 0) {
-	const transport = await Transport.default.create(5000, 10000)
-	const hycon = new Hycon.default(transport)
-	const signTransaction = await hycon.signTransaction(`44'/1397'/0'/0/${index}`, rawTxHex)
-	await transport.close()
-	return signTransaction
+	try {
+		const transport = await Transport.default.create(5000, 10000)
+		const hycon = new Hycon.default(transport)
+		const signTransaction = await hycon.signTransaction(`44'/1397'/0'/0/${index}`, rawTxHex)
+		await transport.close()
+		return signTransaction
+	} catch (e) {
+		console.log(`Fail to sign with Ledger : ${e}`)
+		throw e
+	}
 }
 
 function createWindow() {

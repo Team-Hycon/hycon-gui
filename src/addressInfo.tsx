@@ -3,6 +3,7 @@ import { Tab, Tabs } from "material-ui/Tabs"
 import * as QRCode from "qrcode.react"
 import * as React from "react"
 import update = require("react-addons-update")
+import { Redirect } from "react-router"
 import { IText } from "./locales/locales"
 import { MinedBlockLine } from "./minedBlockLine"
 import { IMinedInfo, IRest, ITxProp, IWalletAddress } from "./rest"
@@ -11,27 +12,42 @@ interface IAddressProps {
     rest: IRest
     hash: string
     language: IText
+    selectedLedger?: number
 }
 interface IAddressView {
     rest: IRest
+    redirectTxView: boolean
     hash: string
-    txs: ITxProp[],
-    pendings: ITxProp[],
-    hasMore: boolean,
-    hasMoreMinedInfo: boolean,
-    index: number,
-    minedBlocks: IMinedInfo[],
-    minerIndex: number,
+    txs: ITxProp[]
+    pendings: ITxProp[]
+    hasMore: boolean
+    hasMoreMinedInfo: boolean
+    index: number
+    minedBlocks: IMinedInfo[]
+    minerIndex: number
     address?: IWalletAddress
+    ledgerIndex?: number
 }
 export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
     constructor(props: IAddressProps) {
         super(props)
-        this.state = { hash: props.hash, rest: props.rest, txs: [], pendings: [], hasMore: true, index: 1, minedBlocks: [], minerIndex: 1, hasMoreMinedInfo: true }
+        this.state = {
+            hasMore: true,
+            hasMoreMinedInfo: true,
+            hash: props.hash,
+            index: 1,
+            ledgerIndex: props.selectedLedger,
+            minedBlocks: [],
+            minerIndex: 1,
+            pendings: [],
+            redirectTxView: false,
+            rest: props.rest,
+            txs: [],
+        }
     }
 
     public componentWillReceiveProps(newProps: IAddressProps) {
-        this.setState({hash: newProps.hash})
+        this.setState({ hash: newProps.hash })
         this.state.rest.setLoading(true)
         this.state.rest.getAddressInfo(newProps.hash).then((data: IWalletAddress) => {
             this.setState({
@@ -55,15 +71,23 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
             this.state.rest.setLoading(false)
         })
     }
+    public makeTransaction() {
+        this.setState({ redirectTxView: true })
+    }
     public render() {
-        if (!this.state.address) {
+        if (this.state.address === undefined) {
             return < div ></div >
+        }
+        if (this.state.redirectTxView) {
+            return <Redirect to={`/maketransaction/true/${this.state.ledgerIndex}`} />
         }
         let count = 0
         let minedIndex = 0
         return (
             <div>
-                <div className="contentTitle">{this.props.language["hycon-address"]}</div>
+                <button onClick={() => { this.makeTransaction() }} className="mdl-button" style={{ display: `${this.state.ledgerIndex === undefined ? ("none") : ("block")}`, float: "right" }}>
+                    <i className="material-icons">send</i>{this.props.language["button-transfer"]}</button>
+                {(this.state.ledgerIndex === undefined) ? (<div className="contentTitle">{this.props.language["hycon-address"]}</div>) : (<div className="contentTitle">{this.props.language["ledger-wallet"]}</div>)}
                 <div className="sumTablesDiv">
                     <table className="tablesInRow twoTablesInRow">
                         <thead>
@@ -94,8 +118,8 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
                                     <TxLine tx={tx} rest={this.state.rest} address={this.state.address} />
                                     <div>
                                         {tx.from === this.state.hash
-                                        ? (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent txAmtBtn">-{tx.amount} HYCON</button>)
-                                        : (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored txAmtBtn">{tx.amount} HYCON</button>)}
+                                            ? (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent txAmtBtn">-{tx.amount} HYCON</button>)
+                                            : (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored txAmtBtn">{tx.amount} HYCON</button>)}
                                     </div>
                                 </div>
                             )
@@ -106,8 +130,8 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
                                     <TxLine tx={tx} rest={this.state.rest} address={this.state.address} />
                                     <div>
                                         {tx.from === this.state.hash
-                                        ? (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent txAmtBtn">-{tx.amount} HYCON</button>)
-                                        : (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored txAmtBtn">{tx.amount} HYCON</button>)}
+                                            ? (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent txAmtBtn">-{tx.amount} HYCON</button>)
+                                            : (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored txAmtBtn">{tx.amount} HYCON</button>)}
                                     </div>
                                 </div>
                             )
@@ -135,8 +159,8 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
                         </table>
                         <br />
                         {this.state.hasMoreMinedInfo && this.state.minedBlocks.length > 0
-                        ? (<div><button className="btn btn-block btn-info" style={{ width: "100%", cursor: "pointer" }} onClick={() => this.fetchNextMinedInfo()}>{this.props.language["load-more"]}</button></div>)
-                        : (<div></div>)}
+                            ? (<div><button className="btn btn-block btn-info" style={{ width: "100%", cursor: "pointer" }} onClick={() => this.fetchNextMinedInfo()}>{this.props.language["load-more"]}</button></div>)
+                            : (<div></div>)}
                     </Tab>
                 </Tabs>
             </div>

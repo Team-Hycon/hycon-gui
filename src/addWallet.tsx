@@ -219,7 +219,7 @@ export class AddWallet extends React.Component<any, any> {
                             /><br />
                             <br />
                             <br />
-                            <span style={{ display: "inline-flex", verticalAlign: "middle" }}>
+                            <span style={{ display: "inline-flex" }}>
                                 <FormControlLabel style={{ margin: "auto" }}
                                     label={this.props.language["advanced-option"]}
                                     control={<Checkbox color="primary" checked={this.state.advanced} onChange={(event) => this.handleCheckbox(event)} />}
