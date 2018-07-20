@@ -31,6 +31,7 @@ export default {
     "alert-invalid-mnemonic": "ニーモニックキー、セキュリティーコードもしくは言語が異なります。再度、入力してください。",
     "alert-empty-fields": "必須値を入力してください。",
     "alert-duplicate-wallet": "同名のウォレットがすでに存在します。",
+    "alert-duplicate-address": "Duplicate wallet address",
     "title-wallet-info": "ウォレット情報入力",
     "title-receive-mnemonic": "ニーモニックキーを受け取って入力する。",
     "title-check-mnemonic": "ニーモニックキー確認",

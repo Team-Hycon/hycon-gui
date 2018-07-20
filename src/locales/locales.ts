@@ -74,6 +74,7 @@ export interface IText {
     "alert-invalid-mnemonic": string,
     "alert-empty-fields": string,
     "alert-duplicate-wallet": string,
+    "alert-duplicate-address": string,
     "title-wallet-info": string,
     "title-receive-mnemonic": string,
     "title-check-mnemonic": string,

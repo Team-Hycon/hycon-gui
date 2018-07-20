@@ -31,6 +31,7 @@ export default {
     "alert-invalid-mnemonic": "助記詞/助記詞密碼或者語言不正確，請重新輸入.",
     "alert-empty-fields": "請輸入所需值",
     "alert-duplicate-wallet": "錢包名稱重複",
+    "alert-duplicate-address": "Duplicate wallet address",
     "title-wallet-info": "輸入錢包信息",
     "title-receive-mnemonic": "接收和輸入助記詞",
     "title-check-mnemonic": "確認助記詞",

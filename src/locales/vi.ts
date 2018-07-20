@@ -31,6 +31,7 @@ export default {
     "alert-invalid-mnemonic": "Phần Ghi nhớ/Cụm mật khẩu bạn nhập và ngôn ngữ chọn không trùng khớp. Xin mời bạn nhập lại.",
     "alert-empty-fields": "Mời bạn nhập phần bắt buộc",
     "alert-duplicate-wallet": "Tên Ví đã được sử dụng, mời bạn chọn tên khác",
+    "alert-duplicate-address": "Duplicate wallet address",
     "title-wallet-info": "Mời bạn nhập thông tin cho Ví",
     "title-receive-mnemonic": "Nhận và nhập Ghi nhớ",
     "title-check-mnemonic": "Xin bạn kiểm tra lại Ghi nhớ vừa nhập",

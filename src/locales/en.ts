@@ -31,6 +31,7 @@ export default {
     "alert-invalid-mnemonic": "Mnemonic/passphrase or language is incorrect. Please re-enter.",
     "alert-empty-fields": "Please enter required value",
     "alert-duplicate-wallet": "Duplicate wallet name",
+    "alert-duplicate-address": "Duplicate wallet address",
     "title-wallet-info": "Enter wallet information",
     "title-receive-mnemonic": "Receive and type mnemonic",
     "title-check-mnemonic": "Check mnemonic",

@@ -31,6 +31,7 @@ export default {
     "alert-invalid-mnemonic": "Цээжлэх үгс эсвэл хэлний сонголт буруу байна. Дахин оруулна уу.",
     "alert-empty-fields": "Шаардлагатай утгийг оруулна уу",
     "alert-duplicate-wallet": "Хэтэвчний нэр давхардаж байна.",
+    "alert-duplicate-address": "Duplicate wallet address",
     "title-wallet-info": "Хэтэвчний мэдээллийг оруулах",
     "title-receive-mnemonic": "Цээжлэх үгсийг уншаад оруулах",
     "title-check-mnemonic": "Цээжлэх үгсийг шалгах",

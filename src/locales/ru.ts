@@ -31,6 +31,7 @@ export default {
     "alert-invalid-mnemonic": "Некорректные мнемоника / кодовая фраза или язык. Пожалуйста повторите ввод.",
     "alert-empty-fields": "Введите требуемое значение",
     "alert-duplicate-wallet": "Продублируйте имя кошелька",
+    "alert-duplicate-address": "Duplicate wallet address",
     "title-wallet-info": "Введите информацию о кошельке",
     "title-receive-mnemonic": "Получите и введите мнемонику",
     "title-check-mnemonic": "Проверьте мнемонику",
