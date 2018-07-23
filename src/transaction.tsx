@@ -20,13 +20,14 @@ export class Transaction extends React.Component<any, any> {
             address: "",
             amount: 0,
             dialog: false,
-            dialog2: false,
+            dialogTOTP: false,
             errorText: "",
             favorites: [],
             fromAddress: "",
             isLoading: false,
             minerFee: 1,
             name: props.name,
+            nonce: props.nonce,
             password: "",
             pendingAmount: "0",
             piggyBank: "0",
@@ -77,7 +78,7 @@ export class Transaction extends React.Component<any, any> {
         this.setState({ [name]: value })
     }
 
-    public checkInputs(event: any) {
+    public checkInputs() {
         const pattern = /(^[0-9]*)([.]{0,1}[0-9]{0,9})$/
         if (this.state.amount <= 0) {
             alert(`${this.props.language["alert-enter-valid-amount"]}`)
@@ -114,7 +115,7 @@ export class Transaction extends React.Component<any, any> {
 
         this.setState({ isLoading: true })
 
-        this.state.rest.sendTx({ name: this.state.name, password: this.state.password, address: this.state.address, amount: this.state.amount.toString(), minerFee: this.state.minerFee.toString() })
+        this.state.rest.sendTx({ name: this.state.name, password: this.state.password, address: this.state.address, amount: this.state.amount.toString(), minerFee: this.state.minerFee.toString(), nonce: this.state.nonce })
             .then((result: { res: boolean, case?: number }) => {
                 if (result.res === true) {
                     alert(`${this.props.language["alert-send-success"]}\n- ${this.props.language["send-amount"]}: ${this.state.amount}\n- ${this.props.language.fees}: ${this.state.minerFee}\n- ${this.props.language["to-address"]}: ${this.state.address}`)
@@ -169,9 +170,9 @@ export class Transaction extends React.Component<any, any> {
                                 <Button variant="raised" onClick={this.handleCancel} style={{ backgroundColor: "rgb(225, 0, 80)", color: "white", float: "right" }}>{this.props.language["button-cancel"]}</Button>
                                 {this.state.totp
                                 ? (<Button variant="raised" style={{ backgroundColor: "#50aaff", color: "white", float: "right", margin: "0 10px" }}
-                                    onClick={(event) => { if (this.checkInputs(event)) { this.setState({ dialog2: true }) } }}>{this.props.language.totp}</Button>)
+                                    onClick={() => { if (this.checkInputs()) { this.setState({ dialogTOTP: true }) } }}>{this.props.language.totp}</Button>)
                                 : (<Button variant="raised" style={{ backgroundColor: "#50aaff", color: "white", float: "right", margin: "0 10px" }}
-                                    onClick={(event) => { if (this.checkInputs(event)) { this.handleSubmit(event) } }} >{this.props.language["button-transfer"]}</Button>)
+                                    onClick={(event) => { if (this.checkInputs()) { this.handleSubmit(event) } }} >{this.props.language["button-transfer"]}</Button>)
                                 }
                             </Grid>
                         </div>
@@ -191,7 +192,7 @@ export class Transaction extends React.Component<any, any> {
                 </Dialog>
 
                 {/* GOOGLE TRANSACTION OTP */}
-                <Dialog style={{ textAlign: "center" }} open={this.state.dialog2} onClose={() => { this.setState({ dialog2: false }) }}>
+                <Dialog style={{ textAlign: "center" }} open={this.state.dialogTOTP} onClose={() => { this.setState({ dialogTOTP: false }) }}>
                     <DialogTitle id="simple-dialog-title">{this.props.language.totp}</DialogTitle>
                     <div style={{ margin: "2em" }}>
                         <p>{this.props.language["transaction-totp"]}</p>
@@ -203,7 +204,7 @@ export class Transaction extends React.Component<any, any> {
                             value={this.state.totpPw}
                             onChange={(data) => { this.handleTOTPpassword(data) }} /><br /><br />
                         <Grid container direction={"row"} justify={"center"} alignItems={"center"}>
-                            <Button variant="raised" onClick={() => { this.setState({ dialog2: false }) }} style={{ backgroundColor: "rgb(225, 0, 80)", color: "white" }}>{this.props.language["button-cancel"]}</Button>
+                            <Button variant="raised" onClick={() => { this.setState({ dialogTOTP: false }) }} style={{ backgroundColor: "rgb(225, 0, 80)", color: "white" }}>{this.props.language["button-cancel"]}</Button>
                             <Button variant="raised" onClick={this.handleSubmit} style={{ backgroundColor: "#50aaff", color: "white", margin: "0 10px" }}>{this.props.language["button-transfer"]}</Button>
                         </Grid>
                     </div>

@@ -150,7 +150,7 @@ export interface IRest {
     getLedgerWallet(startIndex: number): Promise<IHyconWallet[] | number>
     sendTxWithLedger(index: number, from: string, to: string, amount: string, fee: string, queueTx?: Function): Promise<{ res: boolean, case?: number }>
     possibilityLedger(): Promise<boolean>
-    getTOTP(): Promise<{iv: string, data: string} | boolean>
+    getTOTP(): Promise<{ iv: string, data: string } | boolean>
     saveTOTP(secret: string, totpPw: string): Promise<boolean>
     deleteTOTP(totpPw: string): Promise<{ res: boolean, case?: number }>
     verifyTOTP(token: string, totpPw: string, secret?: string): Promise<boolean>

@@ -116,7 +116,9 @@ export class RestElectron implements IRest {
             }
             status = 2
             let nonce: number
-            if (addressInfo.pendings.length > 0) {
+            if ( tx.nonce !== undefined) {
+                nonce = Number(tx.nonce)
+            } else if (addressInfo.pendings.length > 0) {
                 nonce = addressInfo.pendings[addressInfo.pendings.length - 1].nonce + 1
             } else {
                 nonce = addressInfo.nonce + 1
@@ -339,7 +341,7 @@ export class RestElectron implements IRest {
     public async addWalletFile(name: string, password: string, key: string): Promise<boolean> {
         try {
             if (await this.checkDupleName(name)) {
-                return false
+                return Promise.reject("name")
             }
 
             const keyArr = key.split(":")
@@ -360,6 +362,12 @@ export class RestElectron implements IRest {
             const privateKey = this.decryptWallet(password, iv, data)
             const publicKeyBuff = secp256k1.publicKeyCreate(Buffer.from(privateKey.toString(), "hex"))
             const address = utils.publicKeyToAddress(publicKeyBuff)
+            const addressStr = utils.addressToString(address)
+
+            if (await this.checkDupleAddress(addressStr)) {
+                return Promise.reject("address")
+            }
+
             const store: IStoredWallet = {
                 iv,
                 data,
@@ -372,7 +380,7 @@ export class RestElectron implements IRest {
                 this.walletsDB.insert(store, (err: Error, doc: IStoredWallet) => {
                     if (err) {
                         console.error(err)
-                        resolve(false)
+                        return Promise.reject("db")
                     } else {
                         console.log(`Stored ${doc.address} -> ${JSON.stringify(doc)}`)
                         resolve(true)
@@ -381,7 +389,7 @@ export class RestElectron implements IRest {
             })
         } catch (e) {
             console.log(`${e}`)
-            return false
+            return Promise.reject("key")
         }
     }
 

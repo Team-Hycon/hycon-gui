@@ -1,4 +1,4 @@
-import { Dialog, FormControl, FormControlLabel, FormLabel, Input, InputLabel, Radio, RadioGroup, Select } from "@material-ui/core"
+import { Dialog, DialogTitle, FormControl, FormControlLabel, FormLabel, Input, InputLabel, Radio, RadioGroup, Select } from "@material-ui/core"
 import Button from "@material-ui/core/Button"
 import CardContent from "@material-ui/core/CardContent"
 import Grid from "@material-ui/core/Grid"
@@ -24,6 +24,7 @@ export class MakeTransaction extends React.Component<any, any> {
             amount: 0,
             cancelRedirect: false,
             dialog: false,
+            dialogTOTP: false,
             favorites: [],
             fromAddress: "",
             initialSelected: props.selectedLedger,
@@ -37,6 +38,9 @@ export class MakeTransaction extends React.Component<any, any> {
             piggyBank: "0",
             rest: props.rest,
             selectedLedger: props.selectedLedger,
+            totp: false,
+            totpPw: "",
+            totpToken: "",
             txStep: false,
             wallets: [],
         }
@@ -86,6 +90,7 @@ export class MakeTransaction extends React.Component<any, any> {
             })
         }
         this.getFavorite()
+        this.getTOTP()
     }
 
     public handlePassword(data: any) {
@@ -103,7 +108,7 @@ export class MakeTransaction extends React.Component<any, any> {
         }
     }
 
-    public async handleSubmit(event: any) {
+    public checkInputs() {
         const pattern1 = /(^[0-9]*)([.]{0,1}[0-9]{0,9})$/
         if (this.state.amount <= 0) {
             alert(`${this.props.language["alert-enter-valid-amount"]}`)
@@ -132,6 +137,14 @@ export class MakeTransaction extends React.Component<any, any> {
         if (this.state.name === "" || this.state.fromAddress === "") {
             alert(`${this.props.language["alert-invalid-from-addr"]}`)
             return
+        }
+        return true
+    }
+
+    public async handleSubmit(event: any) {
+        if (this.state.totp) {
+            const res = await this.state.rest.verifyTOTP(this.state.totpToken, this.state.totpPw)
+            if (!res) { alert(this.props.language["alert-invalid-code-password"]); return }
         }
 
         this.setState({ isLoading: true })
@@ -220,19 +233,21 @@ export class MakeTransaction extends React.Component<any, any> {
                             <TextField name="minerFee" floatingLabelFixed={true} style={{ marginLeft: "30px", width: "330px" }} floatingLabelText={this.props.language.fees} type="text" value={this.state.minerFee} onChange={this.handleInputChange} />
                             <br />
                             <TextField name="password" floatingLabelFixed={true} style={{ marginRight: "20px", width: "330px", display: `${this.state.isLedger ? ("none") : ("inline-block")}` }} floatingLabelText={this.props.language.password} value={this.state.password} type="password" autoComplete="off" onChange={(data) => { this.handlePassword(data) }} />
-                            {/* {this.state.isHint ? (<span style={{ fontSize: "12px" }}>(Password Hint: {this.state.hint})</span>) : (<Button onClick={(e) => this.showHint(e)}>Hint</Button>)} */}
                             <br /><br />
                             <Grid container direction={"row"} justify={"center"} alignItems={"center"}>
                                 {(this.state.isLedger && (this.state.initialSelected === undefined || this.state.initialSelected === "") ?
                                     (<Button onClick={this.prevPage}>{this.props.language["button-previous"]}</Button>)
                                     : (<Button onClick={this.handleCancel}>{this.props.language["button-cancel"]}</Button>))}
-                                <Button onClick={this.handleSubmit}>{this.props.language["button-transfer"]}</Button>
+                                {this.state.totp
+                                ? (<Button onClick={() => { if (this.checkInputs()) { this.setState({ dialogTOTP: true }) } }}>{this.props.language.totp}</Button>)
+                                : (<Button onClick={(event) => { if (this.checkInputs()) { this.handleSubmit(event) } }}>{this.props.language["button-transfer"]}</Button>)
+                                }
                             </Grid>
                         </div>
                     </CardContent>
                 </Card >
 
-                {/* ADDRESSBOOK */}
+                {/* ADDRESS BOOK */}
                 <Dialog open={this.state.dialog} onClose={() => { this.setState({ dialog: false }) }}>
                     <AddressBook rest={this.state.rest} favorites={this.state.favorites} language={this.props.language} isWalletView={false} callback={(address: string) => { this.handleListItemClick(address) }} />
                 </Dialog>
@@ -241,6 +256,25 @@ export class MakeTransaction extends React.Component<any, any> {
                 <Dialog open={this.state.isLoading} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" >
                     <div style={{ textAlign: "center" }}>
                         <CircularProgress style={{ marginRight: "5px" }} size={50} thickness={2} /> {this.props.language.loading}
+                    </div>
+                </Dialog>
+
+                {/* GOOGLE TRANSACTION OTP */}
+                <Dialog style={{ textAlign: "center" }} open={this.state.dialogTOTP} onClose={() => { this.setState({ dialogTOTP: false }) }}>
+                    <DialogTitle id="simple-dialog-title">{this.props.language.totp}</DialogTitle>
+                    <div style={{ margin: "2em" }}>
+                        <p>{this.props.language["transaction-totp"]}</p>
+                        <TextField floatingLabelText={this.props.language["totp-google-code"]} autoComplete="off"
+                            errorText={this.state.errorText} errorStyle={{ float: "left" }}
+                            value={this.state.totpToken}
+                            onChange={(data) => { this.handleTOTP(data) }} /><br />
+                        <TextField floatingLabelText={this.props.language["totp-otp-password"]} type="password" autoComplete="off"
+                            value={this.state.totpPw}
+                            onChange={(data) => { this.handleTOTPpassword(data) }} /><br /><br />
+                        <Grid container direction={"row"} justify={"center"} alignItems={"center"}>
+                            <Button variant="raised" onClick={() => { this.setState({ dialogTOTP: false }) }} style={{ backgroundColor: "rgb(225, 0, 80)", color: "white" }}>{this.props.language["button-cancel"]}</Button>
+                            <Button variant="raised" onClick={this.handleSubmit} style={{ backgroundColor: "#50aaff", color: "white", margin: "0 10px" }}>{this.props.language["button-transfer"]}</Button>
+                        </Grid>
                     </div>
                 </Dialog>
             </div >
@@ -311,5 +345,27 @@ export class MakeTransaction extends React.Component<any, any> {
             selectedLedger: "",
             txStep: false,
         })
+    }
+
+    private getTOTP() {
+        this.state.rest.getTOTP().then((result: boolean) => {
+            if (result) {
+                this.setState({ totp: true })
+            } else {
+                this.setState({ totp: false })
+            }
+        })
+    }
+    private handleTOTP(data: any) {
+        const patternSixDigits = /^[0-9]{6}$/
+        this.setState({ totpToken: data.target.value })
+        if (!patternSixDigits.test(data.target.value)) {
+            this.setState({ errorText: this.props.language["alert-six-digit"] })
+        } else {
+            this.setState({ errorText: "" })
+        }
+    }
+    private handleTOTPpassword(data: any) {
+        this.setState({ totpPw: data.target.value })
     }
 }
