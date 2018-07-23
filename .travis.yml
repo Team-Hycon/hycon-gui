@@ -36,6 +36,7 @@ before_install:
 
 script:
   - npm install
+  - npm run-script lint
   - cd hummingbird-desktop
   - npm install
   - npm run-script build

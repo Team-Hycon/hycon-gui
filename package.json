@@ -4,7 +4,8 @@
   "description": "",
   "main": "webpack.config.js",
   "scripts": {
-    "protogen": "pbjs -t static-module -w commonjs -o src/serialization/proto.js proto/tx.proto &&  pbts -o src/serialization/proto.d.ts src/serialization/proto.js"
+    "protogen": "pbjs -t static-module -w commonjs -o src/serialization/proto.js proto/tx.proto &&  pbts -o src/serialization/proto.d.ts src/serialization/proto.js",
+    "lint": "tslint -p tsconfig.json"
   },
   "repository": {
     "type": "git",
