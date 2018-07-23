@@ -10,36 +10,15 @@ import chinese_traditional from "./zh-hk"
 export function getLocale(code: string): IText {
     const locale = code.split("-")
     switch (locale[0]) {
-        case "en":
-            return english
-            break
-        case "ko":
-            return korean
-            break
-        case "zh":
-            if (locale[1] === "cn") {
-                return chinese_simplified
-                break
-            } else {
-                return chinese_traditional
-                break
-            }
-            break
-        case "vi":
-            return vietnamese
-            break
-        case "ru":
-            return russian
-            break
-        case "mn":
-            return mongolian
-            break
-        case "ja":
-            return japanese
-            break
-        default:
-            return english
-            break
+        case "en": return english
+        case "ko": return korean
+        case "zh": return locale[1] === "cn" ?
+            chinese_simplified : chinese_traditional
+        case "vi": return vietnamese
+        case "ru": return russian
+        case "mn": return mongolian
+        case "ja": return japanese
+        default: return english
     }
 }
 export interface IText {

@@ -77,7 +77,7 @@ export default {
     "wallet-address": "주소",
     "wallet-balance": "잔액",
     "wallet-select": "조회하실 지갑을 선택해 주세요.",
-    "ledger-view": "LEDGER 조회",
+    "ledger-view": "Ledger 조회",
     "ledger-wallet": "Ledger 지갑",
 
     "email": "이메일",
