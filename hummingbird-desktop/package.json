@@ -7,6 +7,7 @@
   "scripts": {
     "pack": "electron-builder --dir",
     "dist": "electron-builder -mlw",
+    "publish": "build -p always",
     "start": "NODE_ENV=development electron .",
     "build": "webpack --config webpack.config.js && electron-rebuild",
     "test": "mocha",
@@ -15,14 +16,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@bitbucket.org/glosfer/hycon-ui.git"
+    "url": "git+ssh://git@github.com/Team-Hycon/hycon-gui.git"
   },
   "author": {
     "name": "Glosfer",
     "email": "security@glosfer.com"
   },
   "license": "ISC",
-  "homepage": "https://bitbucket.org/glosfer/hycon-ui#readme",
+  "homepage": "https://github.com/Team-Hycon/hycon-gui#readme",
   "devDependencies": {
     "electron": "^2.0.3",
     "electron-builder": "^20.19.2",

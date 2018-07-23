@@ -5,17 +5,23 @@ protocols:
   schemes:
     - hycon
 
+publish:
+    - github
+
 mac:
   artifactName: ${name}-${version}-${os}.${ext}
   category: public.app-category.wallet
   target:
     - dmg
 
+appImage:
+  systemIntegration: doNotAsk
+
 linux:
   artifactName: ${name}-${version}-${os}-${arch}.${ext}
   category: Finance
   target:
-    - target: deb
+    - target: AppImage
       arch:
         - x64
         - ia32
