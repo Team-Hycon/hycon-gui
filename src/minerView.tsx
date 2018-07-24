@@ -2,8 +2,6 @@ import { Button, Dialog, DialogTitle, Grid, Icon, List, ListItem, ListItemText }
 import CardContent from "@material-ui/core/CardContent"
 import { Card, CircularProgress } from "material-ui"
 import * as React from "react"
-import update = require("react-addons-update")
-import { Link } from "react-router-dom"
 import { IHyconWallet, IMiner, IRest } from "./rest"
 interface IMinerViewProps {
     rest: IRest
@@ -47,7 +45,7 @@ export class MinerView extends React.Component<IMinerViewProps, IMinerView> {
     }
     public render() {
         if (this.state.miner === undefined) {
-            return <div></div>
+            return null
         }
         return (
             <div>
@@ -134,7 +132,7 @@ export class MinerView extends React.Component<IMinerViewProps, IMinerView> {
                             ))}
                         </List>
                     </div>
-                    {this.state.isLoading ? (<CircularProgress style={{ marginRight: "5px", backgroundColor: "none" }} size={50} thickness={2} />) : (<div></div>)}
+                    {this.state.isLoading ? (<CircularProgress style={{ marginRight: "5px", backgroundColor: "none" }} size={50} thickness={2} />) : null}
                 </Dialog>
                 <Dialog open={this.state.adjustCpuMiner} onClose={this.handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
                     <div className={`${this.state.isLoading ? "hide" : ""}`}>
@@ -148,7 +146,7 @@ export class MinerView extends React.Component<IMinerViewProps, IMinerView> {
                             <Icon>check</Icon><span>Apply</span>
                         </Button>
                     </div>
-                    {this.state.isLoading ? (<CircularProgress style={{ marginRight: "5px", backgroundColor: "none" }} size={50} thickness={2} />) : (<div></div>)}
+                    {this.state.isLoading ? (<CircularProgress style={{ marginRight: "5px", backgroundColor: "none" }} size={50} thickness={2} />) : null}
                 </Dialog>
             </div >
         )

@@ -1,9 +1,7 @@
 import * as React from "react"
 import update = require("react-addons-update")
 import * as ReactPaginate from "react-paginate"
-import { Link } from "react-router-dom"
 import { IRest, ITxProp } from "./rest"
-import { TxLine } from "./txLine"
 import { TxPoolLine } from "./txPoolLine"
 interface ITxListView {
     rest: IRest
@@ -113,7 +111,7 @@ export class TxPoolList extends React.Component<any, any> {
                         </table>
                     </div>)
                     :
-                    (<div></div>)
+                    null
                 }
 
             </div>

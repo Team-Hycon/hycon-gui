@@ -6,8 +6,6 @@ import { encodingMnemonic } from "./stringUtil"
 
 export class RecoverWallet extends React.Component<any, any> {
     public mounted: boolean = false
-
-    public pattern1 = /^[a-zA-Z0-9\u1100-\u11FF\u3130-\u318F\uA960-\uA97F\uAC00-\uD7AF\uD7B0-\uD7FF]{2,20}$/
     constructor(props: any) {
         super(props)
         this.state = {
@@ -72,11 +70,12 @@ export class RecoverWallet extends React.Component<any, any> {
         this.setState({ advanced: event.target.checked })
     }
     public recoverWallet() {
+        const patternWalletName = /^[a-zA-Z0-9\u1100-\u11FF\u3130-\u318F\uA960-\uA97F\uAC00-\uD7AF\uD7B0-\uD7FF]{2,20}$/
         if (this.state.name === "") {
             alert(this.props.language["alert-empty-fields"])
             return
         }
-        if (this.state.name.search(/\s/) !== -1 || !this.pattern1.test(this.state.name)) {
+        if (this.state.name.search(/\s/) !== -1 || !patternWalletName.test(this.state.name)) {
             alert(this.props.language["alert-invalid-wallet"])
             return
         }
@@ -119,7 +118,7 @@ export class RecoverWallet extends React.Component<any, any> {
 
     public render() {
         if (!this.state.load) {
-            return <div></div>
+            return null
         }
         if (this.state.redirect) {
             return <Redirect to="/wallet" />
@@ -172,7 +171,7 @@ export class RecoverWallet extends React.Component<any, any> {
                                 onKeyPress={(event) => { if (event.key === "Enter") { event.preventDefault(); this.recoverWallet() } }}
                             />
                         </div>)
-                        : (<div></div>)
+                        : null
                     }
                     <br /><br />
                     <Grid container direction={"row"} justify={"center"} alignItems={"center"}>

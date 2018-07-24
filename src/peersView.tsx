@@ -28,20 +28,6 @@ export class PeersView extends React.Component<any, any> {
         this.mounted = false
     }
     public componentDidMount() {
-        // this.mounted = true
-        // this.state.rest.setLoading(true)
-        // this.state.rest.getPeerList().then((data: IPeer[]) => {
-        //     this.state.rest.setLoading(false)
-        //     if (this.mounted) {
-        //         this.setState({ peer: data })
-        //     }
-        // })
-        // this.state.rest.getPeerConnected().then((data: IPeer[]) => {
-        //     this.state.rest.setLoading(false)
-        //     if (this.mounted) {
-        //         this.setState({ peerCon: data })
-        //     }
-        // })
         this.getRecentPeerList(this.state.index)
     }
 
@@ -80,10 +66,6 @@ export class PeersView extends React.Component<any, any> {
         }
         return (
             <div>
-                {/* <div className="contentTitle">Peers List</div>
-                <div>
-                    <PeersList rest={this.state.rest} peer={this.state.peer} />
-                </div> */}
                 <div className="contentTitle">
                     Peers Connected
                     <span className="seeMoreLink">
@@ -105,28 +87,6 @@ export class PeersView extends React.Component<any, any> {
                 <div>
                     <PeersList rest={this.state.rest} peer={this.state.peerCon} />
                 </div>
-
-                {/* <div style={{ width: "90%", height: "400px", margin: "auto" }}>
-                    <GoogleMap
-                        bootstrapURLKeys={{
-                            key: "AIzaSyAp-2W8_T6dZjq71yOhxW1kRkbY6E1iyuk",
-                        }}
-                        defaultCenter={this.state.center}
-                        defaultZoom={this.state.zoom}
-                    >
-                        {this.state.peer.map((peer: IPeer) => {
-                            return (
-                                <Marker
-                                    key={this.count++}
-                                    className="marker"
-                                    lat={peer.latitude}
-                                    lng={peer.longitude}
-                                    text={"0"}
-                                />
-                            )
-                        })}
-                    </GoogleMap>
-                </div> */}
             </div>
         )
     }

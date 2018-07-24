@@ -1,15 +1,15 @@
-import { Dialog, DialogTitle, FormControl, FormControlLabel, FormLabel, Input, InputLabel, Radio, RadioGroup, Select } from "@material-ui/core"
+
+import { Dialog, DialogTitle, FormControl, Input, InputLabel, Select } from "@material-ui/core"
 import Button from "@material-ui/core/Button"
 import CardContent from "@material-ui/core/CardContent"
 import Grid from "@material-ui/core/Grid"
 import Icon from "@material-ui/core/Icon"
 import { Card, CircularProgress, MenuItem, TextField } from "material-ui"
 import * as React from "react"
-import update = require("react-addons-update")
 import { Redirect } from "react-router"
 import { AddressBook } from "./addressBook"
 import { MultipleLedgerView } from "./multipleLedgerView"
-import { IHyconWallet, IRest } from "./rest"
+import { IHyconWallet } from "./rest"
 import { hyconfromString } from "./stringUtil"
 
 export class MakeTransaction extends React.Component<any, any> {

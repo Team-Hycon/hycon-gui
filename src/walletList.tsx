@@ -2,7 +2,6 @@ import { List } from "material-ui/List"
 import * as React from "react"
 import update = require("react-addons-update")
 import * as ReactPaginate from "react-paginate"
-import { Link } from "react-router-dom"
 import { IText } from "./locales/locales"
 import { IHyconWallet, IRest } from "./rest"
 import { WalletSummary } from "./walletSummary"
@@ -28,7 +27,7 @@ export class WalletList extends React.Component<any, any> {
     public render() {
         let idx = 0
         if (this.state.length === 0) {
-            return < div ></div >
+            return null
         } else if (this.state.length > 20) {
             return (
                 <div>

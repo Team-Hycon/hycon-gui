@@ -1,5 +1,4 @@
 import * as React from "react"
-import { Link } from "react-router-dom"
 import { IRest, ITxProp } from "./rest"
 import { TxLine } from "./txLine"
 interface ITxListView {

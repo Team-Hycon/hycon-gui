@@ -1,10 +1,8 @@
-import Long = require("long")
 import * as React from "react"
 import update = require("react-addons-update")
 import { Link } from "react-router-dom"
 import { NotFound } from "./notFound"
 import { IBlock, IResponseError, IRest, ITxProp } from "./rest"
-import { hyconfromString, hycontoString } from "./stringUtil"
 import { TxLine } from "./txLine"
 interface IBlockProps {
     rest: IRest
@@ -49,7 +47,7 @@ export class BlockView extends React.Component<IBlockProps, IBlockViewState> {
             return <NotFound />
         }
         if (!this.state.notFound && this.state.block === undefined) {
-            return <div></div>
+            return null
         }
         const date = new Date(this.state.block.timeStamp)
         return (
@@ -136,8 +134,7 @@ export class BlockView extends React.Component<IBlockProps, IBlockViewState> {
                 })}
                 {this.state.hasMore && this.state.txs.length > 0 ?
                     (<div><button className="btn btn-block btn-info" style={{width: "100%", cursor: "pointer"}} onClick={() => this.fetchNextTxs()}>Load more</button></div>)
-                    :
-                    (<div></div>)}
+                    : null}
             </div>
         )
     }

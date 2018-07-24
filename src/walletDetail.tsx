@@ -1,14 +1,12 @@
-import { Button, Grid, Icon } from "@material-ui/core"
-import { Dialog, TextField } from "material-ui"
+import { Button } from "@material-ui/core"
+import { Dialog } from "material-ui"
 import Avatar from "material-ui/Avatar"
 import { Tab, Tabs } from "material-ui/Tabs"
 import * as QRCode from "qrcode.react"
 import * as React from "react"
 import update = require("react-addons-update")
 import * as CopyToClipboard from "react-copy-to-clipboard"
-import * as ReactPaginate from "react-paginate"
 import { Redirect } from "react-router"
-import { Link } from "react-router-dom"
 import { IText } from "./locales/locales"
 import { Login } from "./login"
 import { MinedBlockLine } from "./minedBlockLine"
@@ -25,10 +23,6 @@ interface IWalletDetailProps {
     notFound: boolean
 }
 export class WalletDetail extends React.Component<any, any> {
-    public msg1: string = "Are you sure delete your wallet?"
-    public msg2: string = `${this.props.language["alert-delete-success"]}`
-    public msg3: string = `${this.props.language["alert-delete-failed"]}`
-    public msg4: string = "Fail to change account"
     public mounted: boolean = false
     constructor(props: any) {
         super(props)
@@ -71,13 +65,13 @@ export class WalletDetail extends React.Component<any, any> {
         this.setState({ represent: option.target.value })
     }
     public deleteWallet() {
-        if (confirm(this.msg1)) {
+        if (confirm(this.props.language["alert-delete-wallet"])) {
             this.state.rest.deleteWallet(this.state.name).then((isDeleted: boolean) => {
                 if (isDeleted === true) {
-                    alert(this.msg2)
+                    alert(this.props.language["alert-delete-success"])
                     this.setState({ redirect: true })
                 } else {
-                    alert(this.msg3)
+                    alert(this.props.language["alert-delete-failed"])
                 }
             })
         }
@@ -94,7 +88,7 @@ export class WalletDetail extends React.Component<any, any> {
                     }
                 })
             } else {
-                alert(this.msg4)
+                alert("Fail to change account")
                 this.setState({ visible: false })
                 this.state.rest.setLoading(false)
             }
@@ -125,7 +119,7 @@ export class WalletDetail extends React.Component<any, any> {
             return <NotFound />
         }
         if (!this.state.notFound && this.state.wallet === undefined) {
-            return <div></div>
+            return null
         }
         if (this.state.redirect) {
             return <Redirect to="/wallet" />
@@ -145,10 +139,6 @@ export class WalletDetail extends React.Component<any, any> {
                                     <i className="material-icons">send</i>{this.props.language["button-transfer"]}</button>
                                 <button onClick={() => { this.deleteWallet() }} className="mdl-button">
                                     <i className="material-icons">delete</i>{this.props.language["button-forget"]}</button>
-                                {/* <button className="mdl-button">
-                                    <i className="material-icons">mode_edit</i>EDIT</button>
-                                <button className="mdl-button">
-                                    <i className="material-icons">settings</i>SETTING</button> */}
                             </td>
                         </tr>
                     </thead>
@@ -163,9 +153,6 @@ export class WalletDetail extends React.Component<any, any> {
                                                     <Avatar style={{ width: "35px", height: "35px" }} icon={<i className="material-icons walletIcon_white">account_balance_wallet</i>} />
                                                 </span>
                                                 <span className="walletName">{this.state.name}</span>
-
-                                                {/* <button onClick={() => { this.searchAllAccounts() }} className="mdl-button">
-                                                    <i className="material-icons">find_replace</i></button> */}
                                             </td>
                                         </tr>
                                         <tr>
@@ -231,8 +218,7 @@ export class WalletDetail extends React.Component<any, any> {
                         })}
                         {this.state.hasMore && this.state.txs.length > 0 ?
                             (<div><button className="btn btn-block btn-info" style={{width: "100%", cursor: "pointer"}} onClick={() => this.fetchNextTxs()}>{this.props.language["load-more"]}</button></div>)
-                            :
-                            (<div></div>)}
+                            : null}
                     </Tab>
                     <Tab label={this.props.language["mine-reward"]} style={{ backgroundColor: "#FFF", color: "#000" }}>
                         <table className="mdl-data-table mdl-js-data-table mdl-shadow--2dp table_margined">
@@ -253,8 +239,7 @@ export class WalletDetail extends React.Component<any, any> {
                         <br />
                         {this.state.hasMoreMinedInfo && this.state.minedBlocks.length > 0 ?
                             (<div><button className="btn btn-block btn-info" style={{ width: "100%", cursor: "pointer" }} onClick={() => this.fetchNextMinedInfo()}>{this.props.language["load-more"]}</button></div>)
-                            :
-                            (<div></div>)}
+                            : null}
                     </Tab>
                 </Tabs>
                 <Dialog className="dialog" open={this.state.login}>

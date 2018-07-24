@@ -1,4 +1,3 @@
-import Long = require("long")
 import { Tab, Tabs } from "material-ui/Tabs"
 import * as QRCode from "qrcode.react"
 import * as React from "react"
@@ -76,7 +75,7 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
     }
     public render() {
         if (this.state.address === undefined) {
-            return < div ></div >
+            return null
         }
         if (this.state.redirectTxView) {
             return <Redirect to={`/maketransaction/true/${this.state.ledgerIndex}`} />
@@ -138,8 +137,7 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
                         })}
                         {this.state.hasMore && this.state.txs.length > 0 ?
                             (<div><button className="btn btn-block btn-info" style={{ width: "100%", cursor: "pointer" }} onClick={() => this.fetchNextTxs()}>{this.props.language["load-more"]}</button></div>)
-                            :
-                            (<div></div>)}
+                            : null}
                     </Tab>
                     <Tab label={this.props.language["mine-reward"]} style={{ backgroundColor: "#FFF", color: "#000" }}>
                         <table className="mdl-data-table mdl-js-data-table mdl-shadow--2dp table_margined">
@@ -160,7 +158,7 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
                         <br />
                         {this.state.hasMoreMinedInfo && this.state.minedBlocks.length > 0
                             ? (<div><button className="btn btn-block btn-info" style={{ width: "100%", cursor: "pointer" }} onClick={() => this.fetchNextMinedInfo()}>{this.props.language["load-more"]}</button></div>)
-                            : (<div></div>)}
+                            : null}
                     </Tab>
                 </Tabs>
             </div>
