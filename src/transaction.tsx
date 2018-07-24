@@ -7,7 +7,7 @@ import { Card, CircularProgress, TextField } from "material-ui"
 import * as React from "react"
 import { Redirect } from "react-router"
 import { AddressBook } from "./addressBook"
-import { IHyconWallet, IRest } from "./rest"
+import { IHyconWallet } from "./rest"
 import { hyconfromString } from "./stringUtil"
 
 export class Transaction extends React.Component<any, any> {
@@ -143,7 +143,7 @@ export class Transaction extends React.Component<any, any> {
         if (this.state.redirect) {
             return <Redirect to={`/wallet/detail/${this.state.name}`} />
         }
-        if (this.state.wallet === undefined && !this.state.selectFrom) { return <div></div> }
+        if (this.state.wallet === undefined && !this.state.selectFrom) { return null }
         return (
             <div style={{ width: "60%", margin: "auto" }}>
                 <Card>

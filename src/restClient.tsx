@@ -1,14 +1,12 @@
 import {
     IBlock,
     IHyconWallet,
-    ILocationDetails,
     IMinedInfo,
     IMiner,
     IPeer,
     IResponseError,
     IRest,
     ITxProp,
-    IUser,
     IWalletAddress,
 } from "./rest"
 import { WalletDetail } from "./walletDetail"

@@ -5,21 +5,17 @@ import { Link, Route, Switch } from "react-router-dom"
 
 import { TextField } from "material-ui"
 import * as tfa from "node-2fa"
-import { Button, Dialog, DialogTitle, Divider, Drawer, FormControl, FormControlLabel, FormLabel, Grid, Icon, IconButton, ListItemIcon, ListItemText, MenuItem, Radio, RadioGroup, Select } from "../node_modules/@material-ui/core"
+import { Button, Dialog, DialogTitle, Drawer, FormControl, FormControlLabel, FormLabel, Grid, Icon, IconButton, ListItemIcon, ListItemText, MenuItem, Radio, RadioGroup, Select } from "../node_modules/@material-ui/core"
 import { AddressBook } from "./addressBook"
 import { AddressInfo } from "./addressInfo"
 import { AddWallet } from "./addWallet"
-import { BlockView } from "./blockView"
 import { Home } from "./home"
 import { LedgerView } from "./ledgerView"
 import { getLocale, IText } from "./locales/locales"
 import { MakeTransaction } from "./makeTransaction"
-import { MinerView } from "./minerView"
-import { PeersView } from "./peersView"
 import { RecoverWallet } from "./recoverWallet"
 import { IRest } from "./rest"
 import { Transaction } from "./transaction"
-import { TxPoolList } from "./txPoolList"
 import { TxView } from "./txView"
 import { WalletDetail } from "./walletDetail"
 import { WalletView } from "./walletView"
@@ -27,8 +23,6 @@ import { WalletView } from "./walletView"
 export const routes: RouteConfig[] = [
     { exact: true, path: "/" },
     { exact: true, path: "/tx/:hash" },
-    { exact: true, path: "/block/:hash" },
-    { exact: true, path: "/txPool" },
     { exact: true, path: "/address/:hash" },
     { exact: true, path: "/wallet" },
     { exact: true, path: "/wallet/addWallet" },
@@ -38,8 +32,6 @@ export const routes: RouteConfig[] = [
     { exact: true, path: "/transaction/:name/:nonce" },
     { exact: true, path: "/maketransaction/:isLedger" },
     { exact: true, path: "/maketransaction/:isLedger/:selectedLedger" },
-    { exact: true, path: "/peersView" },
-    { exact: true, path: "/minerView" },
     { exact: true, path: "/ledgerView" },
     { exact: true, path: "/address/:hash/:selectedLedger" },
 ]
@@ -49,23 +41,18 @@ export class LiteClient extends React.Component<any, any> {
     public mounted: boolean = false
     public rest: IRest
     public language: IText
-    public blockView: ({ match }: RouteComponentProps<{ hash: string }>) => JSX.Element
     public home: ({ match }: RouteComponentProps<{}>) => JSX.Element
     public addressInfo: (
         { match }: RouteComponentProps<{ hash: string }>,
     ) => JSX.Element
     public txView: ({ match }: RouteComponentProps<{ hash: string }>) => JSX.Element
-    public txPool: ({ match }: RouteComponentProps<{}>) => JSX.Element
-
     public transaction: ({ match }: RouteComponentProps<{ name: string, nonce: number }>) => JSX.Element
     public maketransaction: ({ match }: RouteComponentProps<{ isLedger: boolean }>) => JSX.Element
     public maketransactionWithIndex: ({ match }: RouteComponentProps<{ isLedger: boolean, selectedLedger: number }>) => JSX.Element
-    public peersView: ({ match }: RouteComponentProps<{}>) => JSX.Element
     public wallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
     public addWallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
     public recoverWallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
     public walletDetail: ({ match }: RouteComponentProps<{ name: string }>) => JSX.Element
-    public minerView: ({ match }: RouteComponentProps<{ name: string }>) => JSX.Element
     public ledgerView: ({ match }: RouteComponentProps<{}>) => JSX.Element
     public ledgerAddressView: ({ match }: RouteComponentProps<{ hash: string, selectedLedger: number }>) => JSX.Element
     public notFound: boolean
@@ -101,9 +88,6 @@ export class LiteClient extends React.Component<any, any> {
         this.rest.loadingListener((loading: boolean) => {
             this.state = ({ loading })
         })
-        this.blockView = ({ match }: RouteComponentProps<{ hash: string }>) => (
-            <BlockView hash={match.params.hash} rest={this.rest} notFound={this.notFound} />
-        )
         this.home = ({ match }: RouteComponentProps<{}>) => (
             <Home rest={props.rest} />
         )
@@ -113,9 +97,6 @@ export class LiteClient extends React.Component<any, any> {
         this.txView = ({ match }: RouteComponentProps<{ hash: string }>) => (
             <TxView hash={match.params.hash} rest={this.rest} />
         )
-        this.txPool = ({ match }: RouteComponentProps<{}>) => (
-            <TxPoolList rest={this.rest} />
-        )
         this.transaction = ({ match }: RouteComponentProps<{ name: string, nonce: number }>) => (
             <Transaction name={match.params.name} rest={this.rest} language={this.language} nonce={match.params.nonce}/>
         )
@@ -124,9 +105,6 @@ export class LiteClient extends React.Component<any, any> {
         )
         this.maketransactionWithIndex = ({ match }: RouteComponentProps<{ isLedger: boolean, selectedLedger: number }>) => (
             <MakeTransaction isLedger={match.params.isLedger} rest={this.rest} selectedLedger={match.params.selectedLedger} language={this.language} />
-        )
-        this.peersView = ({ match }: RouteComponentProps<{}>) => (
-            <PeersView rest={props.rest} />
         )
         this.wallet = ({ match }: RouteComponentProps<{}>) => (
             <WalletView rest={props.rest} language={this.language} />
@@ -139,10 +117,6 @@ export class LiteClient extends React.Component<any, any> {
         )
         this.walletDetail = ({ match }: RouteComponentProps<{ name: string }>) => (
             <WalletDetail name={match.params.name} rest={this.rest} language={this.language} notFound={this.notFound} />
-        )
-
-        this.minerView = ({ match }: RouteComponentProps<{}>) => (
-            <MinerView rest={this.rest} />
         )
         this.ledgerView = ({ match }: RouteComponentProps<{}>) => (
             <LedgerView rest={this.rest} language={this.language} />
@@ -268,7 +242,6 @@ export class LiteClient extends React.Component<any, any> {
                         <Switch>
                             <Route exact path="/" component={this.wallet} />
                             <Route exact path="/tx/:hash" component={this.txView} />
-                            <Route exact path="/block/:hash" component={this.blockView} />
                             <Route exact path="/address/:hash" component={this.addressInfo} />
                             <Route exact path="/transaction/:name" component={this.transaction} /> {/* send tx */}
                             <Route exact path="/transaction/:name/:nonce" component={this.transaction} /> {/* send tx */}

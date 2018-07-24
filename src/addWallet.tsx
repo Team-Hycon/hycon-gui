@@ -6,7 +6,6 @@ import { encodingMnemonic } from "./stringUtil"
 
 export class AddWallet extends React.Component<any, any> {
     public mounted: boolean = false
-    public pattern1 = /^[a-zA-Z0-9\u1100-\u11FF\u3130-\u318F\uA960-\uA97F\uAC00-\uD7AF\uD7B0-\uD7FF]{2,20}$/
     constructor(props: any) {
         super(props)
         this.state = {
@@ -99,9 +98,10 @@ export class AddWallet extends React.Component<any, any> {
         }
     }
     public receiveMnemonic() {
+        const patternWalletName = /^[a-zA-Z0-9\u1100-\u11FF\u3130-\u318F\uA960-\uA97F\uAC00-\uD7AF\uD7B0-\uD7FF]{2,20}$/
         if (this.state.name === "") {
             alert(this.props.language["alert-empty-fields"])
-        } else if (this.state.name.search(/\s/) !== -1 || !this.pattern1.test(this.state.name)) {
+        } else if (this.state.name.search(/\s/) !== -1 || !patternWalletName.test(this.state.name)) {
             alert(this.props.language["alert-invalid-wallet"])
         } else {
             if (this.state.password1 !== this.state.password2) {
@@ -173,7 +173,7 @@ export class AddWallet extends React.Component<any, any> {
             return <Redirect to={`/wallet/detail/${this.state.name}`} />
         }
         if (!this.state.load) {
-            return <div></div>
+            return null
         }
         return (
             <div style={{ textAlign: "center", width: "80%", margin: "auto" }}>
@@ -228,8 +228,7 @@ export class AddWallet extends React.Component<any, any> {
                                         onKeyPress={(event) => { if (event.key === "Enter") { event.preventDefault(); this.handleNext() } }}
                                     /><br />
                                 </div>)
-                                : (<div></div>)
-                            }
+                                : null}
                             <br />
                         </div>
                         <div style={{ display: `${this.state.activeStep === 1 ? ("block") : ("none")}` }}>

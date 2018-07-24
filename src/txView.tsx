@@ -1,5 +1,4 @@
 import * as React from "react"
-import { Link } from "react-router-dom"
 import { NotFound } from "./notFound"
 import { IRest, ITxProp } from "./rest"
 import { TxLine } from "./txLine"
@@ -41,7 +40,7 @@ export class TxView extends React.Component<any, any> {
             return <NotFound />
         }
         if (!this.state.notFound && this.state.tx === undefined) {
-            return < div ></div >
+            return null
         }
         const date = new Date(this.state.tx.receiveTime)
         return (
@@ -75,28 +74,18 @@ export class TxView extends React.Component<any, any> {
                                 </td>
                                 <td className="numericTd">{date.toString()}</td>
                             </tr>
-                            {/* <tr>
-                                <td className="mdl-data-table__cell--non-numeric">Lock Time</td>
-                                <td className="numericTd">{this.state.tx.lockTime}</td>
-                            </tr> */}
                             <tr>
                                 <td className="mdl-data-table__cell--non-numeric">
                                     Included In Blocks
                                 </td>
                                 <td className="numericTd">
-                                    <Link to={`/block/${this.state.tx.blockHash}`}>{this.state.tx.blockHash}</Link>
+                                    {this.state.tx.blockHash}
                                 </td>
                             </tr>
                             <tr>
                                 <td className="mdl-data-table__cell--non-numeric">Fees</td>
                                 <td className="numericTd">{this.state.tx.fee} HYCON</td>
                             </tr>
-                            {/* <tr>
-                                <td className="mdl-data-table__cell--non-numeric">Visualize</td>
-                                <td className="numericTd">
-                                    <Link to="/chart">View Tree Chart</Link>
-                                </td>
-                            </tr> */}
                         </tbody>
                     </table>
                 </div>

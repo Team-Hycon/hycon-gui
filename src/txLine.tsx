@@ -71,17 +71,11 @@ export class TxLine extends React.Component<ITxLineProps, ITxLineView> {
                             <i className="material-icons">forward</i>
                         </td>
                         <td className="coloredText tableDivision txAddrTd">
-                            {this.state.tx.to ? (
-                                this.state.tx.to === (this.state.address !== undefined ? this.state.address.hash : undefined) ?
-                                    <div>{this.state.tx.to}</div> :
-                                    <Link to={`/address/${this.state.tx.to}`}>
-                                        {this.state.tx.to}
-                                    </Link>
-                            ) : (
-                                    <span className="CantDecode">
-                                        Unable to decode output address
-                </span>
-                                )}
+                            {this.state.tx.to
+                            ? (this.state.tx.to === (this.state.address !== undefined ? this.state.address.hash : undefined)
+                                ? <div>{this.state.tx.to}</div>
+                                : <Link to={`/address/${this.state.tx.to}`}>{this.state.tx.to}</Link>
+                            ) : (<span className="CantDecode">Unable to decode output address</span>)}
                         </td>
                         <td className="tableDivision amountTd">
                             {this.state.tx.amount + " HYCON"}<br />
@@ -96,7 +90,7 @@ export class TxLine extends React.Component<ITxLineProps, ITxLineView> {
                     <div>Test</div>
                     <Grid container direction={"row"} justify={"center"} alignItems={"center"}>
                         <Button variant="raised" onClick={() => { this.setState({ redirect: true }) }} style={{ backgroundColor: "#50aaff", color: "white", margin: "0 10px" }} >I Agree</Button>
-                        <Button variant="raised" onClick={() => { this.setState({ dialogPending: false }) }} style={{ backgroundColor: "rgb(225, 0, 80)", color: "white" }}>Cancle</Button>
+                        <Button variant="raised" onClick={() => { this.setState({ dialogPending: false }) }} style={{ backgroundColor: "rgb(225, 0, 80)", color: "white" }}>Cancel</Button>
                     </Grid>
                 </div>
             </Dialog>

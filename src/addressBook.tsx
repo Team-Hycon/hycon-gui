@@ -15,7 +15,7 @@ export class AddressBook extends React.Component<any, any> {
             alias: "",
             clickCallback: props.callback,
             favorites: props.favorites,
-            isWalletVeiw: props.isWalletView,
+            isWalletView: props.isWalletView,
             rest: props.rest,
         }
         this.handleInputChange = this.handleInputChange.bind(this)
@@ -36,9 +36,9 @@ export class AddressBook extends React.Component<any, any> {
         return (
             <div style={{ textAlign: "center" }}>
                 <DialogTitle id="simple-dialog-title" style={{ textAlign: "center" }}><span style={{ display: "inline-flex" }}><Icon style={{ color: "grey", fontSize: "larger", marginRight: "5px" }}>bookmark</Icon>{this.props.language["address-book"]}</span></DialogTitle>
-                {(this.state.favorites.length === 0) ? (<h5 style={{ color: "grey" }}> {this.props.language["address-empty"]} </h5>) : (<div></div>)}
+                {(this.state.favorites.length === 0) ? (<h5 style={{ color: "grey" }}> {this.props.language["address-empty"]} </h5>) : null}
                 <List style={{ width: "32em" }}>
-                    {(this.state.isWalletVeiw) ?
+                    {(this.state.isWalletView) ?
                         (<div>
                             {this.state.favorites.map((favorite: { alias: string, address: string }, idx: number) => (
                                 <ListItem

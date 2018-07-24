@@ -2,7 +2,6 @@ import Long = require("long")
 import * as React from "react"
 import update = require("react-addons-update")
 import * as ReactPaginate from "react-paginate"
-import { Link } from "react-router-dom"
 import { BlockLine } from "./blockLine"
 import { IBlock, IRest } from "./rest"
 import { hyconfromString, hycontoString } from "./stringUtil"
@@ -69,7 +68,7 @@ export class BlockList extends React.Component<any, any> {
     public render() {
         let blockIndex = 0
         if (this.state.blocks.length === 0) {
-            return < div ></div >
+            return null
         }
         return (
             <div>

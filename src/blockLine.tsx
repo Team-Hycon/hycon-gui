@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Link } from "react-router-dom"
-import { IBlock, IRest } from "./rest"
+import { IBlock } from "./rest"
 interface IBlockLineView {
     block: IBlock
     age?: IAge
@@ -61,7 +61,7 @@ export class BlockLine extends React.Component<any, any> {
     }
     public render() {
         if (this.state.block.age === undefined) {
-            return < div ></div >
+            return null
         }
         return (
             <tr>
