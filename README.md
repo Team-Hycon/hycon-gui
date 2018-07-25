@@ -3,6 +3,7 @@
 </h1>
 <h4 align="center">Hycon Wallet - Desktop app</h4>
 
+[![Github All Releases](https://img.shields.io/github/downloads/Team-Hycon/hycon-gui/total.svg)](http://www.somsubhra.com/github-release-stats/?username=Team-Hycon&repository=hycon-gui)
 [![Build Status](https://travis-ci.org/Team-Hycon/hycon-gui.svg?branch=master)](https://travis-ci.org/Team-Hycon/hycon-gui)
 
 ## Key Features
