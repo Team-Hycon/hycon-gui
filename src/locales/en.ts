@@ -79,6 +79,7 @@ export default {
     "wallet-select": "Select wallet to view",
     "ledger-view": "LEDGER VIEW",
     "ledger-wallet": "Ledger Wallet",
+    "alert-delete-wallet": "Are you sure delete your wallet?",
 
     "email": "Email",
     "password": "Password",

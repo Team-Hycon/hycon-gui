@@ -79,6 +79,7 @@ export default {
     "wallet-select": "조회하실 지갑을 선택해 주세요.",
     "ledger-view": "Ledger 조회",
     "ledger-wallet": "Ledger 지갑",
+    "alert-delete-wallet": "Are you sure delete your wallet?",
 
     "email": "이메일",
     "password": "패스워드",

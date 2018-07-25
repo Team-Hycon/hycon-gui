@@ -100,7 +100,8 @@ export interface IText {
     "wallet-balance": string,
     "wallet-select": string,
     "ledger-view": string,
-    "ledger-wallet": string
+    "ledger-wallet": string,
+    "alert-delete-wallet": string,
 
     "email": string,
     "password": string,

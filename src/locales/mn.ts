@@ -79,6 +79,7 @@ export default {
     "wallet-select": "Хэтэвчээ сонгоно уу",
     "ledger-view": "LEDGER ХАРАХ",
     "ledger-wallet": "Ledger Хэтэвч",
+    "alert-delete-wallet": "Хэтэвчээ устгах уу?",
 
     "email": "Имэйл",
     "password": "Нууц үг",

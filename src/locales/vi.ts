@@ -79,6 +79,7 @@ export default {
     "wallet-select": "Mời bạn chọn Ví để xem",
     "ledger-view": "Xem Ledger",
     "ledger-wallet": "Ví Ledger",
+    "alert-delete-wallet": "Are you sure delete your wallet?",
 
     "email": "Email",
     "password": "Mật khẩu",

@@ -79,6 +79,7 @@ export default {
     "wallet-select": "選擇需要查看的錢包",
     "ledger-view": "Ledger視圖",
     "ledger-wallet": "Ledger錢包",
+    "alert-delete-wallet": "Are you sure delete your wallet?",
 
     "email": "電子郵箱",
     "password": "密碼",
