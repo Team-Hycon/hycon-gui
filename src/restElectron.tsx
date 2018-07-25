@@ -174,11 +174,11 @@ export class RestElectron implements IRest {
     }
 
     public async generateWallet(Hwallet: IHyconWallet): Promise<string> {
-        const address = await this.recoverWallet(Hwallet)
-        if (typeof address === "boolean") {
-            throw new Error("Could not generate wallet")
+        try {
+            return await this.recoverWallet(Hwallet)
+        } catch (e) {
+            throw new Error(e)
         }
-        return address
     }
 
     public getMnemonic(language: string): Promise<string> {
@@ -294,7 +294,6 @@ export class RestElectron implements IRest {
             this.favoritesDB.find({}, (err: Error, docs: IStoredFavorite[]) => {
                 if (err) {
                     reject(err)
-                    return
                 }
 
                 const list: Array<{ alias: string, address: string }> = []
@@ -316,10 +315,9 @@ export class RestElectron implements IRest {
                 if (err) {
                     console.error(err)
                     resolve(false)
-                } else {
-                    console.log(`Stored ${doc.address} -> ${JSON.stringify(doc)}`)
-                    resolve(true)
                 }
+                console.log(`Stored ${doc.address} -> ${JSON.stringify(doc)}`)
+                resolve(true)
             })
         })
     }
@@ -329,9 +327,7 @@ export class RestElectron implements IRest {
                 if (err) {
                     console.error(err)
                     resolve(false)
-                    return
                 }
-
                 console.log(`Deleted "${alias}" from favorites`)
                 resolve(true)
             })
@@ -707,12 +703,10 @@ export class RestElectron implements IRest {
             this.walletsDB.findOne({ name }, (err: Error, doc: IStoredWallet) => {
                 if (err) {
                     reject(err)
-                    return
                 }
 
                 if (!doc) {
                     reject(new Error(`Wallet '${name}' not found`))
-                    return
                 }
 
                 resolve(doc)
