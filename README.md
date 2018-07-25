@@ -5,6 +5,7 @@
 
 [![Github All Releases](https://img.shields.io/github/downloads/Team-Hycon/hycon-gui/total.svg)](http://www.somsubhra.com/github-release-stats/?username=Team-Hycon&repository=hycon-gui)
 [![Build Status](https://travis-ci.org/Team-Hycon/hycon-gui.svg?branch=master)](https://travis-ci.org/Team-Hycon/hycon-gui)
+[![Coverage Status](https://coveralls.io/repos/github/Team-Hycon/hycon-gui/badge.svg?branch=coveralls)](https://coveralls.io/github/Team-Hycon/hycon-gui?branch=coveralls)
 
 ## Key Features
 
