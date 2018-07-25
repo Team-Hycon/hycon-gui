@@ -16,7 +16,7 @@ export class WalletSummary extends React.Component<any, any> {
     public componentWillUnmount() { }
     public render() {
         if (this.state.wallet.address === undefined) {
-            return < div ></div >
+            return null
         }
         return (
             <div>

@@ -6,6 +6,7 @@ import { encodingMnemonic } from "./stringUtil"
 
 export class RecoverWallet extends React.Component<any, any> {
     public mounted: boolean = false
+
     constructor(props: any) {
         super(props)
         this.state = {

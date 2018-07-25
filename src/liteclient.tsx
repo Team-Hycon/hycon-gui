@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Redirect, RouteComponentProps } from "react-router"
+import { RouteComponentProps } from "react-router"
 import { RouteConfig } from "react-router-config"
 import { Link, Route, Switch } from "react-router-dom"
 
