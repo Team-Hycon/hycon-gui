@@ -118,6 +118,9 @@ export default {
     "alert-ledger-connect-failed": "Ledger 지갑과의 연결과 Hycon 어플리케이션 실행을 확인해 주세요.",
     "alert-select-account": "사용할 계정을 선택해 주세요.",
     "send-amount": "보내신 금액",
+    "attention-change-tx-title": "주의",
+    "attention-change-tx": "현재 진행 중인 트랜잭션을 변경합니다. 트랜잭션을 성공적으로 변경하기 위해서는 이전 트랜잭션을 전송할 때 설정한 수수료보다 더 높은 수수료를 설정해야 합니다. 만약 변경한 트랜잭션이 전파되기 전에 이전 트랜잭션이 담긴 블록이 생성되면 본 트랜잭션 변경이 반영되지 않을 수 있습니다. 위 내용을 숙지하였고 계속 진행하시겠습니까?",
+    "guide-sign-ledger": "Ledger 지갑화면에서 트랜잭션의 세부정보를 확인하십시오. 정보가 맞다면 승인하시기 바랍니다. 계속하시려면 '확인'을 클릭해 주세요.",
 
     "recover-wallet": "지갑 복구",
     "title-recover-wallet": "지갑 복구하기",

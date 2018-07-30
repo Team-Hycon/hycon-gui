@@ -140,6 +140,9 @@ export interface IText {
     "alert-ledger-connect-failed": string,
     "alert-select-account": string,
     "send-amount": string,
+    "attention-change-tx-title": string,
+    "attention-change-tx": string,
+    "guide-sign-ledger": string,
 
     "recover-wallet": string,
     "title-recover-wallet": string,
