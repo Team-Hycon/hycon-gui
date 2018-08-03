@@ -1,9 +1,9 @@
-import { Dialog, DialogTitle, FormControl, Input, InputLabel, Select } from "@material-ui/core"
+import { CircularProgress, Dialog, DialogTitle, FormControl, Input, InputLabel, Select } from "@material-ui/core"
 import Button from "@material-ui/core/Button"
 import CardContent from "@material-ui/core/CardContent"
 import Grid from "@material-ui/core/Grid"
 import Icon from "@material-ui/core/Icon"
-import { Card, CircularProgress, MenuItem, TextField } from "material-ui"
+import { Card, MenuItem, TextField } from "material-ui"
 import * as React from "react"
 import { Redirect } from "react-router"
 import { AddressBook } from "./addressBook"
@@ -149,6 +149,10 @@ export class MakeTransaction extends React.Component<any, any> {
         this.setState({ isLoading: true })
 
         if (this.state.isLedger === true || this.state.isLedger === "true") {
+            if (!confirm(this.props.language["guide-sign-ledger"])) {
+                this.setState({ isLoading: false })
+                return
+            }
             this.state.rest.sendTxWithLedger(Number(this.state.selectedLedger), this.state.fromAddress, this.state.address, this.state.amount.toString(), this.state.minerFee.toString()).then((result: { res: boolean, case: number }) => {
                 this.alertResult(result)
             })
@@ -238,8 +242,8 @@ export class MakeTransaction extends React.Component<any, any> {
                                     (<Button onClick={this.prevPage}>{this.props.language["button-previous"]}</Button>)
                                     : (<Button onClick={this.handleCancel}>{this.props.language["button-cancel"]}</Button>))}
                                 {this.state.totp
-                                ? (<Button onClick={() => { if (this.checkInputs()) { this.setState({ dialogTOTP: true }) } }}>{this.props.language.totp}</Button>)
-                                : (<Button onClick={(event) => { if (this.checkInputs()) { this.handleSubmit(event) } }}>{this.props.language["button-transfer"]}</Button>)
+                                    ? (<Button onClick={() => { if (this.checkInputs()) { this.setState({ dialogTOTP: true }) } }}>{this.props.language.totp}</Button>)
+                                    : (<Button onClick={(event) => { if (this.checkInputs()) { this.handleSubmit(event) } }}>{this.props.language["button-transfer"]}</Button>)
                                 }
                             </Grid>
                         </div>
@@ -253,8 +257,8 @@ export class MakeTransaction extends React.Component<any, any> {
 
                 {/* LOADING */}
                 <Dialog open={this.state.isLoading} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" >
-                    <div style={{ textAlign: "center" }}>
-                        <CircularProgress style={{ marginRight: "5px" }} size={50} thickness={2} /> {this.props.language.loading}
+                    <div style={{ textAlign: "center", margin: "1em" }}>
+                        <CircularProgress style={{ marginRight: "5px" }} size={50} thickness={2} />
                     </div>
                 </Dialog>
 

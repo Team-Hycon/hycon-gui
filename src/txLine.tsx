@@ -1,12 +1,14 @@
 import { Button, Dialog, DialogTitle, Grid, Icon, IconButton } from "@material-ui/core"
 import * as React from "react"
 import { Link, Redirect } from "react-router-dom"
+import { IText } from "./locales/locales"
 import { IRest, ITxProp, IWalletAddress } from "./rest"
 interface ITxLineProps {
     rest: IRest
     tx: ITxProp
     address?: IWalletAddress
     name?: string
+    language?: IText
 }
 interface ITxLineView {
     rest: IRest
@@ -85,15 +87,14 @@ export class TxLine extends React.Component<ITxLineProps, ITxLineView> {
                 </tbody>
             </table>
             <Dialog open={this.state.dialogPending} onClose={() => { this.setState({ dialogPending: false }) }} style={{ width: "100%", height: "100%" }}>
-                <DialogTitle id="simple-dialog-title" style={{ textAlign: "center" }}>Caution</DialogTitle>
-                <div style={{ margin: "2em" }}>
-                    <div>Test</div>
-                    <Grid container direction={"row"} justify={"center"} alignItems={"center"}>
-                        <Button variant="raised" onClick={() => { this.setState({ redirect: true }) }} style={{ backgroundColor: "#50aaff", color: "white", margin: "0 10px" }} >I Agree</Button>
-                        <Button variant="raised" onClick={() => { this.setState({ dialogPending: false }) }} style={{ backgroundColor: "rgb(225, 0, 80)", color: "white" }}>Cancel</Button>
-                    </Grid>
-                </div>
-            </Dialog>
+                <DialogTitle id="simple-dialog-title" style={{ textAlign: "center" }}>{this.props.language !== undefined ? this.props.language["attention-change-tx-title"] : ""}</DialogTitle>
+                        <div style={{ margin: "1em 3em" }}>
+                            <div>{this.props.language !== undefined ? this.props.language["attention-change-tx"] : ""}</div>
+                            <Grid container direction={"row"} justify={"center"} alignItems={"center"} style={{ marginTop: "5%" }}>
+                                <Button variant="outlined" onClick={() => { this.setState({ redirect: true }) }} >I Agree</Button>
+                            </Grid>
+                        </div>
+                </Dialog>
             </div>
         )
     }

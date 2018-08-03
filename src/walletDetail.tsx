@@ -197,7 +197,7 @@ export class WalletDetail extends React.Component<any, any> {
                         {this.state.pendings.map((tx: ITxProp) => {
                             return (
                                 <div key={accountIndex++}>
-                                    <TxLine tx={tx} rest={this.state.rest} address={this.state.address} name={this.state.name}/>
+                                    <TxLine tx={tx} rest={this.state.rest} address={this.state.address} name={this.state.name} language={this.props.language}/>
                                     {tx.from === this.state.address ?
                                         (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent txAmtBtn">-{tx.estimated} HYCON</button>)
                                         :

@@ -1,9 +1,9 @@
-import { Dialog, DialogTitle } from "@material-ui/core"
+import { CircularProgress, Dialog, DialogTitle } from "@material-ui/core"
 import Button from "@material-ui/core/Button"
 import CardContent from "@material-ui/core/CardContent"
 import Grid from "@material-ui/core/Grid"
 import Icon from "@material-ui/core/Icon"
-import { Card, CircularProgress, TextField } from "material-ui"
+import { Card, TextField } from "material-ui"
 import * as React from "react"
 import { Redirect } from "react-router"
 import { AddressBook } from "./addressBook"
@@ -88,7 +88,7 @@ export class Transaction extends React.Component<any, any> {
             alert(`${this.props.language["alert-decimal-overflow"]}`)
             return
         }
-        if (hyconfromString(this.state.amount).add(hyconfromString(this.state.minerFee)).greaterThan(hyconfromString(this.state.piggyBank).sub(hyconfromString(this.state.pendingAmount)))) {
+        if (this.state.nonce === undefined && hyconfromString(this.state.amount).add(hyconfromString(this.state.minerFee)).greaterThan(hyconfromString(this.state.piggyBank).sub(hyconfromString(this.state.pendingAmount)))) {
             alert(`${this.props.language["alert-insufficient-funds"]}`)
             return
         }
@@ -169,10 +169,10 @@ export class Transaction extends React.Component<any, any> {
                             <Grid container direction={"row"} justify={"center"} alignItems={"center"}>
                                 <Button variant="raised" onClick={this.handleCancel} style={{ backgroundColor: "rgb(225, 0, 80)", color: "white", float: "right" }}>{this.props.language["button-cancel"]}</Button>
                                 {this.state.totp
-                                ? (<Button variant="raised" style={{ backgroundColor: "#50aaff", color: "white", float: "right", margin: "0 10px" }}
-                                    onClick={() => { if (this.checkInputs()) { this.setState({ dialogTOTP: true }) } }}>{this.props.language.totp}</Button>)
-                                : (<Button variant="raised" style={{ backgroundColor: "#50aaff", color: "white", float: "right", margin: "0 10px" }}
-                                    onClick={(event) => { if (this.checkInputs()) { this.handleSubmit(event) } }} >{this.props.language["button-transfer"]}</Button>)
+                                    ? (<Button variant="raised" style={{ backgroundColor: "#50aaff", color: "white", float: "right", margin: "0 10px" }}
+                                        onClick={() => { if (this.checkInputs()) { this.setState({ dialogTOTP: true }) } }}>{this.props.language.totp}</Button>)
+                                    : (<Button variant="raised" style={{ backgroundColor: "#50aaff", color: "white", float: "right", margin: "0 10px" }}
+                                        onClick={(event) => { if (this.checkInputs()) { this.handleSubmit(event) } }} >{this.props.language["button-transfer"]}</Button>)
                                 }
                             </Grid>
                         </div>
@@ -186,8 +186,8 @@ export class Transaction extends React.Component<any, any> {
 
                 {/* LOADING */}
                 <Dialog open={this.state.isLoading} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" >
-                    <div style={{ textAlign: "center" }}>
-                        <CircularProgress style={{ marginRight: "5px" }} size={50} thickness={2} /> {this.props.language.loading}
+                    <div style={{ textAlign: "center", margin: "1em" }}>
+                        <CircularProgress style={{ marginRight: "5px" }} size={50} thickness={2} />
                     </div>
                 </Dialog>
 
