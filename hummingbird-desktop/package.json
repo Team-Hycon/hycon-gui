@@ -18,6 +18,9 @@
     "type": "git",
     "url": "git+ssh://git@github.com/Team-Hycon/hycon-gui.git"
   },
+  "bugs": {
+    "url": "https://github.com/Team-Hycon/hycon-gui/issues"
+  },
   "author": {
     "name": "Glosfer",
     "email": "security@glosfer.com"

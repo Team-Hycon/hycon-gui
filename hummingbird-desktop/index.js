@@ -1,4 +1,5 @@
 const { app, BrowserWindow } = require("electron")
+const { Menu, dialog, nativeImage } = require("electron")
 const { autoUpdater } = require("electron-updater")
 const { ipcMain } = require("electron")
 const Transport = require("@ledgerhq/hw-transport-node-hid")
@@ -64,7 +65,12 @@ if (process.env.NODE_ENV === 'development') {
 	});
 }
 
-app.on('ready', createWindow)
+app.on('ready', function() {
+	const menu = Menu.buildFromTemplate(template);
+	Menu.setApplicationMenu(menu)
+
+	createWindow()
+})
 
 app.on('window-all-closed', function () {
 	if (process.platform !== 'darwin') {
@@ -104,3 +110,46 @@ ipcMain.on("getUserPath", async (event, arg) => {
 ipcMain.on("getOSArch", async (event, arg) => {
 	event.returnValue = os.arch();
 })
+
+const template = [
+	{
+		'label': 'Help',
+		'role': 'help',
+		submenu: [
+			{
+				label: 'About',
+				click(item, focusedWindow) {
+					if (focusedWindow) {
+						const options = {
+							buttons: ['OK'],
+							message: `Hycon lite wallet`,
+							detail: `${app.getVersion()}`,
+							icon: nativeImage.createFromPath('./build/icon.png')
+						};
+						dialog.showMessageBox(focusedWindow, options, () => {});
+					}
+				}
+			},
+			{label: 'Quit', role: "quit"}
+		]
+	},
+	{
+		label: 'Edit',
+		submenu: [
+			{ label: "Undo", accelerator: "CmdOrCtrl+Z", role: "undo" },
+			{ label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", role: "redo" },
+			{ type: "separator" },
+			{ label: "Cut", accelerator: "CmdOrCtrl+X", role: "cut" },
+			{ label: "Copy", accelerator: "CmdOrCtrl+C", role: "copy" },
+			{ label: "Paste", accelerator: "CmdOrCtrl+V", role: "paste" },
+			{ label: "Select All", accelerator: "CmdOrCtrl+A", role: "selectAll" }
+		]
+	},
+	{
+		label: 'View',
+		submenu: [
+			{ label: "Refresh", accelerator: "F5", role: "reload" },
+			{ label: "Console", role: "toggledevtools" },
+		]
+	}
+]
