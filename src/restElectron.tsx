@@ -18,7 +18,6 @@ import * as proto from "./serialization/proto"
 // tslint:disable-next-line:no-var-requires
 const { ipcRenderer } = require("electron")
 
-import { isValidElement } from "../node_modules/@types/react"
 import {
     IBlock,
     IHyconWallet,
@@ -133,7 +132,7 @@ export class RestElectron implements IRest {
             }
             const protoTx: Uint8Array = proto.Tx.encode(iTx).finish()
             const txHash: Uint8Array = utils.blake2bHash(protoTx)
-            const privateKey = this.decryptWallet(tx.password, wallet.iv, wallet.data).toString()
+            const privateKey = utils.decrypt(tx.password, wallet.iv, wallet.data).toString()
             const { signature, recovery } = secp256k1.sign(Buffer.from(txHash.buffer), Buffer.from(privateKey, "hex"))
             status = 3
 
@@ -240,15 +239,12 @@ export class RestElectron implements IRest {
             const masterKey = HDKey.fromMasterSeed(seed)
             const wallet = masterKey.derive(`m/44'/${this.coinNumber}'/0'/0/0`)
 
-            const iv = crypto.randomBytes(16)
-            const key = Buffer.from(utils.blake2bHash(Hwallet.password).buffer)
-            const cipher = crypto.createCipheriv("aes-256-cbc", key, iv)
-            const encryptedData = Buffer.concat([cipher.update(Buffer.from(wallet.privateKey.toString("hex"))), cipher.final()])
+            const { iv, encryptedData } = utils.encrypt(Hwallet.password, wallet.privateKey.toString("hex"))
             const address = utils.publicKeyToAddress(wallet.publicKey)
             const addressStr = utils.addressToString(address)
             const store: IStoredWallet = {
-                iv: iv.toString("hex"),
-                data: encryptedData.toString("hex"),
+                iv,
+                data: encryptedData,
                 address: addressStr,
                 hint: Hwallet.hint,
                 name: Hwallet.name,
@@ -355,7 +351,7 @@ export class RestElectron implements IRest {
                 throw new Error(`Fail to decryptAES`)
             }
 
-            const privateKey = this.decryptWallet(password, iv, data)
+            const privateKey = utils.decrypt(password, iv, data)
             const publicKeyBuff = secp256k1.publicKeyCreate(Buffer.from(privateKey.toString(), "hex"))
             const address = utils.publicKeyToAddress(publicKeyBuff)
             const addressStr = utils.addressToString(address)
@@ -565,13 +561,10 @@ export class RestElectron implements IRest {
     }
     public async saveTOTP(secret: string, totpPw: string): Promise<boolean> {
         try {
-            const iv = crypto.randomBytes(16)
-            const key = Buffer.from(utils.blake2bHash(totpPw).buffer)
-            const cipher = crypto.createCipheriv("aes-256-cbc", key, iv)
-            const encryptedData = Buffer.concat([cipher.update(Buffer.from(secret)), cipher.final()])
+            const { iv, encryptedData } = utils.encrypt(totpPw, secret)
             const store: { iv: string, data: string } = {
-                iv: iv.toString("hex"),
-                data: encryptedData.toString("hex"),
+                iv,
+                data: encryptedData,
             }
             return new Promise<boolean>((resolve, _) => {
                 this.totpDB.insert(store, (err: Error, doc: { iv: string, data: string }) => {
@@ -591,17 +584,13 @@ export class RestElectron implements IRest {
         try {
             const totp = await this.getTOTP()
 
-            const secret = this.decryptTOTP(totpPw, totp.iv, totp.data).toString()
+            const secret = utils.decrypt(totpPw, totp.iv, totp.data).toString()
             if (secret === "false") {
                 return Promise.resolve({ res: false, case: 1 })
             }
 
-            const key = Buffer.from(utils.blake2bHash(totpPw).buffer)
-            const iv = Buffer.from(totp.iv, "hex")
-            const cipher = crypto.createCipheriv("aes-256-cbc", key, iv)
-            const encryptedData = Buffer.concat([cipher.update(Buffer.from(secret)), cipher.final()])
-
-            if (totp.data === encryptedData.toString("hex")) {
+            const { iv, encryptedData } = utils.encrypt(totpPw, secret)
+            if (totp.data === encryptedData) {
                 return new Promise<{ res: boolean, case?: number }>((resolve, _) => {
                     this.totpDB.remove({ iv: totp.iv }, {}, (err: Error, n: number) => {
                         if (err) {
@@ -632,7 +621,7 @@ export class RestElectron implements IRest {
                 console.error(`Fail to get Transaction OTP`)
                 resolve(false)
             }
-            const s = this.decryptTOTP(totpPw, totp.iv, totp.data).toString()
+            const s = utils.decrypt(totpPw, totp.iv, totp.data).toString()
             const res = tfa.verifyToken(s, token)
             if (res === null || res.delta !== 0) { resolve(false) }
             resolve(true)
@@ -712,28 +701,6 @@ export class RestElectron implements IRest {
                 resolve(doc)
             })
         })
-    }
-
-    private decryptWallet(password: string, iv: string, data: string) {
-        const ivBuffer = Buffer.from(iv, "hex")
-        const dataBuffer = Buffer.from(data, "hex")
-        const key = utils.blake2bHash(password)
-        const decipher = crypto.createDecipheriv("aes-256-cbc", key, ivBuffer)
-        const originalData = Buffer.concat([decipher.update(dataBuffer), decipher.final()])
-        return originalData
-    }
-
-    private decryptTOTP(totpPw: string, iv: string, data: string): Buffer | boolean {
-        try {
-            const key = Buffer.from(utils.blake2bHash(totpPw).buffer)
-            const ivBuffer = Buffer.from(iv, "hex")
-            const dataBuffer = Buffer.from(data, "hex")
-            const decipher = crypto.createDecipheriv("aes-256-cbc", key, ivBuffer)
-            const originalData = Buffer.concat([decipher.update(dataBuffer), decipher.final()])
-            return originalData
-        } catch (e) {
-            return false
-        }
     }
 
     private checkDupleAddress(address: string): Promise<boolean> {

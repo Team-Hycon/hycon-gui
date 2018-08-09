@@ -15,7 +15,7 @@
   "license": "ISC",
   "homepage": "https://github.com/Team-Hycon/hycon-gui#readme",
   "devDependencies": {
-    "@glosfer/hyconjs-util": "0.0.2",
+    "@glosfer/hyconjs-util": "0.0.3",
     "@material-ui/core": "^1.2.0",
     "@types/bip39": "^2.4.0",
     "@types/chrome": "0.0.69",
