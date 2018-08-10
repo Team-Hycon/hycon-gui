@@ -10,7 +10,7 @@
 
 * Create and recover wallets
 * Check wallet balance
-* Supports <a href="https://www.ledgerwallet.com/products/ledger-nano-s" target="_blank">Ledger Nano S</a> hardware wallet - *only for 64-bit operating systems*
+* Supports [Ledger Nano S](https://www.ledgerwallet.com/products/ledger-nano-s) and [Ledger Blue](https://www.ledgerwallet.com/products/ledger-blue) hardware wallets - *only for 64-bit operating systems*
 * 2 Factor Authentication
 * 8 languages support (English, Korean, Chinese, French, Vietnamese, Japanese, Mongolian and Russian)
 
@@ -20,7 +20,7 @@ You can [download](https://github.com/Team-Hycon/hycon-gui/releases/tag/v1.0.0-b
 
 ## Future Features
 
-* Support for <a href="https://trezor.io" target="_blank">Trezor</a> hardware wallet
+* Support for [Trezor](https://trezor.io) and [Digital BitBox](https://shiftcrypto.ch) hardware wallets
 * Automatic updates
 * More remote node choices
 * UI/UX changes
