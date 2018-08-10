@@ -33,6 +33,7 @@ export class MakeTransaction extends React.Component<any, any> {
             isSelect: false,
             minerFee: 1,
             name: "",
+            password: "",
             pendingAmount: "0",
             piggyBank: "0",
             rest: props.rest,
@@ -79,13 +80,23 @@ export class MakeTransaction extends React.Component<any, any> {
             }
         } else {
             this.state.rest.getWalletList().then((data: { walletList: IHyconWallet[], length: number }) => {
-                for (const wallet of data.walletList) {
-                    this.mapWallets.set(wallet.address, wallet)
-                }
-                if (this.mounted) {
-                    this.setState({ wallets: data.walletList, isLedger: false, isSelect: true, isLoad: true, txStep: true })
-                }
-                this.state.rest.setLoading(false)
+                const walletPromises = data.walletList.map((wallet) => {
+                    return new Promise((resolve, _) => {
+                        this.state.rest.getAddressInfo(wallet.address).then((account: any) => {
+                            resolve({ name: wallet.name, address: wallet.address, balance: account.balance, pendingAmount: account.pendingAmount })
+                        })
+                    })
+                })
+
+                Promise.all(walletPromises).then((walletList: IHyconWallet[]) => {
+                    for (const wallet of walletList) {
+                        this.mapWallets.set(wallet.address, wallet)
+                    }
+                    if (this.mounted) {
+                        this.setState({ wallets: walletList, isLedger: false, isSelect: true, isLoad: true, txStep: true })
+                    }
+                    this.state.rest.setLoading(false)
+                })
             })
         }
         this.getFavorite()
