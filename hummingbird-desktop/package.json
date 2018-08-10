@@ -11,7 +11,7 @@
     "start": "NODE_ENV=development electron .",
     "build": "webpack --config webpack.config.js && electron-rebuild",
     "clean": "rm -rf node_modules dist bundle.* *.db styles.*",
-    "test": "mocha",
+    "test": "node node_modules/jasmine/bin/jasmine test/*",
     "postinstall": "electron-builder install-app-deps",
     "watch": "webpack --config webpack.config.js --watch"
   },
@@ -33,7 +33,7 @@
     "electron-builder": "^20.19.2",
     "electron-rebuild": "^1.8.1",
     "electron-reload": "^1.2.5",
-    "mocha": "^5.2.0",
+    "jasmine": "^3.2.0",
     "spectron": "^3.8.0",
     "webpack": "^4.15.1"
   },
