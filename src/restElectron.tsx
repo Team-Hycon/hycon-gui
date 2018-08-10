@@ -1,6 +1,5 @@
 import * as utils from "@glosfer/hyconjs-util"
 import * as bip39 from "bip39"
-import * as crypto from "crypto"
 import HDKey = require("hdkey")
 import * as datastore from "nedb"
 import * as tfa from "node-2fa"
