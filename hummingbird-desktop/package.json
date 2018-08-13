@@ -1,7 +1,7 @@
 {
   "name": "hycon-wallet-desktop",
   "productName": "Hycon lite wallet",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0",
   "description": "Hycon lite wallet - Desktop",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,8 @@
     "publish": "build -mlw -p always",
     "start": "NODE_ENV=development electron .",
     "build": "webpack --config webpack.config.js && electron-rebuild",
-    "test": "mocha",
+    "clean": "rm -rf node_modules dist bundle.* *.db styles.*",
+    "test": "node node_modules/jasmine/bin/jasmine test/*",
     "postinstall": "electron-builder install-app-deps",
     "watch": "webpack --config webpack.config.js --watch"
   },
@@ -32,7 +33,7 @@
     "electron-builder": "^20.19.2",
     "electron-rebuild": "^1.8.1",
     "electron-reload": "^1.2.5",
-    "mocha": "^5.2.0",
+    "jasmine": "^3.2.0",
     "spectron": "^3.8.0",
     "webpack": "^4.15.1"
   },

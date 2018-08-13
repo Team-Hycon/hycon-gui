@@ -118,9 +118,9 @@ export default {
     "alert-ledger-connect-failed": "请查看Ledger的连接，启动Hycon应用",
     "alert-select-account": "请选择需要使用的钱包",
     "send-amount": "发送金额",
-    "attention-change-tx-title": "Attention",
-    "attention-change-tx": "The transaction in progress will be modified. Successfully modifying the transaction requires setting a higher transaction fee than the previous transaction fee. Your transaction will not change if a block containing the previous transaction is published before the modified transaction is broadcasted in the network. Have you read the above and do you want to proceed?",
-    "guide-sign-ledger": "Please check the details on the Ledger wallet screen. If the details are correct, confirm the transaction on the wallet. Press ”OK” to continue.",
+    "attention-change-tx-title": "注意",
+    "attention-change-tx": "正在处理中的交易将被修改。如果想要成功修改，需要设置比上一笔交易更高的交易费。但是如果在成功修改之前，包含了上一笔交易的区块被发现并且广播到网络中，修改也不会成功。是否已知晓并且想要继续进行？",
+    "guide-sign-ledger": "请查看Ledger钱包界面的详细选项。如果都正确，请在Ledger钱包确认交易。按”OK”继续。",
 
     "recover-wallet": "钱包恢复",
     "title-recover-wallet": "钱包恢复",

@@ -1,6 +1,5 @@
 import * as utils from "@glosfer/hyconjs-util"
 import * as bip39 from "bip39"
-import * as crypto from "crypto"
 import HDKey = require("hdkey")
 import * as datastore from "nedb"
 import * as tfa from "node-2fa"
@@ -206,9 +205,16 @@ export class RestElectron implements IRest {
                     return
                 }
 
-                for (const doc of docs) {
-                    const account = await this.getAddressInfo(doc.address)
-                    walletList.push({ name: doc.name, address: doc.address, balance: account.balance, pendingAmount: account.pendingAmount })
+                if (index) {
+                    docs.map((doc, i) => {
+                        if (i >= index * 12 && i < (index + 1) * 12) {
+                            walletList.push({ address: doc.address, name: doc.name })
+                        }
+                    })
+                } else {
+                    docs.map((doc) => {
+                        walletList.push({ address: doc.address, name: doc.name })
+                    })
                 }
                 resolve({ walletList, length: walletList.length })
             })

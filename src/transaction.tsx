@@ -128,7 +128,7 @@ export class Transaction extends React.Component<any, any> {
                     this.setState({ isLoading: false, password: "" })
                 } else if (result.case === 3) {
                     alert(`${this.props.language["alert-send-failed"]}`)
-                    this.setState({ redirect: true })
+                    this.setState({ redirect: true, isLoading: false })
                 }
             })
 

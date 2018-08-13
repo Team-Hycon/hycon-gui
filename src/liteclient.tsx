@@ -351,7 +351,11 @@ export class LiteClient extends React.Component<any, any> {
         if (this.state.totpPw2 !== "") {
             if (data.target.value === this.state.totpPw2) {
                 this.setState({ errorText2: "" })
-            } else { this.setState({ errorText2: this.language["password-not-matched"] }) }
+            } else {
+                this.setState({ errorText2: this.language["password-not-matched"] })
+            }
+        } else if (data.target.value === "") {
+            if (data.target.value === this.state.totpPw2) { this.setState({ errorText2: "" }) }
         }
         this.setState({ totpPw1: data.target.value })
     }
@@ -359,7 +363,11 @@ export class LiteClient extends React.Component<any, any> {
         if (this.state.totpPw1 !== "") {
             if (data.target.value === this.state.totpPw1) {
                 this.setState({ errorText2: "" })
-            } else { this.setState({ errorText2: this.language["password-not-matched"] }) }
+            } else {
+                this.setState({ errorText2: this.language["password-not-matched"] })
+            }
+        } else if (data.target.value === "") {
+            if (data.target.value === this.state.totpPw1) { this.setState({ errorText2: "" }) }
         }
         this.setState({ totpPw2: data.target.value })
     }
