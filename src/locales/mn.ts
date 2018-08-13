@@ -118,9 +118,9 @@ export default {
     "alert-ledger-connect-failed": "Ledger-тэй холбогдсон эсэхийг шалгаад and Hycon апп-ийг сонгоно уу.",
     "alert-select-account": "Ашиглах дансаа сонгоно уу.",
     "send-amount": "Илгээх дүн",
-    "attention-change-tx-title": "Attention",
-    "attention-change-tx": "The transaction in progress will be modified. Successfully modifying the transaction requires setting a higher transaction fee than the previous transaction fee. Your transaction will not change if a block containing the previous transaction is published before the modified transaction is broadcasted in the network. Have you read the above and do you want to proceed?",
-    "guide-sign-ledger": "Please check the details on the Ledger wallet screen. If the details are correct, confirm the transaction on the wallet. Press ”OK” to continue.",
+    "attention-change-tx-title": "Анхаар",
+    "attention-change-tx": "Хүлээгдэж буй гүйлгээ тань цуцлагдана. Амжилттай өөрчлөхийн тулд өмнөхөөс илүү шимтгэл төлөх ёстой. Таны гүйлгээг өөрчлөх хүсэлт амжилтгүй болох боломжтой ба энэ тохиолдолд таны нэмж төлөх шимтгэл таны данснаас гарахгүй. Зөвшөөрч байна уу?",
+    "guide-sign-ledger": "Ledger төхөөрөмж дээр гарах мэдээллийг шалгаарай. Шалгаж үзээд зөвшөөрч байвал ”OK” товчыг дарж баталгаажуулна уу.",
 
     "recover-wallet": "ХЭТЭВЧ СЭРГЭЭХ",
     "title-recover-wallet": "Хэтэвч сэргээх",

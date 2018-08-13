@@ -79,7 +79,7 @@ export default {
     "wallet-select": "Mời bạn chọn Ví để xem",
     "ledger-view": "Xem Ledger",
     "ledger-wallet": "Ví Ledger",
-    "alert-delete-wallet": "Are you sure delete your wallet?",
+    "alert-delete-wallet": "Bạn chắc chắn muốn xoá Ví này?",
 
     "email": "Email",
     "password": "Mật khẩu",
@@ -118,9 +118,9 @@ export default {
     "alert-ledger-connect-failed": "Mời bạn kiểm tra lại kết nối và khởi động lại phần mềm",
     "alert-select-account": "Mời bạn chọn tài khoản để sử dụng.",
     "send-amount": "Số tiền gửi",
-    "attention-change-tx-title": "Attention",
-    "attention-change-tx": "The transaction in progress will be modified. Successfully modifying the transaction requires setting a higher transaction fee than the previous transaction fee. Your transaction will not change if a block containing the previous transaction is published before the modified transaction is broadcasted in the network. Have you read the above and do you want to proceed?",
-    "guide-sign-ledger": "Please check the details on the Ledger wallet screen. If the details are correct, confirm the transaction on the wallet. Press ”OK” to continue.",
+    "attention-change-tx-title": "Chú ý",
+    "attention-change-tx": "Giao dịch đang thực hiện sẽ được thay đổi, đồng thời phí giao dịch sẽ cao hơn phí giao dịch trước đó. Tuy nhiên, nếu giao dịch của bạn đã được truyền đi trước khi nó được thay đổi, thì thay đổi trên không thực hiện được nữa. Bạn có chắc chắn muốn tiếp tục?",
+    "guide-sign-ledger": "Mời bạn kiểm tra lại thông tin.  Nếu bạn chắc chắn thông tin là chính xác, mời bạn nhất nút ”OK” để tiếp tục.",
 
     "recover-wallet": "Hồi phục Ví",
     "title-recover-wallet": "Hồi phục Ví",
