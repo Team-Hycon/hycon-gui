@@ -99,9 +99,12 @@ export interface IText {
     "wallet-address": string,
     "wallet-balance": string,
     "wallet-select": string,
-    "ledger-view": string,
+    "hardwarewallet-view": string,
     "ledger-wallet": string,
+    "bitbox-wallet": string,
     "alert-delete-wallet": string,
+    "use-hdWallet": string,
+    "hdwallet-type-password": string,
 
     "email": string,
     "password": string,
