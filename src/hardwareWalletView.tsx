@@ -2,7 +2,7 @@ import { CardContent, Icon } from "@material-ui/core"
 import { Card } from "material-ui"
 import * as React from "react"
 import { Redirect } from "react-router"
-import { IHyconWallet } from "../rest"
+import { IHyconWallet } from "./rest"
 import { MultipleAccountsView } from "./multipleAccountsView"
 export class HardwareWalletView extends React.Component<any, any> {
     public mounted: boolean = false
