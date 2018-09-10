@@ -208,7 +208,7 @@ export class RecoverWallet extends React.Component<any, any> {
                         >{this.props.language["button-recover"]}</Button>
                         <Button variant="raised" style={{ backgroundColor: "#50aaff", color: "white", margin: "0 10px" }}
                             onClick={() => { this.recoverHDWallet() }}
-                        >Recover HDWallet</Button>
+                        >{this.props.language["recover-hdwallet"]}</Button>
                     </Grid>
                 </CardContent></Card>
 

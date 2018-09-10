@@ -264,7 +264,7 @@ export class MakeTransaction extends React.Component<IMakeTransactionProps, any>
             return <Redirect to={`/wallet`} />
         }
         return (
-            <div style={{ width: "80%", margin: "auto" }}>
+            <div style={{ width: "50%", margin: "auto" }}>
                 <Card>
                     <h3 style={{ color: "grey", textAlign: "center" }}><Icon style={{ transform: "rotate(-25deg)", marginRight: "10px", color: "grey" }}>send</Icon>{this.props.language["send-transaction"]}</h3><br />
                     {this.state.txStep ?

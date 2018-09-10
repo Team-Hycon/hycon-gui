@@ -126,7 +126,7 @@ export class MultipleAccountsView extends React.Component<any, any> {
         }
         return (
             <div style={{ textAlign: "center" }}>
-                <div style={{ overflow: "scroll", height: "19em", margin: "1%" }}>
+                <div>
                     <table className="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style={{ width: "100%", border: "0" }}>
                         <thead>
                             <tr>
@@ -140,7 +140,7 @@ export class MultipleAccountsView extends React.Component<any, any> {
                             {this.state.accounts.map((account: IHyconWallet, idx: number) => {
                                 return (
                                     <tr key={idx}>
-                                        <td className="mdl-data-table__cell--non-numeric" style={{ padding: "0 0 0 0" }}>
+                                        <td className="mdl-data-table__cell--non-numeric" style={{ padding: 0, maxWidth: "5%" }}>
                                             <Radio
                                                 checked={this.state.selectedAccount === String(idx)}
                                                 onChange={this.handleInputChange}
@@ -148,9 +148,9 @@ export class MultipleAccountsView extends React.Component<any, any> {
                                                 name="selectedAccount"
                                             />
                                         </td>
-                                        <td className="mdl-data-table__cell--numeric" style={{ paddingRight: "10%" }}>{idx}</td>
-                                        <td className="mdl-data-table__cell--non-numeric">{account.address}</td>
-                                        <td className="mdl-data-table__cell--numeric" style={{ paddingRight: "10%" }}>{account.balance} HYCON</td>
+                                        <td className="mdl-data-table__cell--numeric" style={{ maxWidth: "5%" }}>{idx}</td>
+                                        <td className="mdl-data-table__cell--non-numeric" style={{ maxWidth: "65%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{account.address}</td>
+                                        <td className="mdl-data-table__cell--numeric" style={{ maxWidth: "25%" }}>{account.balance} HYC</td>
                                     </tr>
                                 )
                             })}
