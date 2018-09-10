@@ -3,9 +3,9 @@ import * as QRCode from "qrcode.react"
 import * as React from "react"
 import update = require("react-addons-update")
 import { Redirect } from "react-router"
-import { IText } from "./locales/locales"
+import { IText } from "../locales/locales"
+import { IMinedInfo, IRest, ITxProp, IWalletAddress } from "../rest"
 import { MinedBlockLine } from "./minedBlockLine"
-import { IMinedInfo, IRest, ITxProp, IWalletAddress } from "./rest"
 import { TxLine } from "./txLine"
 interface IAddressProps {
     rest: IRest

@@ -9,6 +9,7 @@ import {
     ITxProp,
     IWalletAddress,
 } from "./rest"
+import { WalletDetail } from "./desktop/walletDetail"
 // tslint:disable:no-console
 // tslint:disable:ban-types
 // tslint:disable:object-literal-sort-keys

@@ -4,7 +4,7 @@ import { CircularProgress } from "material-ui"
 import * as React from "react"
 import update = require("react-addons-update")
 import { Redirect } from "react-router"
-import { IHyconWallet } from "./rest"
+import { IHyconWallet } from "../rest"
 
 export class MultipleLedgerView extends React.Component<any, any> {
     public mounted = false

@@ -7,10 +7,10 @@ import { Card, MenuItem, TextField } from "material-ui"
 import * as React from "react"
 import update = require("react-addons-update")
 import { Redirect } from "react-router"
+import { IText } from "../locales/locales"
+import { IHyconWallet, IRest, IWalletAddress } from "../rest"
 import { AddressBook } from "./addressBook"
-import { IText } from "./locales/locales"
 import { MultipleAccountsView } from "./multipleAccountsView"
-import { IHyconWallet, IRest, IWalletAddress } from "./rest"
 import { hyconfromString } from "./stringUtil"
 interface IMakeTransactionProps {
     rest: IRest

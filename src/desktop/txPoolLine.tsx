@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Link } from "react-router-dom"
-import { IRest, ITxProp } from "./rest"
+import { IRest, ITxProp } from "../rest"
 interface IBlockLineView {
     rest: IRest
     tx: ITxProp

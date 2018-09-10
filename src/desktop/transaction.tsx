@@ -6,8 +6,8 @@ import Icon from "@material-ui/core/Icon"
 import { Card, TextField } from "material-ui"
 import * as React from "react"
 import { Redirect } from "react-router"
+import { IHyconWallet } from "../rest"
 import { AddressBook } from "./addressBook"
-import { IHyconWallet } from "./rest"
 import { hyconfromString } from "./stringUtil"
 
 export class Transaction extends React.Component<any, any> {

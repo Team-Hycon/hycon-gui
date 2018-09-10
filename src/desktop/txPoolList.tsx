@@ -1,7 +1,7 @@
 import * as React from "react"
 import update = require("react-addons-update")
 import * as ReactPaginate from "react-paginate"
-import { IRest, ITxProp } from "./rest"
+import { IRest, ITxProp } from "../rest"
 import { TxPoolLine } from "./txPoolLine"
 interface ITxListView {
     rest: IRest
