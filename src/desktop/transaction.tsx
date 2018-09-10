@@ -8,6 +8,7 @@ import * as React from "react"
 import { Redirect } from "react-router"
 import { IHyconWallet } from "../rest"
 import { AddressBook } from "./addressBook"
+import { ProgressBar } from "./progressBar"
 import { hyconfromString } from "./stringUtil"
 
 export class Transaction extends React.Component<any, any> {
@@ -150,12 +151,15 @@ export class Transaction extends React.Component<any, any> {
     }
 
     public render() {
+        if (this.state.isLoading) {
+            return <ProgressBar type={ProgressBar.PAGE} />
+        }
         if (this.state.redirect) {
             return <Redirect to={`/wallet/detail/${this.state.name}`} />
         }
         if (this.state.wallet === undefined && !this.state.selectFrom) { return null }
         return (
-            <div style={{ width: "60%", margin: "auto" }}>
+            <div style={{ width: "50%", margin: "auto" }}>
                 <Card>
                     <CardContent>
                         <div style={{ textAlign: "center" }}>
@@ -165,16 +169,32 @@ export class Transaction extends React.Component<any, any> {
                                     <Icon>bookmark</Icon><span style={{ marginLeft: "5px" }}>{this.props.language["address-book"]}</span>
                                 </Button>
                             </Grid>
-                            <TextField style={{ width: "330px" }} floatingLabelFixed={true} floatingLabelText={this.props.language["from-address"]} type="text" disabled={true} value={this.state.fromAddress} />
-                            <TextField name="address" floatingLabelFixed={true} style={{ marginLeft: "30px", width: "330px" }} floatingLabelText={this.props.language["to-address"]} type="text" value={this.state.address} onChange={this.handleInputChange} />
+                            <Grid container direction={"row"} justify={"flex-end"} alignItems={"flex-end"} spacing={24}>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <TextField fullWidth floatingLabelFixed={true} floatingLabelText={this.props.language["from-address"]} type="text" disabled={true} value={this.state.fromAddress} />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <TextField fullWidth name="address" floatingLabelFixed={true} floatingLabelText={this.props.language["to-address"]} type="text" value={this.state.address} onChange={this.handleInputChange} />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <TextField fullWidth floatingLabelFixed={true} floatingLabelText={this.props.language["total-amount"]} type="text" disabled={true} value={this.state.piggyBank} />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <TextField fullWidth name="amount" floatingLabelFixed={true} floatingLabelText={this.props.language.amount} type="text" value={this.state.amount} max={this.state.piggyBank} onChange={this.handleInputChange} />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <TextField fullWidth floatingLabelText={this.props.language["wallet-pending"]} floatingLabelFixed={true} type="text" disabled={true} value={this.state.pendingAmount} />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <TextField fullWidth name="minerFee" floatingLabelFixed={true} floatingLabelText={this.props.language.fees} type="text" value={this.state.minerFee} onChange={this.handleInputChange} />
+                                </Grid>
+                                <Grid item xs zeroMinWidth />
+                                <Grid item xs={8}>
+                                    <TextField fullWidth name="password" value={this.state.password} floatingLabelFixed={true} floatingLabelText={this.props.language.password} type="password" autoComplete="off" onChange={(data) => { this.handlePassword(data) }} />
+                                </Grid>
+                                <Grid item xs zeroMinWidth />
+                            </Grid>
                             <br />
-                            <TextField style={{ width: "330px" }} floatingLabelFixed={true} floatingLabelText={this.props.language["total-amount"]} type="text" disabled={true} value={this.state.piggyBank} />
-                            <TextField style={{ marginLeft: "30px", width: "330px" }} name="amount" floatingLabelFixed={true} floatingLabelText={this.props.language.amount} type="text" value={this.state.amount} max={this.state.piggyBank} onChange={this.handleInputChange} />
-                            <br />
-                            <TextField floatingLabelText={this.props.language["wallet-pending"]} floatingLabelFixed={true} style={{ width: "330px" }} type="text" disabled={true} value={this.state.pendingAmount} />
-                            <TextField name="minerFee" floatingLabelFixed={true} style={{ marginLeft: "30px", width: "330px" }} floatingLabelText={this.props.language.fees} type="text" value={this.state.minerFee} onChange={this.handleInputChange} />
-                            <br />
-                            <TextField name="password" value={this.state.password} floatingLabelFixed={true} style={{ marginRight: "20px", width: "330px" }} floatingLabelText={this.props.language.password} type="password" autoComplete="off" onChange={(data) => { this.handlePassword(data) }} />
                             <br /><br />
                             <Grid container direction={"row"} justify={"center"} alignItems={"center"}>
                                 <Button variant="raised" onClick={this.handleCancel} style={{ backgroundColor: "rgb(225, 0, 80)", color: "white", float: "right" }}>{this.props.language["button-cancel"]}</Button>
@@ -227,7 +247,7 @@ export class Transaction extends React.Component<any, any> {
     }
     private handleTOTP(data: any) {
         const patternSixDigits = /^[0-9]{6}$/
-        this.setState({ totpToken: data.target.value })
+        this.setState({ totpToken:   data.target.value })
         if (!patternSixDigits.test(data.target.value)) {
             this.setState({ errorText: this.props.language["alert-six-digit"] })
         } else {
