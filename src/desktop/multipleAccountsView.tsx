@@ -345,7 +345,6 @@ export class MultipleAccountsView extends React.Component<any, any> {
             default:
                 alert(`Failed to connect with bitbox. Please try again.`)
                 this.setState({ redirect: true })
-                break
         }
     }
 

@@ -1,18 +1,11 @@
-import { LinearProgress } from "material-ui"
 import { List } from "material-ui/List"
 import * as React from "react"
 import update = require("react-addons-update")
 import * as ReactPaginate from "react-paginate"
-import { IText } from "../locales/locales"
-import { IHyconWallet, IRest } from "../rest"
+import { IHyconWallet } from "../rest"
 import { ProgressBar } from "./progressBar"
 import { WalletSummary } from "./walletSummary"
-interface IWalletListView {
-    rest: IRest
-    wallets: IHyconWallet[]
 
-    language: IText
-}
 export class WalletList extends React.Component<any, any> {
     public mounted: boolean = false
     constructor(props: any) {

@@ -1,13 +1,8 @@
 import * as React from "react"
 import update = require("react-addons-update")
 import * as ReactPaginate from "react-paginate"
-import { IPeer, IRest } from "../rest"
+import { IPeer } from "../rest"
 import { PeersList } from "./peersList"
-
-interface IPeersProps {
-    rest: IRest
-    peer: IPeer
-}
 
 export class PeersView extends React.Component<any, any> {
     public mounted: boolean = false

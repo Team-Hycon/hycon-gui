@@ -1,9 +1,7 @@
 import { Button, Dialog, DialogTitle, Grid, Icon } from "@material-ui/core"
 import { Avatar, List, ListItem, TextField } from "material-ui"
 import * as React from "react"
-import { Link, Redirect } from "react-router-dom"
-import { IBlock, IHyconWallet, IRest } from "../rest"
-import { AddressBook } from "./addressBook"
+import { Redirect } from "react-router-dom"
 import { WalletList } from "./walletList"
 
 export class WalletView extends React.Component<any, any> {

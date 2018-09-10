@@ -1,10 +1,7 @@
 import * as React from "react"
-import { IRest, ITxProp } from "../rest"
+import { ITxProp } from "../rest"
 import { TxLine } from "./txLine"
-interface ITxListView {
-    rest: IRest
-    txs: ITxProp[]
-}
+
 export class TxList extends React.Component<any, any> {
     constructor(props: any) {
         super(props)

@@ -2,7 +2,7 @@ import { Button, Dialog, DialogTitle, Grid, Icon, IconButton } from "@material-u
 import * as React from "react"
 import { Link, Redirect } from "react-router-dom"
 import { IText } from "../locales/locales"
-import { IRest, ITxProp, IWalletAddress } from "../rest"
+import { IRest, ITxProp } from "../rest"
 interface ITxLineProps {
     rest: IRest
     tx: ITxProp

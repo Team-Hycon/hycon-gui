@@ -1,8 +1,8 @@
+import * as utils from "@glosfer/hyconjs-util"
 import { Button, CardContent, Checkbox, FormControl, FormControlLabel, Grid, Icon, Input, InputLabel, MenuItem, Select, Step, StepLabel, Stepper } from "@material-ui/core"
 import { Card, Dialog, IconButton, TextField } from "material-ui"
 import * as React from "react"
 import { Redirect } from "react-router"
-import { encodingMnemonic } from "./stringUtil"
 
 export class AddWallet extends React.Component<any, any> {
     public mounted: boolean = false
@@ -129,8 +129,8 @@ export class AddWallet extends React.Component<any, any> {
         if (this.state.confirmMnemonic === "") {
             alert(this.props.language["title-check-mnemonic"])
         } else {
-            const mnemonicString = encodingMnemonic(this.state.mnemonic)
-            const confirmMnemonicString = encodingMnemonic(this.state.confirmMnemonic)
+            const mnemonicString = utils.encodingMnemonic(this.state.mnemonic)
+            const confirmMnemonicString = utils.encodingMnemonic(this.state.confirmMnemonic)
             if (mnemonicString === confirmMnemonicString) {
                 this.setState({ activeStep: this.state.activeStep + 1 })
             } else {
@@ -143,8 +143,8 @@ export class AddWallet extends React.Component<any, any> {
             alert(this.props.language["title-check-mnemonic"])
             return
         }
-        const mnemonicString = encodingMnemonic(this.state.mnemonic)
-        const typedMnemonicString = encodingMnemonic(this.state.typedMnemonic)
+        const mnemonicString = utils.encodingMnemonic(this.state.mnemonic)
+        const typedMnemonicString = utils.encodingMnemonic(this.state.typedMnemonic)
         if (mnemonicString !== typedMnemonicString) {
             alert(this.props.language["title-check-mnemonic"])
             return
@@ -166,8 +166,8 @@ export class AddWallet extends React.Component<any, any> {
             alert(this.props.language["title-check-mnemonic"])
             return
         }
-        const mnemonicString = encodingMnemonic(this.state.mnemonic)
-        const typedMnemonicString = encodingMnemonic(this.state.typedMnemonic)
+        const mnemonicString = utils.encodingMnemonic(this.state.mnemonic)
+        const typedMnemonicString = utils.encodingMnemonic(this.state.typedMnemonic)
         if (mnemonicString !== typedMnemonicString) {
             alert(this.props.language["title-check-mnemonic"])
             return

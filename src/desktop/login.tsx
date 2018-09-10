@@ -104,7 +104,6 @@ export class Login extends React.Component<any, any> {
             claimLockAmt: "",
             claimPendingAmt: "",
         }
-        // this.handleSubmit = this.handleSubmit.bind(this)
         this.completeClaim = this.completeClaim.bind(this)
         this.handleLogin = this.handleLogin.bind(this)
         this.handleUpdateAddress = this.handleUpdateAddress.bind(this)
