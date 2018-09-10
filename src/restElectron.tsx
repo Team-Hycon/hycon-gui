@@ -708,7 +708,7 @@ export class RestElectron implements IRest {
             const protoTx: Uint8Array = proto.Tx.encode(iTx).finish()
             const txHash: Uint8Array = utils.blake2bHash(protoTx)
             const privateKey = this.deriveWallet(rootKey, index).privateKey
-            const { signature, recovery } = secp256k1.sign(Buffer.from(txHash), privateKey)
+            const { signature, recovery } = secp256k1.sign(Buffer.from(txHash.buffer), privateKey)
             status = 3
 
             const signedTx = {
@@ -825,7 +825,7 @@ export class RestElectron implements IRest {
             const iTx: proto.ITx = { from, to, amount: utils.hyconfromString(tx.amount), fee: utils.hyconfromString(tx.minerFee), nonce }
             const txHash: Uint8Array = utils.blake2bHash(proto.Tx.encode(iTx).finish())
             const path = `m/44'/1397'/0'/0/${index}`
-            const hash = Buffer.from(txHash).toString("hex")
+            const hash = Buffer.from(txHash.buffer).toString("hex")
 
             const signResponse = ipcRenderer.sendSync("sendTxWithBitbox", { password: tx.password, path, hash })
             if (signResponse.error) { return signResponse.error }
