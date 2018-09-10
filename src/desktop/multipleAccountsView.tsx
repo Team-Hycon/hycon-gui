@@ -4,7 +4,7 @@ import { CircularProgress, TextField } from "material-ui"
 import * as React from "react"
 import update = require("react-addons-update")
 import { Redirect } from "react-router"
-import { IHyconWallet, IResponseError } from "./rest"
+import { IHyconWallet, IResponseError } from "../rest"
 
 export class MultipleAccountsView extends React.Component<any, any> {
     public mounted = false

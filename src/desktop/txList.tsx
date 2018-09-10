@@ -1,5 +1,5 @@
 import * as React from "react"
-import { IRest, ITxProp } from "./rest"
+import { IRest, ITxProp } from "../rest"
 import { TxLine } from "./txLine"
 interface ITxListView {
     rest: IRest

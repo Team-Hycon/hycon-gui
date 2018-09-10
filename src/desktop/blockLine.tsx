@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Link } from "react-router-dom"
-import { IBlock } from "./rest"
+import { IBlock } from "../rest"
 interface IBlockLineView {
     block: IBlock
     age?: IAge

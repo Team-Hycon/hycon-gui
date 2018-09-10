@@ -1,7 +1,7 @@
 import * as React from "react"
-import { IText } from "./locales/locales"
+import { IText } from "../locales/locales"
+import { IRest, ITxProp } from "../rest"
 import { NotFound } from "./notFound"
-import { IRest, ITxProp } from "./rest"
 import { TxLine } from "./txLine"
 interface ITxProps {
     rest: IRest

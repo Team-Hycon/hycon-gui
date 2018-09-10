@@ -131,7 +131,7 @@ export class AddWallet extends React.Component<any, any> {
         } else {
             const mnemonicString = encodingMnemonic(this.state.mnemonic)
             const confirmMnemonicString = encodingMnemonic(this.state.confirmMnemonic)
-            if (this.state.mnemonic === confirmMnemonicString) {
+            if (mnemonicString === confirmMnemonicString) {
                 this.setState({ activeStep: this.state.activeStep + 1 })
             } else {
                 alert(this.props.language["title-check-mnemonic"])
@@ -141,25 +141,49 @@ export class AddWallet extends React.Component<any, any> {
     public createWallet() {
         if (this.state.typedMnemonic === "") {
             alert(this.props.language["title-check-mnemonic"])
-        } else {
-            const mnemonicString = encodingMnemonic(this.state.mnemonic)
-            const typedMnemonicString = encodingMnemonic(this.state.typedMnemonic)
-            if (mnemonicString === typedMnemonicString) {
-                this.state.rest.generateWallet({
-                    hint: this.state.hint,
-                    language: this.state.language,
-                    mnemonic: this.state.mnemonic,
-                    name: this.state.name,
-                    passphrase: this.state.passphrase1,
-                    password: this.state.password1,
-                }).then((data: string) => {
-                    this.setState({ walletViewRedirect: true, address: data })
-                })
-            } else {
-                alert(this.props.language["title-check-mnemonic"])
-            }
+            return
         }
+        const mnemonicString = encodingMnemonic(this.state.mnemonic)
+        const typedMnemonicString = encodingMnemonic(this.state.typedMnemonic)
+        if (mnemonicString !== typedMnemonicString) {
+            alert(this.props.language["title-check-mnemonic"])
+            return
+        }
+        this.state.rest.generateWallet({
+            hint: this.state.hint,
+            language: this.state.language,
+            mnemonic: this.state.mnemonic,
+            name: this.state.name,
+            passphrase: this.state.passphrase1,
+            password: this.state.password1,
+        }).then((data: string) => {
+            this.setState({ walletViewRedirect: true, address: data })
+        })
     }
+
+    public createHDWallet() {
+        if (this.state.typedMnemonic === "") {
+            alert(this.props.language["title-check-mnemonic"])
+            return
+        }
+        const mnemonicString = encodingMnemonic(this.state.mnemonic)
+        const typedMnemonicString = encodingMnemonic(this.state.typedMnemonic)
+        if (mnemonicString !== typedMnemonicString) {
+            alert(this.props.language["title-check-mnemonic"])
+            return
+        }
+        this.state.rest.generateHDWallet({
+            hint: this.state.hint,
+            language: this.state.language,
+            mnemonic: this.state.mnemonic,
+            name: this.state.name,
+            passphrase: this.state.passphrase1,
+            password: this.state.password1,
+        }).then((data: string) => {
+            this.setState({ redirect: true })
+        })
+    }
+
     public cancelWallet() {
         this.setState({ redirect: true })
     }
@@ -236,7 +260,7 @@ export class AddWallet extends React.Component<any, any> {
                             <div style={{ color: "red", fontSize: "11px" }}>{this.props.language["mnemonic-subtitle"]}</div>
                             <br /><br />
                             <div style={{ fontWeight: "bold" }}>{this.state.mnemonic}</div>
-                            <Input style={{ border: "none", borderBottom: "0.5px solid", width: "53%" }} placeholder="Please type mnemonic phrase above" autoComplete="off"
+                            <Input style={{ border: "none", borderBottom: "0.5px solid", width: "53%" }} placeholder={this.props.language["input-placeholder1"]} autoComplete="off"
                                 onChange={(data) => { this.handleConfirmMnemonic(data) }} onPaste={(e) => { e.preventDefault() }}
                                 onKeyPress={(event) => { if (event.key === "Enter") { event.preventDefault(); this.handleNext() } }}
                             />
@@ -244,7 +268,7 @@ export class AddWallet extends React.Component<any, any> {
                         <div style={{ display: `${this.state.activeStep === 2 ? ("block") : ("none")}` }}>
                             <h4 style={{ color: "grey", marginBottom: "0%" }}>{this.props.language["mnemonic-title2"]}</h4>
                             <br /><br />
-                            <Input style={{ border: "none", borderBottom: "0.5px solid", width: "53%" }} placeholder="Please type one more time to confirm mnemonic phrase" autoComplete="off"
+                            <Input style={{ border: "none", borderBottom: "0.5px solid", width: "53%" }} placeholder={this.props.language["input-placeholder2"]} autoComplete="off"
                                 onChange={(data) => { this.handleTypeMnemonic(data) }} onPaste={(e) => { e.preventDefault() }}
                                 onKeyPress={(event) => { if (event.key === "Enter") { event.preventDefault(); this.handleNext() } }}
                             />
@@ -253,11 +277,12 @@ export class AddWallet extends React.Component<any, any> {
                 </Card>
                 <br /><br />
                 <Grid container direction={"row"} justify={"center"} alignItems={"center"} style={{ display: "inline-block", width: "80%" }}>
-                    <Button onClick={this.cancelWallet}>{this.props.language["button-cancel"]} <Icon style={{ fontSize: "17px" }}>close</Icon></Button>
+                    <Button onClick={this.cancelWallet}>{this.props.language["button-cancel"]}</Button>
                     <Button onClick={this.handleNext} >
                         {this.state.activeStep === steps.length - 1 ? `${this.props.language["button-submit"]}` : `${this.props.language["button-next"]}`}
-                        {this.state.activeStep === steps.length - 1 ? (<Icon style={{ fontSize: "20px" }}>check</Icon>) : (<Icon style={{ fontSize: "20px" }}>chevron_right</Icon>)}
                     </Button>
+                    <Button onClick={this.createHDWallet.bind(this)} style={{ display: `${this.state.activeStep === steps.length - 1 ? "unset" : "none"}` }}>
+                        {this.props.language["create-hdwallet"]}</Button>
                 </Grid>
 
                 {/* HELP - ADVANCED OPTIONS */}

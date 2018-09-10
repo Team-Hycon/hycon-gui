@@ -1,3 +1,4 @@
+import { WalletDetail } from "./desktop/walletDetail"
 import {
     IBlock,
     IHyconWallet,
@@ -9,6 +10,7 @@ import {
     ITxProp,
     IWalletAddress,
 } from "./rest"
+
 // tslint:disable:no-console
 // tslint:disable:ban-types
 // tslint:disable:object-literal-sort-keys

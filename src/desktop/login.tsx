@@ -11,7 +11,7 @@ import Select from "@material-ui/core/Select"
 import Typography from "@material-ui/core/Typography"
 import { Dialog, TextField } from "material-ui"
 import * as React from "react"
-import { IHyconWallet } from "./rest"
+import { IHyconWallet } from "../rest"
 
 export interface ILogin {
     email: string

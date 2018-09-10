@@ -1,6 +1,6 @@
 import * as React from "react"
+import { IPeer, IRest } from "../rest"
 import { PeersLine } from "./peersLine"
-import { IPeer, IRest } from "./rest"
 
 interface IPeerListView {
     rest: IRest

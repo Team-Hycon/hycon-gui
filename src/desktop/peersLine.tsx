@@ -1,5 +1,5 @@
 import * as React from "react"
-import { IPeer, IRest } from "./rest"
+import { IPeer, IRest } from "../rest"
 
 interface IPeersLineView {
     rest: IRest

@@ -1,8 +1,8 @@
 import * as React from "react"
 import update = require("react-addons-update")
 import * as ReactPaginate from "react-paginate"
+import { IPeer, IRest } from "../rest"
 import { PeersList } from "./peersList"
-import { IPeer, IRest } from "./rest"
 
 interface IPeersProps {
     rest: IRest

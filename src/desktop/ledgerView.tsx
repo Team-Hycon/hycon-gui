@@ -2,9 +2,8 @@ import { CardContent, Icon } from "@material-ui/core"
 import { Card } from "material-ui"
 import * as React from "react"
 import { Redirect } from "react-router"
+import { IHyconWallet } from "../rest"
 import { MultipleAccountsView } from "./multipleAccountsView"
-import { IHyconWallet } from "./rest"
-
 export class LedgerView extends React.Component<any, any> {
     public mounted: boolean = false
     constructor(props: any) {

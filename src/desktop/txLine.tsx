@@ -1,8 +1,8 @@
 import { Button, Dialog, DialogTitle, Grid, Icon, IconButton } from "@material-ui/core"
 import * as React from "react"
 import { Link, Redirect } from "react-router-dom"
-import { IText } from "./locales/locales"
-import { IRest, ITxProp, IWalletAddress } from "./rest"
+import { IText } from "../locales/locales"
+import { IRest, ITxProp, IWalletAddress } from "../rest"
 interface ITxLineProps {
     rest: IRest
     tx: ITxProp

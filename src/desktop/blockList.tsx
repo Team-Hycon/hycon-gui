@@ -2,8 +2,8 @@ import Long = require("long")
 import * as React from "react"
 import update = require("react-addons-update")
 import * as ReactPaginate from "react-paginate"
+import { IBlock, IRest } from "../rest"
 import { BlockLine } from "./blockLine"
-import { IBlock, IRest } from "./rest"
 import { hyconfromString, hycontoString } from "./stringUtil"
 
 interface IBlockListView {
