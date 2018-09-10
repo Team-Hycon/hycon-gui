@@ -17,7 +17,7 @@
 
 ## Download
 
-You can [download](https://github.com/Team-Hycon/hycon-gui/releases/tag/v1.0.0-beta.0) latest installable version of Hycon Wallet for Windows, macOS and Linux.
+You can [download](https://github.com/Team-Hycon/hycon-gui/releases/tag/v1.1.0) latest installable version of Hycon Wallet for Windows, macOS and Linux.
 
 ## Future Features
 
