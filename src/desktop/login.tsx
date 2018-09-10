@@ -99,12 +99,18 @@ export class Login extends React.Component<any, any> {
             token: "",
             age: "",
             dialog: false,
+            claimAddr: "",
+            claimTotalAmt: "",
+            claimLockAmt: "",
+            claimPendingAmt: "",
         }
         // this.handleSubmit = this.handleSubmit.bind(this)
         this.completeClaim = this.completeClaim.bind(this)
+        this.handleLogin = this.handleLogin.bind(this)
+        this.handleUpdateAddress = this.handleUpdateAddress.bind(this)
     }
 
-    public async handleLogin(event: any) {
+    public async handleLogin() {
         let data: any
         if (this.state.tfaInput === "") {
             data = {
@@ -122,7 +128,13 @@ export class Login extends React.Component<any, any> {
 
         switch (response.status) {
             case 305:
-                this.setState({ claimErr: true })
+                this.setState({
+                                claimErr: true,
+                                claimAddr: response.hycaddr,
+                                claimTotalAmt: response.hycon,
+                                claimLockAmt: response.lock,
+                                claimPendingAmt: response.pendingAmt,
+                            })
                 break
             case 302:
                 this.setState({ tfaError: true })
@@ -144,7 +156,7 @@ export class Login extends React.Component<any, any> {
     public changeLanguage = (name: any) => (event: any) => {
         this.setState({ [name]: event.target.value })
     }
-    public async handleUpdateAddress(event: any) {
+    public async handleUpdateAddress() {
         if (!(await this.handleMnemonic())) {
             this.setState({ mnemonicError: true })
             return
@@ -201,31 +213,31 @@ export class Login extends React.Component<any, any> {
         }
 
         return (
-            <Grid container style={{ width: "100%" }}>
+            <Grid container style={{ width: "100%", minWidth: 600 }}>
                 {!this.state.loggedIn ?
                     <CardContent>
                         <Grid container spacing={24}>
                             <Grid item xs={12}>
                                 <FormControl style={styles.formField}>
                                     <InputLabel htmlFor="email">{this.props.language.email}</InputLabel>
-                                    <Input id="email" type="text" value={this.state.email} onChange={this.handleChange.bind(this)} autoComplete="off" />
+                                    <Input id="email" type="text" value={this.state.email} onChange={this.handleChange.bind(this)} onKeyPress={(event) => { if (event.key === "Enter") { event.preventDefault(); this.handleLogin() } }} autoComplete="off" />
                                 </FormControl>
                             </Grid>
                             <Grid item xs={12}>
                                 <FormControl style={styles.formField}>
                                     <InputLabel htmlFor="password">{this.props.language.password}</InputLabel>
-                                    <Input id="password" type="password" value={this.state.password} onChange={this.handleChange.bind(this)} autoComplete="off" />
+                                    <Input id="password" type="password" value={this.state.password} onChange={this.handleChange.bind(this)} onKeyPress={(event) => { if (event.key === "Enter") { event.preventDefault(); this.handleLogin() } }} autoComplete="off" />
                                 </FormControl>
                                 {this.state.errorMsg ? <Typography style={styles.typography.statusError}>{this.props.language["alert-invalid-login"]}</Typography> : null}
-                                {this.state.claimErr ? <Typography style={styles.typography.statusError}>{this.props.language["alert-tx-sent"]}</Typography> : null}
+                                {this.state.claimErr ? <Typography style={styles.typography.statusError}>{this.props.language["alert-tx-sent"]}<br/>Address : {this.state.claimAddr}<br/>Total amount : {this.state.claimTotalAmt}<br/>Pending amount : {this.state.claimPendingAmt}<br/>Locked amount : {this.state.claimLockAmt}</Typography> : null}
                             </Grid>
                             <Grid item xs={12} />
                             <Grid container style={{ justifyContent: "space-between", padding: "0 12px" }}>
                                 {this.state.tfaShow ?
-                                    <Button id="loginSubmitBtn" variant="outlined" disabled onClick={this.handleLogin.bind(this)}>
+                                    <Button id="loginSubmitBtn" variant="outlined" disabled onClick={this.handleLogin}>
                                         {this.props.language.login}
                                 </Button> :
-                                    <Button id="loginSubmitBtn" variant="outlined" color="primary" onClick={this.handleLogin.bind(this)}>
+                                    <Button id="loginSubmitBtn" variant="outlined" color="primary" onClick={this.handleLogin}>
                                         {this.props.language.login}
                                 </Button>
                                 }
@@ -241,7 +253,7 @@ export class Login extends React.Component<any, any> {
                                         <Grid item xs={12}>
                                             <FormControl style={styles.formField}>
                                                 <InputLabel htmlFor="tfaInput">PIN</InputLabel>
-                                                <Input id="tfaInput" type="text" value={this.state.tfaInput} onChange={this.handleChange.bind(this)} autoComplete="off" />
+                                                <Input id="tfaInput" type="text" value={this.state.tfaInput} onChange={this.handleChange.bind(this)} onKeyPress={(event) => { if (event.key === "Enter") { event.preventDefault(); this.handleLogin() } }} autoComplete="off" />
                                             </FormControl>
                                             {this.state.tfaError ? <Typography style={styles.typography.statusError}>{this.props.language["alert-invalid-2fa"]}</Typography> : null}
                                         </Grid>
@@ -250,7 +262,7 @@ export class Login extends React.Component<any, any> {
                                         <Grid item xs={12}>
                                             <Grid container justify={"flex-end"} spacing={8} style={styles.modal.modalbtn}>
                                                 <Button color="primary" id="modal_cancel" onClick={this.closeModal.bind(this)} >{this.props.language["button-cancel"]}</Button>
-                                                <Button variant="raised" color="primary" id="modal_submit" onClick={this.handleLogin.bind(this)}>{this.props.language["button-submit"]}</Button>
+                                                <Button variant="raised" color="primary" id="modal_submit" onClick={this.handleLogin}>{this.props.language["button-submit"]}</Button>
                                             </Grid>
                                         </Grid>
                                     </Grid>
@@ -259,12 +271,12 @@ export class Login extends React.Component<any, any> {
                             <Divider />
                         </Grid>
                     </CardContent> :
-                    <CardContent style={{ width: "100%" }}>
+                    <CardContent style={{ width: "100%"}}>
                         <Grid container spacing={8}>
                             <Grid item xs={8} style={{ paddingBottom: "10px" }}>
                                 <FormControl style={styles.formField}>
                                     <InputLabel htmlFor="mnemonic">{this.props.language["confirm-mnemonic"]}</InputLabel>
-                                    <Input id="mnemonic" type="text" value={this.state.mnemonic} onChange={this.handleChange.bind(this)} autoComplete="off" />
+                                    <Input id="mnemonic" type="text" value={this.state.mnemonic} onChange={this.handleChange.bind(this)} onKeyPress={(event) => { if (event.key === "Enter") { event.preventDefault(); this.handleUpdateAddress() } }} autoComplete="off" />
                                 </FormControl>
                                 {this.state.mnemonicError ? <Typography style={styles.typography.statusError}>{this.props.language["alert-invalid-mnemonic"]}</Typography> : null}
                             </Grid>
@@ -300,19 +312,20 @@ export class Login extends React.Component<any, any> {
                                     <TextField type="password" floatingLabelText="BIP39 Passphrase" floatingLabelFixed={true} autoComplete="off" name="pp1"
                                         value={this.state.passphrase}
                                         onChange={(data) => { this.handlePassphrase(data) }}
+                                        onKeyPress={(event) => { if (event.key === "Enter") { event.preventDefault(); this.handleUpdateAddress() } }}
                                     />
                                 </div>)
                                 : null
                             }
                             <Grid item xs={12}>
-                                <Button variant="raised" color="primary" id="update_address" onClick={this.handleUpdateAddress.bind(this)}>{this.props.language["button-submit"]}</Button>
+                                <Button variant="raised" color="primary" id="update_address" onClick={this.handleUpdateAddress}>{this.props.language["button-submit"]}</Button>
                             </Grid>
                         </Grid>
                     </CardContent>
                 }
                 {/* HELP - ADVANCED OPTIONS */}
                 <Dialog className="dialog" open={this.state.dialog} contentStyle={{ width: "70%", maxWidth: "none" }}>
-                    <div className="mdl-dialog__content dialogContent">{this.props.language["alert-complete-claim"]} <a href="https://hycon.io" style={{float: "none"}}>http://hycon.io</a>
+                    <div className="mdl-dialog__content dialogContent">{this.props.language["alert-complete-claim"]}
                     </div><br />
                     <Grid container direction={"row"} justify={"center"} alignItems={"center"}>
                         <Button variant="raised" onClick={this.completeClaim} style={{ backgroundColor: "#50aaff", color: "white", float: "right" }}>OK</Button>
