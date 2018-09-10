@@ -148,10 +148,20 @@ export interface IRest {
     deleteFavorite(alias: string): Promise<boolean>
     addWalletFile(name: string, password: string, key: string): Promise<boolean>
     getLedgerWallet(startIndex: number): Promise<IHyconWallet[] | number>
-    sendTxWithLedger(index: number, from: string, to: string, amount: string, fee: string, queueTx?: Function): Promise<{ res: boolean, case?: number }>
+    sendTxWithLedger(index: number, from: string, to: string, amount: string, fee: string, txNonce?: number, queueTx?: Function): Promise<{ res: boolean, case?: number }>
     possibilityLedger(): Promise<boolean>
     getTOTP(): Promise<{ iv: string, data: string } | boolean>
     saveTOTP(secret: string, totpPw: string): Promise<boolean>
     deleteTOTP(totpPw: string): Promise<{ res: boolean, case?: number }>
     verifyTOTP(token: string, totpPw: string, secret?: string): Promise<boolean>
+    getHDWallet(name: string, password: string, index: number, count: number): Promise<IHyconWallet[] | IResponseError>
+    sendTxWithHDWallet(tx: { name: string, password: string, address: string, amount: string, minerFee: string, nonce?: number }, index: number, queueTx?: Function): Promise<{ res: boolean, case?: number }>
+    generateHDWallet(Hwallet: IHyconWallet): Promise<string>
+    recoverHDWallet(Hwallet: IHyconWallet): Promise<string | boolean>
+    checkPasswordBitbox(): Promise<boolean | number>
+    checkWalletBitbox(password: string): Promise<boolean | number | { error: number, remain_attemp: string }>
+    getBitboxWallet(password: string, startIndex: number, count: number): Promise<IHyconWallet[] | number>
+    sendTxWithBitbox(tx: { from: string, password: string, address: string, amount: string, minerFee: string, nonce?: number }, index: number, queueTx?: Function): Promise<{ res: boolean, case?: (number | { error: number, remain_attemp: string }) }>
+    setBitboxPassword(password: string): Promise<boolean | number>
+    createBitboxWallet(name: string, password: string): Promise<boolean | number>
 }

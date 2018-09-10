@@ -2,8 +2,9 @@ import { CardContent, Icon } from "@material-ui/core"
 import { Card } from "material-ui"
 import * as React from "react"
 import { Redirect } from "react-router"
-import { MultipleLedgerView } from "./multipleLedgerView"
+import { MultipleAccountsView } from "./multipleAccountsView"
 import { IHyconWallet } from "./rest"
+
 export class LedgerView extends React.Component<any, any> {
     public mounted: boolean = false
     constructor(props: any) {
@@ -56,7 +57,7 @@ export class LedgerView extends React.Component<any, any> {
                     <Card>
                         <h3 style={{ color: "grey", textAlign: "center" }}><Icon style={{ marginRight: "10px", color: "grey" }}>account_balance_wallet</Icon>{this.props.language["wallet-select"]}</h3><br />
                         <CardContent style={{ display: `${this.state.txStep ? ("none") : ("block")}` }}>
-                            <MultipleLedgerView isLedgerPossibility={true} selectFunction={(index: string, account: IHyconWallet) => { this.selectedLedgerFunction(index, account) }} rest={this.state.rest} selectedLedger={this.state.selectedLedger} language={this.props.language} />
+                            <MultipleAccountsView isLedgerPossibility={true} selectFunction={(index: string, account: IHyconWallet) => { this.selectedLedgerFunction(index, account) }} rest={this.state.rest} selectedAccount={this.state.selectedLedger} isHDWallet={false} />
                         </CardContent>
                     </Card >
                 </div >
