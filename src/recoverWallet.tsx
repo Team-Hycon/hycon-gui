@@ -70,20 +70,25 @@ export class RecoverWallet extends React.Component<any, any> {
         if (event.target.checked === false) { this.setState({ passphrase1: "" }) }
         this.setState({ advanced: event.target.checked })
     }
-    public recoverWallet() {
+
+    public checkParam(): boolean {
         const patternWalletName = /^[a-zA-Z0-9\u1100-\u11FF\u3130-\u318F\uA960-\uA97F\uAC00-\uD7AF\uD7B0-\uD7FF]{2,20}$/
         if (this.state.name === "") {
             alert(this.props.language["alert-empty-fields"])
-            return
+            return false
         }
         if (this.state.name.search(/\s/) !== -1 || !patternWalletName.test(this.state.name)) {
             alert(this.props.language["alert-invalid-wallet"])
-            return
+            return false
         }
         if (this.state.password1 !== this.state.password2) {
             alert(this.props.language["password-not-matched"])
-            return
+            return false
         }
+        return true
+    }
+    public recoverWallet() {
+        if (!this.checkParam()) { return }
 
         const mnemonic = encodingMnemonic(this.state.mnemonic)
         this.state.rest.recoverWallet({
@@ -110,6 +115,25 @@ export class RecoverWallet extends React.Component<any, any> {
                     break
                 default:
                     alert("unexpected error")
+            }
+        })
+    }
+
+    public recoverHDWallet() {
+        if (!this.checkParam()) { return }
+
+        const mnemonic = encodingMnemonic(this.state.mnemonic)
+        this.state.rest.recoverHDWallet({
+            language: this.state.language,
+            mnemonic,
+            name: this.state.name,
+            passphrase: this.state.passphrase1,
+            password: this.state.password1,
+        }).then((data: string | boolean) => {
+            if (typeof data !== "string") {
+                alert(this.props.language["alert-invalid-mnemonic"])
+            } else {
+                this.setState({ redirect: true })
             }
         })
     }
@@ -182,6 +206,9 @@ export class RecoverWallet extends React.Component<any, any> {
                         <Button variant="raised" style={{ backgroundColor: "#50aaff", color: "white", margin: "0 10px" }}
                             onClick={() => { this.recoverWallet() }}
                         >{this.props.language["button-recover"]}</Button>
+                        <Button variant="raised" style={{ backgroundColor: "#50aaff", color: "white", margin: "0 10px" }}
+                            onClick={() => { this.recoverHDWallet() }}
+                        >Recover HDWallet</Button>
                     </Grid>
                 </CardContent></Card>
 

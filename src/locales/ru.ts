@@ -77,9 +77,12 @@ export default {
     "wallet-address": "Address",
     "wallet-balance": "Balance",
     "wallet-select": "Select wallet to view",
-    "ledger-view": "LEDGER VIEW",
+    "hardwarewallet-view": "HARDWARE WALLET",
     "ledger-wallet": "Ledger Wallet",
+    "bitbox-wallet": "Bitbox Wallet",
     "alert-delete-wallet": "Are you sure delete your wallet?",
+    "use-hdWallet": "Using HD wallets",
+    "hdwallet-type-password": "If you want to load HD wallets, Type password here.",
 
     "email": "Эл. адрес",
     "password": "Пароль",

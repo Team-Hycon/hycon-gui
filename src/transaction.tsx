@@ -24,7 +24,7 @@ export class Transaction extends React.Component<any, any> {
             errorText: "",
             favorites: [],
             fromAddress: "",
-            isLoading: false,
+            isLoading: true,
             minerFee: 1,
             name: props.name,
             nonce: props.nonce,
@@ -46,19 +46,27 @@ export class Transaction extends React.Component<any, any> {
     }
     public componentDidMount() {
         this.mounted = true
+        this.state.rest.loadingListener((isLoading: boolean) => {
+            this.setState({ isLoading })
+        })
         this.state.rest.setLoading(true)
-        this.state.rest.getWalletDetail(this.state.name)
-            .then((data: IHyconWallet) => {
-                this.state.rest.setLoading(false)
-                if (this.mounted) {
-                    this.setState({ wallet: data, piggyBank: data.balance, fromAddress: data.address, pendingAmount: data.pendingAmount })
-                }
-            })
-        this.state.rest.getFavoriteList()
-            .then((data: Array<{ alias: string, address: string }>) => {
-                this.state.rest.setLoading(false)
-                if (this.mounted) { this.setState({ favorites: data }) }
-            })
+        Promise.all(
+            [
+                this.state.rest.getWalletDetail(this.state.name)
+                    .then((data: IHyconWallet) => {
+                        if (this.mounted) {
+                            this.setState({ wallet: data, piggyBank: data.balance, fromAddress: data.address, pendingAmount: data.pendingAmount })
+                        }
+                    }),
+                this.state.rest.getFavoriteList()
+                    .then((data: Array<{ alias: string, address: string }>) => {
+                        if (this.mounted) { this.setState({ favorites: data }) }
+                    }),
+            ],
+        ).then(() => {
+            this.state.rest.setLoading(false)
+        })
+
         this.state.rest.getTOTP().then((result: boolean) => {
             if (result) {
                 this.setState({ totp: true })
@@ -117,18 +125,20 @@ export class Transaction extends React.Component<any, any> {
 
         this.state.rest.sendTx({ name: this.state.name, password: this.state.password, address: this.state.address, amount: this.state.amount.toString(), minerFee: this.state.minerFee.toString(), nonce: this.state.nonce })
             .then((result: { res: boolean, case?: number }) => {
+                this.setState({ isLoading: false })
                 if (result.res === true) {
                     alert(`${this.props.language["alert-send-success"]}\n- ${this.props.language["send-amount"]}: ${this.state.amount}\n- ${this.props.language.fees}: ${this.state.minerFee}\n- ${this.props.language["to-address"]}: ${this.state.address}`)
                     this.setState({ redirect: true })
-                } else if (result.case === 1) {
-                    alert(`${this.props.language["alert-invalid-address-to"]}`)
-                    this.setState({ isLoading: false })
-                } else if (result.case === 2) {
+                    return
+                }
+                if (result.case === 1) {
+                    this.setState({ password: "" })
                     alert(`${this.props.language["alert-invalid-password"]}`)
-                    this.setState({ isLoading: false, password: "" })
+                } else if (result.case === 2) {
+                    alert(`${this.props.language["alert-invalid-address-to"]}`)
                 } else if (result.case === 3) {
                     alert(`${this.props.language["alert-send-failed"]}`)
-                    this.setState({ redirect: true, isLoading: false })
+                    this.setState({ redirect: true })
                 }
             })
 

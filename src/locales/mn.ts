@@ -77,9 +77,12 @@ export default {
     "wallet-address": "Хаяг",
     "wallet-balance": "Үлдэгдэл",
     "wallet-select": "Хэтэвчээ сонгоно уу",
-    "ledger-view": "LEDGER ХАРАХ",
+    "hardwarewallet-view": "HARDWARE WALLET",
     "ledger-wallet": "Ledger Хэтэвч",
+    "bitbox-wallet": "Bitbox Wallet",
     "alert-delete-wallet": "Хэтэвчээ устгах уу?",
+    "use-hdWallet": "Using HD wallets",
+    "hdwallet-type-password": "If you want to load HD wallets, Type password here.",
 
     "email": "Имэйл",
     "password": "Нууц үг",

@@ -5,17 +5,27 @@ import Grid from "@material-ui/core/Grid"
 import Icon from "@material-ui/core/Icon"
 import { Card, MenuItem, TextField } from "material-ui"
 import * as React from "react"
+import update = require("react-addons-update")
 import { Redirect } from "react-router"
 import { AddressBook } from "./addressBook"
-import { MultipleLedgerView } from "./multipleLedgerView"
-import { IHyconWallet } from "./rest"
+import { IText } from "./locales/locales"
+import { MultipleAccountsView } from "./multipleAccountsView"
+import { IHyconWallet, IRest, IWalletAddress } from "./rest"
 import { hyconfromString } from "./stringUtil"
-
-export class MakeTransaction extends React.Component<any, any> {
+interface IMakeTransactionProps {
+    rest: IRest
+    language: IText
+    walletType?: string
+    address?: string
+    name?: string
+    selectedAccount?: string
+    nonce?: number
+}
+export class MakeTransaction extends React.Component<IMakeTransactionProps, any> {
     public mounted = false
     public mapWallets: Map<string, IHyconWallet>
 
-    constructor(props: any) {
+    constructor(props: IMakeTransactionProps) {
         super(props)
 
         this.state = {
@@ -23,25 +33,22 @@ export class MakeTransaction extends React.Component<any, any> {
             amount: 0,
             cancelRedirect: false,
             dialog: false,
-            dialogTOTP: false,
             favorites: [],
-            fromAddress: "",
-            initialSelected: props.selectedLedger,
-            isLedger: props.isLedger,
+            fromAddress: props.address ? props.address : "",
+            initialSelected: props.selectedAccount,
             isLoading: false,
             isMultiple: true,
-            isSelect: false,
             minerFee: 1,
-            name: "",
+            name: props.name ? props.name : "",
+            nonce: props.nonce,
             password: "",
             pendingAmount: "0",
             piggyBank: "0",
+            remain_attemp: "",
             rest: props.rest,
-            selectedLedger: props.selectedLedger,
-            totp: false,
-            totpPw: "",
-            totpToken: "",
+            selectedAccount: props.selectedAccount,
             txStep: false,
+            walletType: props.walletType,
             wallets: [],
         }
         this.handleInputChange = this.handleInputChange.bind(this)
@@ -56,51 +63,76 @@ export class MakeTransaction extends React.Component<any, any> {
     public componentDidMount() {
         this.mounted = true
         this.state.rest.setLoading(true)
-        if (this.state.isLedger === true || this.state.isLedger === "true") {
-            this.setState({ isLedger: true })
-            if (this.state.selectedLedger !== undefined) {
-                this.state.rest.getLedgerWallet(Number(this.state.selectedLedger), 1).then((result: IHyconWallet[] | number) => {
-                    if (this.mounted) {
-                        if (typeof (result) !== "number") {
-                            this.setState({
-                                fromAddress: result[0].address,
-                                isLoad: true,
-                                name: "ledgerWallet",
-                                pendingAmount: result[0].pendingAmount,
-                                piggyBank: result[0].balance,
-                                txStep: true,
-                            })
-                        } else {
-                            alert(`${this.props.language["alert-ledger-connect-failed"]}`)
-                            this.setState({ isLoad: true, cancelRedirect: true })
-                            window.location.reload()
-                        }
+        this.getFavorite()
+        this.getTOTP()
+        if (this.state.walletType === "ledger") {
+            if (this.state.selectedAccount === undefined) { return }
+            this.state.rest.getLedgerWallet(Number(this.state.selectedAccount), 1).then((result: IHyconWallet[] | number) => {
+                if (this.mounted) {
+                    if (typeof (result) !== "number") {
+                        this.setState({
+                            fromAddress: result[0].address,
+                            name: "ledgerWallet",
+                            pendingAmount: result[0].pendingAmount,
+                            piggyBank: result[0].balance,
+                            txStep: true,
+                        })
+                    } else {
+                        alert(`Please check connection and launch Hycon app.`)
+                        this.setState({ cancelRedirect: true })
                     }
-                })
-            }
-        } else {
+                }
+                this.state.rest.setLoading(false)
+            })
+        }
+        if (this.state.walletType === "local") {
             this.state.rest.getWalletList().then((data: { walletList: IHyconWallet[], length: number }) => {
                 const walletPromises = data.walletList.map((wallet) => {
-                    return new Promise((resolve, _) => {
-                        this.state.rest.getAddressInfo(wallet.address).then((account: any) => {
-                            resolve({ name: wallet.name, address: wallet.address, balance: account.balance, pendingAmount: account.pendingAmount })
+                    if (wallet.address && wallet.address !== "") {
+                        return new Promise((resolve, _) => {
+                            this.state.rest.getAddressInfo(wallet.address).then((account: any) => {
+                                resolve({ name: wallet.name, address: wallet.address, balance: account.balance, pendingAmount: account.pendingAmount })
+                            })
                         })
-                    })
+                    } else {
+                        return new Promise((resolve, _) => {
+                            resolve({ name: "", address: "", balance: "0.0", pendingAmount: "0.0" })
+                        })
+                    }
                 })
 
                 Promise.all(walletPromises).then((walletList: IHyconWallet[]) => {
                     for (const wallet of walletList) {
-                        this.mapWallets.set(wallet.address, wallet)
+                        if (wallet.name !== "") {
+                            this.mapWallets.set(wallet.address, wallet)
+                            this.setState({ wallets: update(this.state.wallets, { $push: [wallet] }) })
+                        }
                     }
                     if (this.mounted) {
-                        this.setState({ wallets: walletList, isLedger: false, isSelect: true, isLoad: true, txStep: true })
+                        this.setState({ txStep: true })
                     }
                     this.state.rest.setLoading(false)
                 })
             })
         }
-        this.getFavorite()
-        this.getTOTP()
+        if (this.state.walletType === "hdwallet") {
+            if (this.state.fromAddress === "") { alert(`Error`); this.setState({ cancelRedirect: true }) }
+            this.state.rest.getAddressInfo(this.state.fromAddress).then((result: IWalletAddress) => {
+                if (this.mounted) {
+                    this.setState({ pendingAmount: result.pendingAmount, piggyBank: result.balance, txStep: true })
+                }
+                this.state.rest.setLoading(false)
+            })
+        }
+        if (this.state.walletType === "bitbox") {
+            if (this.state.fromAddress === "") { return }
+            this.state.rest.getAddressInfo(this.state.fromAddress).then((result: IWalletAddress) => {
+                if (this.mounted) {
+                    this.setState({ name: "bitboxWallet", fromAddress: this.state.fromAddress, pendingAmount: result.pendingAmount, piggyBank: result.balance, txStep: true })
+                }
+                this.state.rest.setLoading(false)
+            })
+        }
     }
 
     public handlePassword(data: any) {
@@ -128,7 +160,7 @@ export class MakeTransaction extends React.Component<any, any> {
             alert(`${this.props.language["alert-decimal-overflow"]}`)
             return
         }
-        if (hyconfromString(this.state.amount).add(hyconfromString(this.state.minerFee)).greaterThan(hyconfromString(this.state.piggyBank).sub(hyconfromString(this.state.pendingAmount)))) {
+        if (this.state.nonce === undefined && hyconfromString(this.state.amount).add(hyconfromString(this.state.minerFee)).greaterThan(hyconfromString(this.state.piggyBank).sub(hyconfromString(this.state.pendingAmount)))) {
             alert(`${this.props.language["alert-insufficient-funds"]}`)
             return
         }
@@ -159,15 +191,16 @@ export class MakeTransaction extends React.Component<any, any> {
 
         this.setState({ isLoading: true })
 
-        if (this.state.isLedger === true || this.state.isLedger === "true") {
+        if (this.state.walletType === "ledger") {
             if (!confirm(this.props.language["guide-sign-ledger"])) {
                 this.setState({ isLoading: false })
                 return
             }
-            this.state.rest.sendTxWithLedger(Number(this.state.selectedLedger), this.state.fromAddress, this.state.address, this.state.amount.toString(), this.state.minerFee.toString()).then((result: { res: boolean, case: number }) => {
+            this.state.rest.sendTxWithLedger(Number(this.state.selectedAccount), this.state.fromAddress, this.state.address, this.state.amount.toString(), this.state.minerFee.toString(), this.state.nonce).then((result: { res: boolean, case: number }) => {
                 this.alertResult(result)
             })
-        } else {
+        }
+        if (this.state.walletType === "local") {
             const namecheck = this.mapWallets.get(this.state.fromAddress)
             if (this.state.name !== namecheck.name) {
                 alert(`${this.props.language["alert-try-again"]}`)
@@ -178,9 +211,28 @@ export class MakeTransaction extends React.Component<any, any> {
                     this.alertResult(result)
                 })
         }
+        if (this.state.walletType === "hdwallet") {
+            this.state.rest.sendTxWithHDWallet({ name: this.state.name, password: this.state.password, address: this.state.address, amount: this.state.amount.toString(), minerFee: this.state.minerFee.toString(), nonce: this.state.nonce }, Number(this.state.selectedAccount))
+                .then((result: { res: boolean, case?: number }) => {
+                    this.alertResult(result)
+                })
+        }
+        if (this.state.walletType === "bitbox") {
+            this.state.rest.sendTxWithBitbox({ from: this.state.fromAddress, password: this.state.password, address: this.state.address, amount: this.state.amount.toString(), minerFee: this.state.minerFee.toString(), nonce: this.state.nonce }, Number(this.state.selectedAccount))
+                .then((result: { res: boolean, case?: (number | { error: number, remain_attemp: string }) }) => {
+                    if (typeof (result.case) === "number") {
+                        this.alertResult({ res: result.res, case: result.case })
+                    } else if (!result.res) {
+                        this.setState({ remain_attemp: result.case.remain_attemp })
+                        this.alertResult({ res: result.res, case: result.case.error })
+                    } else {
+                        this.alertResult({ res: result.res })
+                    }
+                })
+        }
         event.preventDefault()
     }
-    public handleCancel(event: any) {
+    public handleCancel() {
         if (this.state.initialSelected !== undefined && this.state.initialSelected !== "") {
             this.setState({ redirect: true })
         } else {
@@ -188,13 +240,13 @@ export class MakeTransaction extends React.Component<any, any> {
         }
     }
 
-    public selectedLedgerFunction(selectedLedger: string, account: IHyconWallet) {
+    public selectedAccountFunction(selectedAccount: string, account: IHyconWallet) {
         this.setState({
             fromAddress: account.address,
             name: "ledgerWallet",
             pendingAmount: account.pendingAmount,
             piggyBank: account.balance,
-            selectedLedger,
+            selectedAccount,
             txStep: true,
         })
     }
@@ -202,10 +254,10 @@ export class MakeTransaction extends React.Component<any, any> {
     public render() {
         let walletIndex = 0
         if (this.state.redirect) {
-            if (this.state.isLedger === true || this.state.isLedger === "true") {
-                return <Redirect to={`/address/${this.state.fromAddress}/${this.state.selectedLedger}`} />
-            } else {
+            if (this.state.walletType === "local" || this.state.walletType === "hdwallet") {
                 return <Redirect to={`/wallet/detail/${this.state.name}`} />
+            } else {
+                return <Redirect to={`/address/${this.state.fromAddress}/${this.state.walletType}/${this.state.selectedAccount}`} />
             }
         }
         if (this.state.cancelRedirect) {
@@ -215,50 +267,51 @@ export class MakeTransaction extends React.Component<any, any> {
             <div style={{ width: "80%", margin: "auto" }}>
                 <Card>
                     <h3 style={{ color: "grey", textAlign: "center" }}><Icon style={{ transform: "rotate(-25deg)", marginRight: "10px", color: "grey" }}>send</Icon>{this.props.language["send-transaction"]}</h3><br />
-                    <CardContent style={{ display: `${this.state.txStep ? ("none") : ("block")}` }}>
-                        <MultipleLedgerView isLedgerPossibility={this.state.isLedger} selectFunction={(index: string, account: IHyconWallet) => { this.selectedLedgerFunction(index, account) }} rest={this.state.rest} selectedLedger={this.state.selectedLedger} language={this.props.language} />
-                    </CardContent>
-                    <CardContent style={{ display: `${this.state.txStep ? ("block") : ("none")}` }}>
-                        <div style={{ textAlign: "center" }}>
-                            <Grid container direction={"row"} justify={"flex-end"} alignItems={"flex-end"}>
-                                <Button variant="raised" onClick={() => { this.setState({ dialog: true }) }} style={{ backgroundColor: "#f2d260", color: "white", float: "right", margin: "0 10px" }}>
-                                    <Icon>bookmark</Icon><span style={{ marginLeft: "5px" }}>{this.props.language["address-book"]}</span>
-                                </Button>
-                            </Grid>
-                            {(this.state.isSelect)
-                                ? (<FormControl style={{ width: "330px", marginTop: "1.5%" }}>
-                                    <InputLabel style={{ top: "19px", transform: "scale(0.75) translate(0px, -28px)", color: "rgba(0, 0, 0, 0.3)", fontSize: "16px" }} htmlFor="fromAddress">{this.props.language["from-address"]}</InputLabel>
-                                    <Select value={this.state.fromAddress} onChange={this.handleInputChange} input={<Input name="fromAddress" />}>
-                                        {this.state.wallets.map((wallet: IHyconWallet) => {
-                                            return (
-                                                <MenuItem key={walletIndex++} value={wallet.address}>{wallet.address}</MenuItem>
-                                            )
-                                        })}
-                                    </Select>
-                                </FormControl>)
-                                : (<TextField style={{ width: "330px" }} floatingLabelFixed={true} floatingLabelText={this.props.language["from-address"]} type="text" disabled={true} value={this.state.fromAddress} />)
-                            }
-                            <TextField name="address" floatingLabelFixed={true} style={{ marginLeft: "30px", width: "330px" }} floatingLabelText={this.props.language["to-address"]} type="text" value={this.state.address} onChange={this.handleInputChange} />
-                            <br />
-                            <TextField style={{ width: "330px" }} floatingLabelFixed={true} floatingLabelText={this.props.language["wallet-balance"]} type="text" disabled={true} value={this.state.piggyBank} />
-                            <TextField style={{ marginLeft: "30px", width: "330px" }} name="amount" floatingLabelFixed={true} floatingLabelText={this.props.language["total-amount"]} type="text" value={this.state.amount} max={this.state.piggyBank} onChange={this.handleInputChange} />
-                            <br />
-                            <TextField floatingLabelText={this.props.language["wallet-pending"]} floatingLabelFixed={true} style={{ width: "330px" }} type="text" disabled={true} value={this.state.pendingAmount} />
-                            <TextField name="minerFee" floatingLabelFixed={true} style={{ marginLeft: "30px", width: "330px" }} floatingLabelText={this.props.language.fees} type="text" value={this.state.minerFee} onChange={this.handleInputChange} />
-                            <br />
-                            <TextField name="password" floatingLabelFixed={true} style={{ marginRight: "20px", width: "330px", display: `${this.state.isLedger ? ("none") : ("inline-block")}` }} floatingLabelText={this.props.language.password} value={this.state.password} type="password" autoComplete="off" onChange={(data) => { this.handlePassword(data) }} />
-                            <br /><br />
-                            <Grid container direction={"row"} justify={"center"} alignItems={"center"}>
-                                {(this.state.isLedger && (this.state.initialSelected === undefined || this.state.initialSelected === "") ?
-                                    (<Button onClick={this.prevPage}>{this.props.language["button-previous"]}</Button>)
-                                    : (<Button onClick={this.handleCancel}>{this.props.language["button-cancel"]}</Button>))}
-                                {this.state.totp
-                                    ? (<Button onClick={() => { if (this.checkInputs()) { this.setState({ dialogTOTP: true }) } }}>{this.props.language.totp}</Button>)
-                                    : (<Button onClick={(event) => { if (this.checkInputs()) { this.handleSubmit(event) } }}>{this.props.language["button-transfer"]}</Button>)
+                    {this.state.txStep ?
+                        <CardContent>
+                            <div style={{ textAlign: "center" }}>
+                                <Grid container direction={"row"} justify={"flex-end"} alignItems={"flex-end"}>
+                                    <Button variant="raised" onClick={() => { this.setState({ dialog: true }) }} style={{ backgroundColor: "#f2d260", color: "white", float: "right", margin: "0 10px" }}>
+                                        <Icon>bookmark</Icon><span style={{ marginLeft: "5px" }}>{this.props.language["address-book"]}</span>
+                                    </Button>
+                                </Grid>
+                                {(this.state.walletType === "local")
+                                    ? (<FormControl style={{ width: "330px", marginTop: "1.5%" }}>
+                                        <InputLabel style={{ top: "19px", transform: "scale(0.75) translate(0px, -28px)", color: "rgba(0, 0, 0, 0.3)", fontSize: "16px" }} htmlFor="fromAddress">{this.props.language["from-address"]}</InputLabel>
+                                        <Select value={this.state.fromAddress} onChange={this.handleInputChange} input={<Input name="fromAddress" />}>
+                                            {this.state.wallets.map((wallet: IHyconWallet) => {
+                                                return (<MenuItem key={walletIndex++} value={wallet.address}>{wallet.address}</MenuItem>)
+                                            })}
+                                        </Select>
+                                    </FormControl>)
+                                    : (<TextField style={{ width: "330px" }} floatingLabelFixed={true} floatingLabelText={this.props.language["from-address"]} type="text" disabled={true} value={this.state.fromAddress} />)
                                 }
-                            </Grid>
-                        </div>
-                    </CardContent>
+                                <TextField name="address" floatingLabelFixed={true} style={{ marginLeft: "30px", width: "330px" }} floatingLabelText={this.props.language["to-address"]} type="text" value={this.state.address} onChange={this.handleInputChange} />
+                                <br />
+                                <TextField style={{ width: "330px" }} floatingLabelFixed={true} floatingLabelText={this.props.language["wallet-balance"]} type="text" disabled={true} value={this.state.piggyBank} />
+                                <TextField style={{ marginLeft: "30px", width: "330px" }} name="amount" floatingLabelFixed={true} floatingLabelText={this.props.language["total-amount"]} type="text" value={this.state.amount} max={this.state.piggyBank} onChange={this.handleInputChange} />
+                                <br />
+                                <TextField floatingLabelText={this.props.language["wallet-pending"]} floatingLabelFixed={true} style={{ width: "330px" }} type="text" disabled={true} value={this.state.pendingAmount} />
+                                <TextField name="minerFee" floatingLabelFixed={true} style={{ marginLeft: "30px", width: "330px" }} floatingLabelText={this.props.language.fees} type="text" value={this.state.minerFee} onChange={this.handleInputChange} />
+                                <br />
+                                <TextField name="password" value={this.state.password} floatingLabelFixed={true} style={{ margin: "auto", width: "330px", display: `${this.state.walletType === "ledger" ? "none" : "block"}` }} floatingLabelText={this.props.language.password} type="password" autoComplete="off" onChange={(data) => { this.handlePassword(data) }} />
+                                <br /><br />
+                                <Grid container direction={"row"} justify={"center"} alignItems={"center"}>
+                                    {(this.state.walletType !== "local" && (this.state.initialSelected === undefined || this.state.initialSelected === "") ?
+                                        (<Button onClick={this.prevPage}>{this.props.language["button-previous"]}</Button>)
+                                        : (<Button onClick={this.handleCancel}>{this.props.language["button-cancel"]}</Button>))}
+                                    {this.state.totp
+                                        ? (<Button onClick={() => { if (this.checkInputs()) { this.setState({ dialogTOTP: true }) } }}>{this.props.language.totp}</Button>)
+                                        : (<Button onClick={(event) => { if (this.checkInputs()) { this.handleSubmit(event) } }}>{this.props.language["button-transfer"]}</Button>)
+                                    }
+                                </Grid>
+                            </div>
+                        </CardContent>
+                        :
+                        <CardContent>
+                            <MultipleAccountsView selectFunction={(index: string, account: IHyconWallet) => { this.selectedAccountFunction(index, account) }} rest={this.state.rest} selectedAccount={this.state.selectedAccount} walletType={this.state.walletType} />
+                        </CardContent>
+                    }
                 </Card >
 
                 {/* ADDRESS BOOK */}
@@ -312,38 +365,67 @@ export class MakeTransaction extends React.Component<any, any> {
             return
         }
         this.setState({ isLoading: false })
-        if (this.state.isLedger === true || this.state.isLedger === "true") {
-            switch (result.case) {
-                case 0:
+        switch (result.case) {
+            case 1:
+                if (this.state.walletType === "ledger") {
                     alert(`${this.props.language["alert-invalid-address-from"]}`)
-                    break
-                case 1:
-                    alert(`${this.props.language["alert-invalid-address-to"]}`)
-                    break
-                case 2:
-                    alert(`${this.props.language["alert-load-address-failed"]}`)
-                    break
-                case 3:
-                    alert(`${this.props.language["alert-ledger-sign-failed"]}`)
-                    break
-                case 4:
-                    alert(`${this.props.language["alert-send-failed"]}`)
-                    this.setState({ redirect: true })
-                    break
-            }
-        } else {
-            switch (result.case) {
-                case 1:
-                    alert(`${this.props.language["alert-invalid-address-to"]}`)
-                    break
-                case 2:
+                } else {
+                    this.setState({ password: "" })
                     alert(`${this.props.language["alert-invalid-password"]}`)
-                    break
-                case 3:
-                    alert(`${this.props.language["alert-send-failed"]}`)
-                    this.setState({ redirect: true })
-                    break
-            }
+                }
+                break
+            case 2:
+                alert(`${this.props.language["alert-invalid-address-to"]}`)
+                break
+            case 3:
+                alert(`${this.props.language["alert-send-failed"]}`)
+                this.setState({ redirect: true })
+                break
+            case 4:
+                alert(`${this.props.language["alert-ledger-sign-failed"]}`)
+                break
+            case 20:
+                alert(`Can not find bitbox device.`)
+                break
+            case 21:
+                alert(`Password information was not found.`)
+                this.setState({ redirect: true })
+                break
+            case 22:
+                alert(`Wallet information was not found.`)
+                this.setState({ redirect: true })
+                break
+            case 23:
+                if (this.state.remain_attemp !== "") {
+                    alert(`Invalid password. Please try again. ${this.state.remain_attemp} attempts remain before the device is reset.`)
+                } else {
+                    alert(`Invalid password. Please try again.`)
+                }
+                this.setState({ password: "" })
+                break
+            case 26:
+                alert(`Your Bitbox Wallet has been reset. Please make new wallet.`)
+                this.setState({ redirect: true })
+                break
+            case 27:
+                alert(`Invalid from address. Please try again.`)
+                break
+            case 28:
+                alert(`Failed to sign with bitbox wallet. Please try again.`)
+                break
+            case 29:
+                alert(`Due to many login attempts, the next login requires holding the touch button for 3 seconds. If the LED light is displayed on the bitbox, touch it for 3 seconds.`)
+                break
+            case 30:
+                alert(`Failed to get accounts from bitbox wallet. Please check connection and try again.`)
+                break
+            case 32:
+                alert(`Failed to check that wallet information is set.`)
+                break
+            default:
+                alert("Failed to transfer hycon")
+                this.setState({ redirect: true })
+                break
         }
     }
 
@@ -352,11 +434,10 @@ export class MakeTransaction extends React.Component<any, any> {
             address: "",
             amount: 0,
             fromAddress: "",
-            isLedger: true,
             minerFee: 1,
             pendingAmount: "0",
             piggyBank: "0",
-            selectedLedger: "",
+            selectedAccount: "",
             txStep: false,
         })
     }

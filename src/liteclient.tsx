@@ -1,16 +1,15 @@
+import { TextField } from "material-ui"
+import * as tfa from "node-2fa"
 import * as React from "react"
 import { RouteComponentProps } from "react-router"
 import { RouteConfig } from "react-router-config"
 import { Link, Route, Switch } from "react-router-dom"
-
-import { TextField } from "material-ui"
-import * as tfa from "node-2fa"
 import { Button, Dialog, DialogTitle, Drawer, FormControl, FormControlLabel, FormLabel, Grid, Icon, IconButton, ListItemIcon, ListItemText, MenuItem, Radio, RadioGroup, Select } from "../node_modules/@material-ui/core"
 import { AddressBook } from "./addressBook"
 import { AddressInfo } from "./addressInfo"
 import { AddWallet } from "./addWallet"
+import { HardwareWalletView } from "./hardwareWalletView"
 import { Home } from "./home"
-import { LedgerView } from "./ledgerView"
 import { getLocale, IText } from "./locales/locales"
 import { MakeTransaction } from "./makeTransaction"
 import { RecoverWallet } from "./recoverWallet"
@@ -30,10 +29,15 @@ export const routes: RouteConfig[] = [
     { exact: true, path: "/wallet/detail/:name" },
     { exact: true, path: "/transaction/:name" },
     { exact: true, path: "/transaction/:name/:nonce" },
-    { exact: true, path: "/maketransaction/:isLedger" },
-    { exact: true, path: "/maketransaction/:isLedger/:selectedLedger" },
-    { exact: true, path: "/ledgerView" },
-    { exact: true, path: "/address/:hash/:selectedLedger" },
+    { exact: true, path: "/maketransaction/:walletType" },
+    { exact: true, path: "/maketransactionIndex/:walletType/:selectedAccount" },
+    { exact: true, path: "/maketransactionIndex/:walletType/:selectedAccount/:nonce" },
+    { exact: true, path: "/maketransactionAddress/:walletType/:address/:selectedAccount" },
+    { exact: true, path: "/maketransactionAddress/:walletType/:address/:selectedAccount/:nonce" },
+    { exact: true, path: "/maketransactionHDWallet/:walletType/:name/:address/:selectedAccount" },
+    { exact: true, path: "/maketransactionHDWallet/:walletType/:name/:address/:selectedAccount/:nonce" },
+    { exact: true, path: "/hardwareWallet/:walletType" },
+    { exact: true, path: "/address/:hash/:walletType/:selectedAccount" },
 ]
 
 // tslint:disable:no-shadowed-variable
@@ -47,14 +51,15 @@ export class LiteClient extends React.Component<any, any> {
     ) => JSX.Element
     public txView: ({ match }: RouteComponentProps<{ hash: string }>) => JSX.Element
     public transaction: ({ match }: RouteComponentProps<{ name: string, nonce: number }>) => JSX.Element
-    public maketransaction: ({ match }: RouteComponentProps<{ isLedger: boolean }>) => JSX.Element
-    public maketransactionWithIndex: ({ match }: RouteComponentProps<{ isLedger: boolean, selectedLedger: number }>) => JSX.Element
+    public maketransaction: ({ match }: RouteComponentProps<{ walletType: string, nonce: number }>) => JSX.Element
+    public maketransactionIndex: ({ match }: RouteComponentProps<{ walletType: string, address: string, selectedAccount: string, nonce: number }>) => JSX.Element
+    public maketransactionHDWallet: ({ match }: RouteComponentProps<{ walletType: string, name: string, address: string, selectedAccount: string, nonce: number }>) => JSX.Element
     public wallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
     public addWallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
     public recoverWallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
     public walletDetail: ({ match }: RouteComponentProps<{ name: string }>) => JSX.Element
-    public ledgerView: ({ match }: RouteComponentProps<{}>) => JSX.Element
-    public ledgerAddressView: ({ match }: RouteComponentProps<{ hash: string, selectedLedger: number }>) => JSX.Element
+    public hardwareWalletView: ({ match }: RouteComponentProps<{ walletType: string }>) => JSX.Element
+    public hardwareAddressView: ({ match }: RouteComponentProps<{ walletType: string, hash: string, selectedAccount: string }>) => JSX.Element
     public notFound: boolean
 
     constructor(props: any) {
@@ -68,6 +73,8 @@ export class LiteClient extends React.Component<any, any> {
             errorText: "",
             errorText2: "",
             favorites: [],
+            hardwareDialog: false,
+            hardwareWalletType: "",
             languageSelect: navigator.language.split("-")[0],
             ledgerAddress: "",
             load: false,
@@ -98,13 +105,16 @@ export class LiteClient extends React.Component<any, any> {
             <TxView hash={match.params.hash} rest={this.rest} />
         )
         this.transaction = ({ match }: RouteComponentProps<{ name: string, nonce: number }>) => (
-            <Transaction name={match.params.name} rest={this.rest} language={this.language} nonce={match.params.nonce}/>
+            <Transaction name={match.params.name} rest={this.rest} language={this.language} nonce={match.params.nonce} />
         )
-        this.maketransaction = ({ match }: RouteComponentProps<{ isLedger: boolean }>) => (
-            <MakeTransaction isLedger={match.params.isLedger} rest={this.rest} language={this.language} />
+        this.maketransaction = ({ match }: RouteComponentProps<{ walletType: string, nonce: number }>) => (
+            <MakeTransaction walletType={match.params.walletType} rest={this.rest} nonce={match.params.nonce} language={this.language} />
         )
-        this.maketransactionWithIndex = ({ match }: RouteComponentProps<{ isLedger: boolean, selectedLedger: number }>) => (
-            <MakeTransaction isLedger={match.params.isLedger} rest={this.rest} selectedLedger={match.params.selectedLedger} language={this.language} />
+        this.maketransactionIndex = ({ match }: RouteComponentProps<{ walletType: string, address: string, selectedAccount: string, nonce: number }>) => (
+            <MakeTransaction walletType={match.params.walletType} rest={this.rest} address={match.params.address} selectedAccount={match.params.selectedAccount} nonce={match.params.nonce} language={this.language} />
+        )
+        this.maketransactionHDWallet = ({ match }: RouteComponentProps<{ walletType: string, name: string, address: string, selectedAccount: string, nonce: number }>) => (
+            <MakeTransaction rest={this.rest} walletType={match.params.walletType} name={match.params.name} address={match.params.address} selectedAccount={match.params.selectedAccount} nonce={match.params.nonce} language={this.language} />
         )
         this.wallet = ({ match }: RouteComponentProps<{}>) => (
             <WalletView rest={props.rest} language={this.language} />
@@ -118,11 +128,11 @@ export class LiteClient extends React.Component<any, any> {
         this.walletDetail = ({ match }: RouteComponentProps<{ name: string }>) => (
             <WalletDetail name={match.params.name} rest={this.rest} language={this.language} notFound={this.notFound} />
         )
-        this.ledgerView = ({ match }: RouteComponentProps<{}>) => (
-            <LedgerView rest={this.rest} language={this.language} />
+        this.hardwareWalletView = ({ match }: RouteComponentProps<{ walletType: string }>) => (
+            <HardwareWalletView rest={this.rest} walletType={match.params.walletType} />
         )
-        this.ledgerAddressView = ({ match }: RouteComponentProps<{ hash: string, selectedLedger: number }>) => (
-            <AddressInfo hash={match.params.hash} rest={this.rest} selectedLedger={match.params.selectedLedger} language={this.language} />
+        this.hardwareAddressView = ({ match }: RouteComponentProps<{ walletType: string, hash: string, selectedAccount: string }>) => (
+            <AddressInfo hash={match.params.hash} walletType={match.params.walletType} rest={this.rest} selectedAccount={match.params.selectedAccount} language={this.language} />
         )
     }
 
@@ -156,8 +166,8 @@ export class LiteClient extends React.Component<any, any> {
             this.setState({ alias: value })
         } else if (name === "addr") {
             this.setState({ address: value })
-        } else if (name === "walletType") {
-            this.setState({ walletType: value })
+        } else {
+            this.setState({ [name]: value })
         }
     }
 
@@ -169,7 +179,11 @@ export class LiteClient extends React.Component<any, any> {
             <div className="mdl-layout mdl-js-layout mdl-layout--fixed-header">
                 <header className="mdl-layout__header" >
                     <div className="mdl-layout__header-row" style={{ padding: "0 16px 0 10px" }}>
-                        <Icon onClick={() => { history.back() }} style={{ color: "white", float: "left", margin: "0 1em 0 0.5em", cursor: "pointer" }}>chevron_left</Icon>
+                        <div>
+                            {this.state.homeUrl === location.href || this.state.homeUrl + "/" === location.href
+                                ? (<div style={{ marginLeft: "4.35em" }} />)
+                                : (<Icon onClick={() => { history.back() }} style={{ color: "white", float: "left", margin: "0 1em 0 0.5em", cursor: "pointer" }}>chevron_left</Icon>)}
+                        </div>
                         <Link to="/wallet">
                             <img style={{ maxHeight: 40, paddingRight: 10 }} src="./hycon_logo1.png" />
                         </Link>
@@ -221,14 +235,14 @@ export class LiteClient extends React.Component<any, any> {
                                             <ListItemIcon><Icon>vpn_key</Icon></ListItemIcon>
                                             <ListItemText primary={this.language.totp} /></MenuItem>
                                         {(this.state.possibilityLedger ? (
-                                        <MenuItem onClick={() => { this.setState({ dialogLedger: true }) }}>
-                                            <ListItemIcon><Icon>send</Icon></ListItemIcon>
-                                            <ListItemText primary={this.language["button-transfer"]} /></MenuItem>
+                                            <MenuItem onClick={() => { this.setState({ dialogLedger: true }) }}>
+                                                <ListItemIcon><Icon>send</Icon></ListItemIcon>
+                                                <ListItemText primary={this.language["button-transfer"]} /></MenuItem>
                                         ) : null)}
                                         {(this.state.possibilityLedger ? (
-                                        <Link style={{ width: "22em" }} to="/ledgerView"><MenuItem>
-                                            <ListItemIcon><Icon>account_balance_wallet</Icon></ListItemIcon>
-                                            <ListItemText primary={this.language["ledger-view"]} /></MenuItem></Link>
+                                            <MenuItem onClick={() => { this.setState({ hardwareDialog: true }) }}>
+                                                <ListItemIcon><Icon>account_balance_wallet</Icon></ListItemIcon>
+                                                <ListItemText primary={this.language["hardwarewallet-view"]} /></MenuItem>
                                         ) : null)}
                                     </div>
                                 </div>
@@ -245,14 +259,19 @@ export class LiteClient extends React.Component<any, any> {
                             <Route exact path="/address/:hash" component={this.addressInfo} />
                             <Route exact path="/transaction/:name" component={this.transaction} /> {/* send tx */}
                             <Route exact path="/transaction/:name/:nonce" component={this.transaction} /> {/* send tx */}
-                            <Route exact path="/maketransaction/:isLedger" component={this.maketransaction} />
-                            <Route exact path="/maketransaction/:isLedger/:selectedLedger" component={this.maketransactionWithIndex} />
+                            <Route exact path="/maketransaction/:walletType" component={this.maketransaction} />
+                            <Route exact path="/maketransactionIndex/:walletType/:selectedAccount" component={this.maketransactionIndex} />
+                            <Route exact path="/maketransactionIndex/:walletType/:selectedAccount/:nonce" component={this.maketransactionIndex} />
+                            <Route exact path="/maketransactionAddress/:walletType/:address/:selectedAccount" component={this.maketransactionIndex} />
+                            <Route exact path="/maketransactionAddress/:walletType/:address/:selectedAccount/:nonce" component={this.maketransactionIndex} />
+                            <Route exact path="/maketransactionHDwallet/:walletType/:name/:address/:selectedAccount" component={this.maketransactionHDWallet} />
+                            <Route exact path="/maketransactionHDwallet/:walletType/:name/:address/:selectedAccount/:nonce" component={this.maketransactionHDWallet} />
                             <Route exact path="/wallet/addWallet" component={this.addWallet} />
                             <Route exact path="/wallet" component={this.wallet} />
                             <Route exact path="/wallet/recoverWallet" component={this.recoverWallet} />
                             <Route exact path="/wallet/detail/:name" component={this.walletDetail} />
-                            <Route exact path="/ledgerView" component={this.ledgerView} />
-                            <Route exact path="/address/:hash/:selectedLedger" component={this.ledgerAddressView} />
+                            <Route exact path="/hardwareWallet/:walletType" component={this.hardwareWalletView} />
+                            <Route exact path="/address/:hash/:walletType/:selectedAccount" component={this.hardwareAddressView} />
                         </Switch>
                     </div>
                 </main>
@@ -269,7 +288,7 @@ export class LiteClient extends React.Component<any, any> {
                         <p>{this.language["enable-totp-tip1"]}<p></p><strong>{this.language["enable-totp-tip2"]}</strong></p>
                         <img src={this.state.totpQr} height="200" width="200" color="#084b8a" /><br /><br />
                         <p>{this.language["enable-totp-tip3"]}</p>
-                        <span style={{ backgroundColor: "#f2d260"}}>{this.state.totpSecret}</span><br /><br />
+                        <span style={{ backgroundColor: "#f2d260" }}>{this.state.totpSecret}</span><br /><br />
                         <TextField floatingLabelText={this.language["totp-google-code"]} autoComplete="off"
                             errorText={this.state.errorText} errorStyle={{ float: "left" }}
                             value={this.state.totpToken}
@@ -295,7 +314,7 @@ export class LiteClient extends React.Component<any, any> {
                     <DialogTitle id="simple-dialog-title" >{this.language["disable-totp"]}</DialogTitle>
                     <div style={{ margin: "2em" }}>
                         <p>{this.language["disable-totp-tip1"]}</p>
-                        <p style={{fontSize: "0.8em", color: "#bc3309"}}>{this.language["disable-totp-tip2"]}<br />{this.language["disable-totp-tip3"]}</p>
+                        <p style={{ fontSize: "0.8em", color: "#bc3309" }}>{this.language["disable-totp-tip2"]}<br />{this.language["disable-totp-tip3"]}</p>
                         <TextField floatingLabelText={this.language["totp-otp-password"]} type="password" autoComplete="off"
                             value={this.state.totpPw1}
                             onChange={(data) => { this.handleTOTPpassword(data) }} /><br /><br />
@@ -314,14 +333,29 @@ export class LiteClient extends React.Component<any, any> {
                         <RadioGroup style={{ width: "70%", margin: "auto" }} aria-label="walletType" name="walletType" value={this.state.walletType} onChange={(data) => { this.handleInputChange(data) }}>
                             <FormControlLabel value="local" control={<Radio />} label={this.language["local-wallet"]} />
                             <FormControlLabel value="ledger" control={<Radio />} label={this.language["Hardware-wallet"]} />
+                            <FormControlLabel value="bitbox" control={<Radio />} label="Digital Bitbox" />
                         </RadioGroup>
                     </div>
-                    {this.state.walletType === "local"
-                        ? (<Link to="/maketransaction/false"><Button onClick={() => { this.setState({ dialogLedger: false }) }}>{this.language["button-next"]}</Button></Link>)
-                        : (<Link to="/maketransaction/true"><Button onClick={() => { this.setState({ dialogLedger: false }) }}>{this.language["button-next"]}</Button></Link>)
-                    }
+                    <Link to={`/maketransaction/${this.state.walletType}`}><Button onClick={() => { this.setState({ dialogLedger: false }) }}>{this.language["button-next"]}</Button></Link>
                 </Dialog>
-            </div>
+
+                {/* SELECT HARDWARE WALLET */}
+                <Dialog open={this.state.hardwareDialog} onClose={() => { this.setState({ hardwareDialog: false }) }}>
+                    <DialogTitle id="simple-dialog-title" style={{ textAlign: "center" }}><Icon style={{ marginRight: "10px", color: "grey" }}>account_balance_wallet</Icon>HARDWARE WALLET</DialogTitle>
+                    <div style={{ textAlign: "center" }}>
+                        <FormLabel component="legend">Select wallet to use.</FormLabel>
+                        <RadioGroup style={{ width: "70%", margin: "auto" }} aria-label="hardwareWalletType" name="hardwareWalletType" value={this.state.hardwareWalletType} onChange={(data) => { this.handleInputChange(data) }}>
+                            <FormControlLabel value="ledger" control={<Radio />} label="Ledger" />
+                            <FormControlLabel value="bitbox" control={<Radio />} label="Digital Bitbox" />
+                        </RadioGroup>
+                    </div><br />
+                    <Grid container direction={"row"} justify={"center"} alignItems={"center"}>
+                        <Link to={`/hardwareWallet/${this.state.hardwareWalletType}`}>
+                            <Button variant="outlined" onClick={() => { this.setState({ hardwareDialog: false }) }} style={{ margin: "0 10px" }}>Select</Button>
+                        </Link>
+                    </Grid><br />
+                </Dialog>
+            </div >
         )
     }
     private closeAddressBook() {
@@ -407,7 +441,7 @@ export class LiteClient extends React.Component<any, any> {
     }
     private generateTOTP() {
         this.setState({ dialogTOTP: true })
-        const s = tfa.generateSecret({name: "HYCON-LiteWallet", account: "TransactionOTP"})
+        const s = tfa.generateSecret({ name: "HYCON-LiteWallet", account: "TransactionOTP" })
         this.setState({ totpSecret: s.secret, totpQr: s.qr })
     }
 }

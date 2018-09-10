@@ -1,11 +1,13 @@
 import * as React from "react"
+import { IText } from "./locales/locales"
 import { NotFound } from "./notFound"
 import { IRest, ITxProp } from "./rest"
 import { TxLine } from "./txLine"
 interface ITxProps {
     rest: IRest
     hash: string
-    tx: ITxProp,
+    tx: ITxProp
+    language: IText
     notFound: boolean
 }
 
