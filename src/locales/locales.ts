@@ -74,6 +74,8 @@ export interface IText {
     "bip39-confirm": string,
     "bip39-not-matched": string,
     "bip39-warning": string,
+    "input-placeholder1": string,
+    "input-placeholder2": string,
 
     "wallet-details": string,
     "hycon-address": string,
@@ -105,6 +107,8 @@ export interface IText {
     "alert-delete-wallet": string,
     "use-hdWallet": string,
     "hdwallet-type-password": string,
+    "create-hdwallet": string,
+    "recover-hdwallet": string,
 
     "email": string,
     "password": string,
