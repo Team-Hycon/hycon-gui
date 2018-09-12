@@ -930,19 +930,16 @@ export class RestElectron implements IRest {
     }
 
     private checkPublicKey(publicKey: Buffer, privateKey: Buffer): boolean {
-        let isEqual = true
         const secpPublicKey = secp256k1.publicKeyCreate(privateKey)
         if (publicKey.length !== secpPublicKey.length) {
-            isEqual = false
-        } else {
-            for (let i = 0; i < publicKey.length; i++) {
-                if (publicKey[i] !== secpPublicKey[i]) {
-                    isEqual = false
-                    break
-                }
+            return false
+        }
+        for (let i = 0; i < publicKey.length; i++) {
+            if (publicKey[i] !== secpPublicKey[i]) {
+                return false
             }
         }
-        return isEqual
+        return true
     }
 
     private async prepareSendTx(fromAddress: string, toAddress: string, amount: string, minerFee: string, txNonce?: number): Promise<{ from: Uint8Array, to: Uint8Array, nonce: number }> {
