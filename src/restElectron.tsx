@@ -105,23 +105,7 @@ export class RestElectron implements IRest {
         let status = 1
         try {
             const wallet = await this.getWallet(tx.name)
-            const from = utils.addressToUint8Array(wallet.address)
-            const to = utils.addressToUint8Array(tx.address)
-            const addressInfo = await this.getAddressInfo(wallet.address)
-
-            if (addressInfo.nonce < 0) {
-                throw new Error("Nonce is not valid.")
-            }
-            status = 2
-            let nonce: number
-            if ( tx.nonce !== undefined) {
-                nonce = Number(tx.nonce)
-            } else if (addressInfo.pendings.length > 0) {
-                nonce = addressInfo.pendings[addressInfo.pendings.length - 1].nonce + 1
-            } else {
-                nonce = addressInfo.nonce + 1
-            }
-
+            const { from, to, nonce } = await this.prepareSendTx(wallet.address, tx.address, tx.amount, tx.minerFee, tx.nonce)
             const iTx: proto.ITx = {
                 from,
                 to,
@@ -186,6 +170,7 @@ export class RestElectron implements IRest {
 
     public async getWalletDetail(name: string): Promise<IHyconWallet | IResponseError> {
         const wallet = await this.getWallet(name)
+        if (!wallet.address || wallet.address === "") { return { name, address: "" } }
         const addressInfo = await this.getAddressInfo(wallet.address)
         const address = wallet.address
         const balance = addressInfo.balance
@@ -241,13 +226,18 @@ export class RestElectron implements IRest {
         if (Hwallet.hint === undefined) { Hwallet.hint = "" }
 
         try {
-            const seed = bip39.mnemonicToSeed(Hwallet.mnemonic, Hwallet.passphrase)
-            const masterKey = HDKey.fromMasterSeed(seed)
-            const wallet = masterKey.derive(`m/44'/${this.coinNumber}'/0'/0/0`)
+            const hdKey = this.hdKeyFromMnemonic(Hwallet.mnemonic, Hwallet.language, Hwallet.passphrase)
+            const wallet = this.deriveWallet(hdKey.privateExtendedKey)
 
             const { iv, encryptedData } = utils.encrypt(Hwallet.password, wallet.privateKey.toString("hex"))
             const address = utils.publicKeyToAddress(wallet.publicKey)
             const addressStr = utils.addressToString(address)
+            if (typeof address === "number") {
+                throw new Error("invalid address created")
+            } else {
+                address.slice(12)
+            }
+
             const store: IStoredWallet = {
                 iv,
                 data: encryptedData,
@@ -476,25 +466,13 @@ export class RestElectron implements IRest {
         }
     }
 
-    public async sendTxWithLedger(index: number, from: string, to: string, amount: string, fee: string, queueTx?: Function): Promise<{ res: boolean, case?: number }> {
-        let status = 1
+    public async sendTxWithLedger(index: number, fromAddress: string, toAddress: string, amount: string, fee: string, txNonce?: number, queueTx?: Function): Promise<{ res: boolean, case?: number }> {
+        const status = 1
         try {
-            const fromAddress = utils.addressToUint8Array(from)
-            const toAddress = utils.addressToUint8Array(to)
-            const addressInfo = await this.getAddressInfo(from)
-            if (addressInfo.nonce < 0) {
-                throw new Error("Nonce is not valid.")
-            }
-            status = 2
-            let nonce: number
-            if (addressInfo.pendings.length > 0) {
-                nonce = addressInfo.pendings[addressInfo.pendings.length - 1].nonce + 1
-            } else {
-                nonce = addressInfo.nonce + 1
-            }
+            const { from, to, nonce } = await this.prepareSendTx(fromAddress, toAddress, amount, fee, txNonce)
             const iTx: proto.ITx = {
-                from: fromAddress,
-                to: toAddress,
+                from,
+                to,
                 amount: utils.hyconfromString(amount),
                 fee: utils.hyconfromString(fee),
                 nonce,
@@ -503,13 +481,12 @@ export class RestElectron implements IRest {
             const rawTxHex = bytesToHex(protoTx)
             const singed = ipcRenderer.sendSync("sign", { rawTxHex, index })
 
-            if (!("signature" in singed)) { throw 2 }
-            status = 3
+            if (!("signature" in singed)) { throw 4 }
 
             const signedTx = {
                 signature: singed.signature,
-                from,
-                to,
+                from: fromAddress,
+                to: toAddress,
                 amount,
                 fee,
                 nonce,
@@ -540,9 +517,8 @@ export class RestElectron implements IRest {
     }
 
     public createNewWallet(Hwallet: IHyconWallet): Promise<IHyconWallet | IResponseError> {
-        const seed: Buffer = bip39.mnemonicToSeed(Hwallet.mnemonic, Hwallet.passphrase)
-        const masterKey = HDKey.fromMasterSeed(seed)
-        const wallet = masterKey.derive(`m/44'/${this.coinNumber}'/0'/0/0`)
+        const hdKey = this.hdKeyFromMnemonic(Hwallet.mnemonic, Hwallet.language, Hwallet.passphrase)
+        const wallet = this.deriveWallet(hdKey.privateExtendedKey, 0)
 
         const address = utils.publicKeyToAddress(wallet.publicKey)
 
@@ -693,6 +669,207 @@ export class RestElectron implements IRest {
         return (this.osArch === "x64") ? Promise.resolve(true) : Promise.resolve(false)
     }
 
+    public async getHDWallet(name: string, password: string, index: number, count: number): Promise<IHyconWallet[] | IResponseError> {
+        try {
+            const electronWallet = await this.getWallet(name)
+            const rootKey = utils.decrypt(password, electronWallet.iv, electronWallet.data).toString()
+            const hyconWallets: IHyconWallet[] = []
+            for (let i = index; i < index + count; i++) {
+                hyconWallets.push(await this.getHDWalletInfo(rootKey, i))
+            }
+            return hyconWallets
+        } catch (e) {
+            return Promise.resolve({
+                status: 404,
+                timestamp: Date.now(),
+                error: "NOT_FOUND",
+                message: "the wallet cannot be found",
+            })
+        }
+    }
+
+    public async sendTxWithHDWallet(tx: { name: string; password: string; address: string; amount: string; minerFee: string; nonce?: number; }, index: number, queueTx?: Function): Promise<{ res: boolean; case?: number; }> {
+        tx.password === undefined ? tx.password = "" : tx.password = tx.password
+        let status = 1
+        try {
+            const wallet = await this.getWallet(tx.name)
+            const rootKey = utils.decrypt(tx.password, wallet.iv, wallet.data).toString()
+            const hdWallet = await this.getHDWalletInfo(rootKey, index)
+            status = 2
+
+            const { from, to, nonce } = await this.prepareSendTx(hdWallet.address, tx.address, tx.amount, tx.minerFee, tx.nonce)
+            const iTx: proto.ITx = {
+                from,
+                to,
+                amount: utils.hyconfromString(tx.amount),
+                fee: utils.hyconfromString(tx.minerFee),
+                nonce,
+            }
+            const protoTx: Uint8Array = proto.Tx.encode(iTx).finish()
+            const txHash: Uint8Array = utils.blake2bHash(protoTx)
+            const privateKey = this.deriveWallet(rootKey, index).privateKey
+            const { signature, recovery } = secp256k1.sign(Buffer.from(txHash.buffer), privateKey)
+            status = 3
+
+            const signedTx = {
+                signature: Buffer.from(signature).toString("hex"),
+                from: utils.addressToString(from),
+                to: tx.address,
+                amount: tx.amount,
+                fee: tx.minerFee,
+                nonce,
+                recovery,
+            }
+
+            const result = await this.outgoingTx(signedTx)
+
+            if (!("txHash" in result) || (typeof result.txHash) !== "string") {
+                return { res: false, case: 3 }
+            }
+            return { res: true }
+        } catch (e) {
+            if (typeof (e) === "number") { return { res: false, case: e } }
+            return { res: false, case: status }
+        }
+    }
+    public generateHDWallet(Hwallet: IHyconWallet): Promise<string> {
+        try {
+            return this.recoverHDWallet(Hwallet)
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+    public async recoverHDWallet(Hwallet: IHyconWallet): Promise<string> {
+        if (Hwallet.name === undefined || Hwallet.mnemonic === undefined || Hwallet.language === undefined) {
+            return Promise.reject("params")
+        }
+        if (await this.checkDupleName(Hwallet.name)) {
+            return Promise.reject("name")
+        }
+        if (Hwallet.password === undefined) { Hwallet.password = "" }
+        if (Hwallet.passphrase === undefined) { Hwallet.passphrase = "" }
+        if (Hwallet.hint === undefined) { Hwallet.hint = "" }
+        try {
+            const hdKey = this.hdKeyFromMnemonic(Hwallet.mnemonic, Hwallet.language, Hwallet.passphrase)
+            const { iv, encryptedData } = utils.encrypt(Hwallet.password, hdKey.privateExtendedKey)
+            const store: IStoredWallet = {
+                name: Hwallet.name,
+                address: "",
+                iv,
+                data: encryptedData,
+                hint: Hwallet.hint,
+            }
+            return new Promise<string>((resolve, reject) => {
+                this.walletsDB.insert(store, (err: Error, doc: IStoredWallet) => {
+                    if (err) {
+                        console.error(err)
+                        reject("db")
+                    } else {
+                        resolve(doc.name)
+                    }
+                })
+            })
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+    public checkPasswordBitbox(): Promise<number | boolean> {
+        try {
+            const resultPasswordCheck = ipcRenderer.sendSync("checkBitboxPasswordSetting")
+            if (resultPasswordCheck.error) { return resultPasswordCheck.error }
+            return Promise.resolve(resultPasswordCheck)
+        } catch (e) {
+            return e
+        }
+    }
+    public checkWalletBitbox(password: string): Promise<number | boolean | { error: number; remain_attemp: string; }> {
+        try {
+            const resultWalletCheck = ipcRenderer.sendSync("checkBitboxWalletSetting", { password })
+            if (resultWalletCheck.error) { return resultWalletCheck.error }
+            return Promise.resolve(resultWalletCheck)
+        } catch (e) {
+            return e
+        }
+    }
+    public async getBitboxWallet(password: string, startIndex: number, count: number): Promise<number | IHyconWallet[]> {
+        try {
+            const extendedKeys = ipcRenderer.sendSync("getBitboxExtendedKey", { password, startIndex, count })
+            if (extendedKeys.error) { return extendedKeys.error }
+            const wallets: IHyconWallet[] = []
+            for (const extendedKey of extendedKeys) {
+                const address = this.getAddressFromExtPubKey(extendedKey)
+                const addressInfo = await this.getAddressInfo(address)
+                wallets.push({
+                    address,
+                    balance: addressInfo ? addressInfo.balance : "0",
+                    pendingAmount: addressInfo ? addressInfo.pendingAmount : "0",
+                })
+            }
+            return wallets
+        } catch (e) {
+            return e
+        }
+    }
+    public async sendTxWithBitbox(tx: { from: string; password: string; address: string; amount: string; minerFee: string; nonce?: number; }, index: number, queueTx?: Function): Promise<{ res: boolean; case?: number | { error: number; remain_attemp: string; }; }> {
+        try {
+            const isSetted = ipcRenderer.sendSync("checkBitboxWalletSetting", { password: tx.password })
+            if (isSetted.error) { return { res: false, case: isSetted.error } }
+            if (!isSetted) { throw 22 }
+            const extendedKey = ipcRenderer.sendSync("getBitboxExtendedKey", { password: tx.password, startIndex: index, count: 1 })
+            if (extendedKey.error) { return { res: false, case: extendedKey.error } }
+
+            const address = this.getAddressFromExtPubKey(extendedKey[0])
+            if (address !== tx.from) { throw 23 }
+
+            const { from, to, nonce } = await this.prepareSendTx(address, tx.address, tx.amount, tx.minerFee, tx.nonce)
+            const iTx: proto.ITx = { from, to, amount: utils.hyconfromString(tx.amount), fee: utils.hyconfromString(tx.minerFee), nonce }
+            const txHash: Uint8Array = utils.blake2bHash(proto.Tx.encode(iTx).finish())
+            const path = `m/44'/1397'/0'/0/${index}`
+            const hash = Buffer.from(txHash.buffer).toString("hex")
+
+            const signResponse = ipcRenderer.sendSync("sendTxWithBitbox", { password: tx.password, path, hash })
+            if (signResponse.error) { return signResponse.error }
+
+            const signedTx = {
+                signature: signResponse.sig,
+                from: address,
+                to: tx.address,
+                amount: tx.amount,
+                fee: tx.minerFee,
+                nonce,
+                recovery: Number(signResponse.recid),
+            }
+
+            const result = await this.outgoingTx(signedTx)
+
+            if (!("txHash" in result) || (typeof result.txHash) !== "string") {
+                return { res: false, case: 3 }
+            }
+            return { res: true }
+        } catch (e) {
+            console.log(`Error : ${e}`)
+            return e
+        }
+    }
+    public setBitboxPassword(password: string): Promise<number | boolean> {
+        try {
+            const resultCreatePasword = ipcRenderer.sendSync("createBitboxPassword", { password })
+            if (resultCreatePasword.error) { return resultCreatePasword.error }
+            return resultCreatePasword
+        } catch (e) {
+            return e
+        }
+    }
+    public createBitboxWallet(name: string, password: string): Promise<number | boolean> {
+        try {
+            const resultCreatewallet = ipcRenderer.sendSync("setBitboxWallet", { name, password })
+            if (resultCreatewallet.error) { return resultCreatewallet.error }
+            return resultCreatewallet
+        } catch (e) {
+            return e
+        }
+    }
+
     private async getWallet(name: string) {
         return new Promise<IStoredWallet>((resolve, reject) => {
             this.walletsDB.findOne({ name }, (err: Error, doc: IStoredWallet) => {
@@ -720,5 +897,109 @@ export class RestElectron implements IRest {
                 exist ? resolve(true) : resolve(false)
             })
         })
+    }
+
+    private hdKeyFromMnemonic(mnemonic: string, language: string, passphrase: string): HDKey { // should private
+        if (!bip39.validateMnemonic(mnemonic, getBip39Wordlist(language))) {
+            throw new Error("mnemonic")
+        }
+
+        const seed: Buffer = bip39.mnemonicToSeed(mnemonic, passphrase)
+        const masterKey = HDKey.fromMasterSeed(seed)
+        if (!masterKey.privateExtendedKey) {
+            throw new Error("Extended PrivateKey does not have privateKey")
+        }
+        return masterKey
+    }
+
+    private deriveWallet(extendPrvKey: string, index: number = 0): { privateKey: Buffer, publicKey: Buffer } { // should private
+        const hdkey = HDKey.fromExtendedKey(extendPrvKey)
+        const wallet = hdkey.derive(`m/44'/${this.coinNumber}'/0'/0/${index}`)
+        if (!wallet.privateKey) {
+            throw new Error("Not much key information to save wallet")
+        }
+
+        if (!secp256k1.privateKeyVerify(wallet.privateKey)) {
+            throw new Error("Fail to privateKeyVerify in generate Key with mnemonic")
+        }
+
+        if (!(this.checkPublicKey(wallet.publicKey, wallet.privateKey))) {
+            throw new Error("publicKey from masterKey generated by hdkey is not equal publicKey generated by secp256k1")
+        }
+        return { privateKey: wallet.privateKey, publicKey: wallet.publicKey }
+    }
+
+    private checkPublicKey(publicKey: Buffer, privateKey: Buffer): boolean {
+        const secpPublicKey = secp256k1.publicKeyCreate(privateKey)
+        if (publicKey.length !== secpPublicKey.length) {
+            return false
+        }
+        for (let i = 0; i < publicKey.length; i++) {
+            if (publicKey[i] !== secpPublicKey[i]) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private async prepareSendTx(fromAddress: string, toAddress: string, amount: string, minerFee: string, txNonce?: number): Promise<{ from: Uint8Array, to: Uint8Array, nonce: number }> {
+        let checkAddr = false
+        try {
+            const from = utils.addressToUint8Array(fromAddress)
+            const address = utils.addressToUint8Array(toAddress)
+            checkAddr = true
+
+            const addressInfo = await this.getAddressInfo(fromAddress)
+            if (addressInfo.nonce < 0) {
+                throw 3
+            }
+
+            let accountBalance = utils.hyconfromString(addressInfo.balance)
+
+            let nonce: number
+            const addressTxs = addressInfo.pendings
+            if (txNonce !== undefined) {
+                nonce = Number(txNonce)
+            } else if (addressTxs.length > 0) {
+                nonce = addressTxs[addressTxs.length - 1].nonce + 1
+            } else {
+                nonce = addressInfo.nonce + 1
+            }
+
+            let totalPendings = utils.hyconfromString("0")
+            for (const tx of addressTxs) {
+                totalPendings = totalPendings.add(tx.amount).add(tx.fee)
+            }
+
+            accountBalance = accountBalance.sub(totalPendings)
+
+            const totalSend = utils.hyconfromString(amount).add(utils.hyconfromString(minerFee))
+
+            if (totalSend.greaterThan(accountBalance)) {
+                throw new Error("insufficient wallet balance to send transaction")
+            }
+            return { from, to: address, nonce }
+        } catch (e) {
+            if (!checkAddr) { throw 2 }
+            throw 3
+        }
+    }
+
+    private async getHDWalletInfo(rootKey: string, index: number) {
+        const wallet = this.deriveWallet(rootKey, index)
+        const address = utils.publicKeyToAddress(wallet.publicKey)
+        const addressString = utils.addressToString(address)
+        const addressInfo = await this.getAddressInfo(addressString)
+        const balance = addressInfo.balance
+        const pendingAmount = addressInfo.pendingAmount
+        const minedBlocks = addressInfo.minedBlocks === undefined ? [] : addressInfo.minedBlocks
+        const txs = addressInfo.txs === undefined ? [] : addressInfo.txs
+        const pendings = addressInfo.pendings === undefined ? [] : addressInfo.pendings // pending txs
+        return { name, address: addressString, balance, minedBlocks, txs, pendingAmount, pendings }
+    }
+
+    private getAddressFromExtPubKey(extendedKey: string) {
+        const wallet = HDKey.fromExtendedKey(extendedKey)
+        return utils.addressToString(utils.publicKeyToAddress(wallet.publicKey))
     }
 }

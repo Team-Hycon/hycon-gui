@@ -2,9 +2,9 @@ import { CardContent, Icon } from "@material-ui/core"
 import { Card } from "material-ui"
 import * as React from "react"
 import { Redirect } from "react-router"
-import { MultipleLedgerView } from "./multipleLedgerView"
-import { IHyconWallet } from "./rest"
-export class LedgerView extends React.Component<any, any> {
+import { IHyconWallet } from "../rest"
+import { MultipleAccountsView } from "./multipleAccountsView"
+export class HardwareWalletView extends React.Component<any, any> {
     public mounted: boolean = false
     constructor(props: any) {
         super(props)
@@ -16,8 +16,9 @@ export class LedgerView extends React.Component<any, any> {
             minedBlocks: [],
             minerIndex: 1,
             rest: props.rest,
-            selectedLedger: "",
+            selectedAccount: "",
             txs: [],
+            walletType: props.walletType,
         }
         this.handleInputChange = this.handleInputChange.bind(this)
     }
@@ -40,23 +41,27 @@ export class LedgerView extends React.Component<any, any> {
         this.setState({ isTransfer: true })
     }
 
-    public selectedLedgerFunction(index: string, account: IHyconWallet) {
-        this.setState({ address: account.address, selectedLedger: index, isAddressView: true })
+    public selectFunction(index: string, account: IHyconWallet) {
+        this.setState({ address: account.address, selectedAccount: index, isAddressView: true })
     }
     public render() {
         if (this.state.redirect) {
             return <Redirect to="/wallet" />
         }
         if (this.state.isAddressView) {
-            return <Redirect to={`/address/${this.state.address}/${this.state.selectedLedger}`} />
+            return <Redirect to={`/address/${this.state.address}/${this.state.walletType}/${this.state.selectedAccount}`} />
         }
         return (
             <div>
                 <div style={{ width: "80%", margin: "auto" }}>
                     <Card>
-                        <h3 style={{ color: "grey", textAlign: "center" }}><Icon style={{ marginRight: "10px", color: "grey" }}>account_balance_wallet</Icon>{this.props.language["wallet-select"]}</h3><br />
+                        <h3 style={{ color: "grey", textAlign: "center" }}><Icon style={{ marginRight: "10px", color: "grey" }}>account_balance_wallet</Icon>Select wallet to view</h3><br />
                         <CardContent style={{ display: `${this.state.txStep ? ("none") : ("block")}` }}>
-                            <MultipleLedgerView isLedgerPossibility={true} selectFunction={(index: string, account: IHyconWallet) => { this.selectedLedgerFunction(index, account) }} rest={this.state.rest} selectedLedger={this.state.selectedLedger} language={this.props.language} />
+                            {this.state.walletType === "ledger" ? (
+                                <MultipleAccountsView selectFunction={(index: string, account: IHyconWallet) => { this.selectFunction(index, account) }} rest={this.state.rest} selectedAccount={this.state.selectedAccount} walletType="ledger" />
+                            ) : (
+                                    <MultipleAccountsView selectFunction={(index: string, account: IHyconWallet) => { this.selectFunction(index, account) }} rest={this.state.rest} selectedAccount={this.state.selectedAccount} walletType="bitbox" />
+                                )}
                         </CardContent>
                     </Card >
                 </div >

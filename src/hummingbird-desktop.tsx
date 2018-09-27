@@ -8,10 +8,10 @@ import { RestElectron } from "./restElectron"
 
 import "material-design-lite"
 import "material-design-lite/material.css"
-import "./blockexplorer.css"
-import "./marker.css"
-import "./material.css"
-import "./transaction.css"
+import "./desktop/blockexplorer.css"
+import "./desktop/marker.css"
+import "./desktop/material.css"
+import "./desktop/transaction.css"
 
 const rest = new RestElectron()
 

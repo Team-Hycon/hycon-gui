@@ -1,3 +1,4 @@
+import * as utils from "@glosfer/hyconjs-util"
 import { CircularProgress, Dialog, DialogTitle } from "@material-ui/core"
 import Button from "@material-ui/core/Button"
 import CardContent from "@material-ui/core/CardContent"
@@ -6,9 +7,9 @@ import Icon from "@material-ui/core/Icon"
 import { Card, TextField } from "material-ui"
 import * as React from "react"
 import { Redirect } from "react-router"
+import { IHyconWallet } from "../rest"
 import { AddressBook } from "./addressBook"
-import { IHyconWallet } from "./rest"
-import { hyconfromString } from "./stringUtil"
+import { ProgressBar } from "./progressBar"
 
 export class Transaction extends React.Component<any, any> {
     public mounted = false
@@ -24,7 +25,7 @@ export class Transaction extends React.Component<any, any> {
             errorText: "",
             favorites: [],
             fromAddress: "",
-            isLoading: false,
+            isLoading: true,
             minerFee: 1,
             name: props.name,
             nonce: props.nonce,
@@ -46,19 +47,27 @@ export class Transaction extends React.Component<any, any> {
     }
     public componentDidMount() {
         this.mounted = true
+        this.state.rest.loadingListener((isLoading: boolean) => {
+            this.setState({ isLoading })
+        })
         this.state.rest.setLoading(true)
-        this.state.rest.getWalletDetail(this.state.name)
-            .then((data: IHyconWallet) => {
-                this.state.rest.setLoading(false)
-                if (this.mounted) {
-                    this.setState({ wallet: data, piggyBank: data.balance, fromAddress: data.address, pendingAmount: data.pendingAmount })
-                }
-            })
-        this.state.rest.getFavoriteList()
-            .then((data: Array<{ alias: string, address: string }>) => {
-                this.state.rest.setLoading(false)
-                if (this.mounted) { this.setState({ favorites: data }) }
-            })
+        Promise.all(
+            [
+                this.state.rest.getWalletDetail(this.state.name)
+                    .then((data: IHyconWallet) => {
+                        if (this.mounted) {
+                            this.setState({ wallet: data, piggyBank: data.balance, fromAddress: data.address, pendingAmount: data.pendingAmount })
+                        }
+                    }),
+                this.state.rest.getFavoriteList()
+                    .then((data: Array<{ alias: string, address: string }>) => {
+                        if (this.mounted) { this.setState({ favorites: data }) }
+                    }),
+            ],
+        ).then(() => {
+            this.state.rest.setLoading(false)
+        })
+
         this.state.rest.getTOTP().then((result: boolean) => {
             if (result) {
                 this.setState({ totp: true })
@@ -88,11 +97,11 @@ export class Transaction extends React.Component<any, any> {
             alert(`${this.props.language["alert-decimal-overflow"]}`)
             return
         }
-        if (this.state.nonce === undefined && hyconfromString(this.state.amount).add(hyconfromString(this.state.minerFee)).greaterThan(hyconfromString(this.state.piggyBank).sub(hyconfromString(this.state.pendingAmount)))) {
+        if (this.state.nonce === undefined && utils.hyconfromString(this.state.amount).add(utils.hyconfromString(this.state.minerFee)).greaterThan(utils.hyconfromString(this.state.piggyBank).sub(utils.hyconfromString(this.state.pendingAmount)))) {
             alert(`${this.props.language["alert-insufficient-funds"]}`)
             return
         }
-        if (hyconfromString(this.state.minerFee).compare(hyconfromString("0")) === 0) {
+        if (utils.hyconfromString(this.state.minerFee).compare(utils.hyconfromString("0")) === 0) {
             alert(`${this.props.language["alert-miner-fee"]}`)
             return
         }
@@ -117,18 +126,20 @@ export class Transaction extends React.Component<any, any> {
 
         this.state.rest.sendTx({ name: this.state.name, password: this.state.password, address: this.state.address, amount: this.state.amount.toString(), minerFee: this.state.minerFee.toString(), nonce: this.state.nonce })
             .then((result: { res: boolean, case?: number }) => {
+                this.setState({ isLoading: false })
                 if (result.res === true) {
                     alert(`${this.props.language["alert-send-success"]}\n- ${this.props.language["send-amount"]}: ${this.state.amount}\n- ${this.props.language.fees}: ${this.state.minerFee}\n- ${this.props.language["to-address"]}: ${this.state.address}`)
                     this.setState({ redirect: true })
-                } else if (result.case === 1) {
-                    alert(`${this.props.language["alert-invalid-address-to"]}`)
-                    this.setState({ isLoading: false })
-                } else if (result.case === 2) {
+                    return
+                }
+                if (result.case === 1) {
+                    this.setState({ password: "" })
                     alert(`${this.props.language["alert-invalid-password"]}`)
-                    this.setState({ isLoading: false, password: "" })
+                } else if (result.case === 2) {
+                    alert(`${this.props.language["alert-invalid-address-to"]}`)
                 } else if (result.case === 3) {
                     alert(`${this.props.language["alert-send-failed"]}`)
-                    this.setState({ redirect: true, isLoading: false })
+                    this.setState({ redirect: true })
                 }
             })
 
@@ -140,12 +151,15 @@ export class Transaction extends React.Component<any, any> {
     }
 
     public render() {
+        if (this.state.isLoading) {
+            return <ProgressBar type={ProgressBar.PAGE} />
+        }
         if (this.state.redirect) {
             return <Redirect to={`/wallet/detail/${this.state.name}`} />
         }
         if (this.state.wallet === undefined && !this.state.selectFrom) { return null }
         return (
-            <div style={{ width: "60%", margin: "auto" }}>
+            <div style={{ width: "50%", margin: "auto" }}>
                 <Card>
                     <CardContent>
                         <div style={{ textAlign: "center" }}>
@@ -155,16 +169,32 @@ export class Transaction extends React.Component<any, any> {
                                     <Icon>bookmark</Icon><span style={{ marginLeft: "5px" }}>{this.props.language["address-book"]}</span>
                                 </Button>
                             </Grid>
-                            <TextField style={{ width: "330px" }} floatingLabelFixed={true} floatingLabelText={this.props.language["from-address"]} type="text" disabled={true} value={this.state.fromAddress} />
-                            <TextField name="address" floatingLabelFixed={true} style={{ marginLeft: "30px", width: "330px" }} floatingLabelText={this.props.language["to-address"]} type="text" value={this.state.address} onChange={this.handleInputChange} />
+                            <Grid container direction={"row"} justify={"flex-end"} alignItems={"flex-end"} spacing={24}>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <TextField fullWidth floatingLabelFixed={true} floatingLabelText={this.props.language["from-address"]} type="text" disabled={true} value={this.state.fromAddress} />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <TextField fullWidth name="address" floatingLabelFixed={true} floatingLabelText={this.props.language["to-address"]} type="text" value={this.state.address} onChange={this.handleInputChange} />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <TextField fullWidth floatingLabelFixed={true} floatingLabelText={this.props.language["total-amount"]} type="text" disabled={true} value={this.state.piggyBank} />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <TextField fullWidth name="amount" floatingLabelFixed={true} floatingLabelText={this.props.language.amount} type="text" value={this.state.amount} max={this.state.piggyBank} onChange={this.handleInputChange} />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <TextField fullWidth floatingLabelText={this.props.language["wallet-pending"]} floatingLabelFixed={true} type="text" disabled={true} value={this.state.pendingAmount} />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <TextField fullWidth name="minerFee" floatingLabelFixed={true} floatingLabelText={this.props.language.fees} type="text" value={this.state.minerFee} onChange={this.handleInputChange} />
+                                </Grid>
+                                <Grid item xs zeroMinWidth />
+                                <Grid item xs={8}>
+                                    <TextField fullWidth name="password" value={this.state.password} floatingLabelFixed={true} floatingLabelText={this.props.language.password} type="password" autoComplete="off" onChange={(data) => { this.handlePassword(data) }} />
+                                </Grid>
+                                <Grid item xs zeroMinWidth />
+                            </Grid>
                             <br />
-                            <TextField style={{ width: "330px" }} floatingLabelFixed={true} floatingLabelText={this.props.language["total-amount"]} type="text" disabled={true} value={this.state.piggyBank} />
-                            <TextField style={{ marginLeft: "30px", width: "330px" }} name="amount" floatingLabelFixed={true} floatingLabelText={this.props.language.amount} type="text" value={this.state.amount} max={this.state.piggyBank} onChange={this.handleInputChange} />
-                            <br />
-                            <TextField floatingLabelText={this.props.language["wallet-pending"]} floatingLabelFixed={true} style={{ width: "330px" }} type="text" disabled={true} value={this.state.pendingAmount} />
-                            <TextField name="minerFee" floatingLabelFixed={true} style={{ marginLeft: "30px", width: "330px" }} floatingLabelText={this.props.language.fees} type="text" value={this.state.minerFee} onChange={this.handleInputChange} />
-                            <br />
-                            <TextField name="password" value={this.state.password} floatingLabelFixed={true} style={{ marginRight: "20px", width: "330px" }} floatingLabelText={this.props.language.password} type="password" autoComplete="off" onChange={(data) => { this.handlePassword(data) }} />
                             <br /><br />
                             <Grid container direction={"row"} justify={"center"} alignItems={"center"}>
                                 <Button variant="raised" onClick={this.handleCancel} style={{ backgroundColor: "rgb(225, 0, 80)", color: "white", float: "right" }}>{this.props.language["button-cancel"]}</Button>
@@ -217,7 +247,7 @@ export class Transaction extends React.Component<any, any> {
     }
     private handleTOTP(data: any) {
         const patternSixDigits = /^[0-9]{6}$/
-        this.setState({ totpToken: data.target.value })
+        this.setState({ totpToken:   data.target.value })
         if (!patternSixDigits.test(data.target.value)) {
             this.setState({ errorText: this.props.language["alert-six-digit"] })
         } else {

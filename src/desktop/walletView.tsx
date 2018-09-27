@@ -20,11 +20,7 @@ export class WalletView extends React.Component<any, any> {
     public handleInputChange(event: any) {
         const name = event.target.name
         const value = event.target.value
-        if (name === "walletName") {
-            this.setState({ walletName: value })
-        } else if (name === "walletPass") {
-            this.setState({ walletPass: value })
-        }
+        this.setState({ [name]: value })
     }
 
     public addWalletPrivateKey() {
@@ -76,7 +72,7 @@ export class WalletView extends React.Component<any, any> {
                             <ListItem style={{ width: "23em" }}
                                 leftAvatar={<Avatar icon={<i className="material-icons walletIcon_white">note_add</i>} />}
                                 primaryText={this.props.language["load-key-from-file"]}
-                                secondaryText={<input type="file" style={{ height: "20px" }} onChange={(e) => this.onDrop(e.target.files)} />}
+                                secondaryText={<input type="file" style={{ height: "20px" }} onChange={(e) => {this.onDrop(e) }} />}
                             />
                         </List>
                     </Grid>
@@ -103,11 +99,12 @@ export class WalletView extends React.Component<any, any> {
         )
     }
 
-    private onDrop(files: any) {
+    private onDrop(event: any) {
         const reader = new FileReader()
         reader.onload = () => {
             this.setState({ dialog: true, privateKey: reader.result })
         }
-        reader.readAsText(files[0])
+        reader.readAsText(event.target.files[0])
+        event.target.value = ""
     }
 }

@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Link } from "react-router-dom"
-import { IMinedInfo } from "./rest"
+import { IMinedInfo } from "../rest"
 
 interface IMinedBlockLineProps {
     minedInfo: IMinedInfo

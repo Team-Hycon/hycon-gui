@@ -1,15 +1,11 @@
+import * as utils from "@glosfer/hyconjs-util"
 import Long = require("long")
 import * as React from "react"
 import update = require("react-addons-update")
 import * as ReactPaginate from "react-paginate"
+import { IBlock } from "../rest"
 import { BlockLine } from "./blockLine"
-import { IBlock, IRest } from "./rest"
-import { hyconfromString, hycontoString } from "./stringUtil"
 
-interface IBlockListView {
-    rest: IRest
-    blocks: IBlock[]
-}
 export class BlockList extends React.Component<any, any> {
     public intervalId: any // NodeJS.Timer
     public mounted: boolean = false
@@ -34,9 +30,9 @@ export class BlockList extends React.Component<any, any> {
             for (const block of result.blocks) {
                 let sum = Long.fromInt(0)
                 for (const tx of block.txs) {
-                    sum = sum.add(hyconfromString(tx.amount))
+                    sum = sum.add(utils.hyconfromString(tx.amount))
                 }
-                block.txSummary = hycontoString(sum)
+                block.txSummary = utils.hycontoString(sum)
             }
             this.setState({
                 blocks: update(

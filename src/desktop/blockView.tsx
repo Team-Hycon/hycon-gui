@@ -1,8 +1,8 @@
 import * as React from "react"
 import update = require("react-addons-update")
 import { Link } from "react-router-dom"
+import { IBlock, IResponseError, IRest, ITxProp } from "../rest"
 import { NotFound } from "./notFound"
-import { IBlock, IResponseError, IRest, ITxProp } from "./rest"
 import { TxLine } from "./txLine"
 interface IBlockProps {
     rest: IRest

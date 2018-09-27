@@ -3,46 +3,55 @@ import * as QRCode from "qrcode.react"
 import * as React from "react"
 import update = require("react-addons-update")
 import { Redirect } from "react-router"
-import { IText } from "./locales/locales"
+import { IText } from "../locales/locales"
+import { IMinedInfo, IRest, ITxProp, IWalletAddress } from "../rest"
 import { MinedBlockLine } from "./minedBlockLine"
-import { IMinedInfo, IRest, ITxProp, IWalletAddress } from "./rest"
 import { TxLine } from "./txLine"
 interface IAddressProps {
     rest: IRest
     hash: string
     language: IText
-    selectedLedger?: number
+    selectedAccount?: string
+    walletType?: string
 }
 interface IAddressView {
     rest: IRest
     redirectTxView: boolean
     hash: string
-    txs: ITxProp[]
-    pendings: ITxProp[]
-    hasMore: boolean
-    hasMoreMinedInfo: boolean
-    index: number
-    minedBlocks: IMinedInfo[]
-    minerIndex: number
+    txs: ITxProp[],
+    pendings: ITxProp[],
+    hasMore: boolean,
+    hasMoreMinedInfo: boolean,
+    index: number,
+    minedBlocks: IMinedInfo[],
+    minerIndex: number,
+    name: string,
     address?: IWalletAddress
-    ledgerIndex?: number
+    accountIndex?: string
+    walletType?: string
 }
 export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
+    public mounted: boolean = false
     constructor(props: IAddressProps) {
         super(props)
         this.state = {
+            accountIndex: props.selectedAccount,
             hasMore: true,
             hasMoreMinedInfo: true,
             hash: props.hash,
             index: 1,
-            ledgerIndex: props.selectedLedger,
             minedBlocks: [],
             minerIndex: 1,
+            name: "",
             pendings: [],
             redirectTxView: false,
             rest: props.rest,
             txs: [],
+            walletType: props.walletType,
         }
+    }
+    public componentWillUnmount() {
+        this.mounted = false
     }
 
     public componentWillReceiveProps(newProps: IAddressProps) {
@@ -58,15 +67,17 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
             this.state.rest.setLoading(false)
         })
     }
-    public componentWillMount() {
+    public componentDidMount() {
+        this.mounted = true
         this.state.rest.setLoading(true)
         this.state.rest.getAddressInfo(this.state.hash).then((data: IWalletAddress) => {
-            this.setState({
-                address: data,
-                minedBlocks: data.minedBlocks,
-                pendings: data.pendings,
-                txs: data.txs,
-            })
+            if (this.mounted) {
+                this.setState({ address: data, minedBlocks: data.minedBlocks, pendings: data.pendings, txs: data.txs })
+                switch (this.state.walletType) {
+                    case "ledger": this.setState({ name: this.props.language["ledger-wallet"] }); break
+                    case "bitbox": this.setState({ name: this.props.language["bitbox-wallet"] }); break
+                }
+            }
             this.state.rest.setLoading(false)
         })
     }
@@ -78,15 +89,15 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
             return null
         }
         if (this.state.redirectTxView) {
-            return <Redirect to={`/maketransaction/true/${this.state.ledgerIndex}`} />
+            return <Redirect to={`/maketransactionAddress/${this.state.walletType}/${this.state.hash}/${this.state.accountIndex}`} />
         }
         let count = 0
         let minedIndex = 0
         return (
             <div>
-                <button onClick={() => { this.makeTransaction() }} className="mdl-button" style={{ display: `${this.state.ledgerIndex === undefined ? ("none") : ("block")}`, float: "right" }}>
+                <button onClick={() => { this.makeTransaction() }} className="mdl-button" style={{ display: `${this.state.accountIndex === undefined ? ("none") : ("block")}`, float: "right" }}>
                     <i className="material-icons">send</i>{this.props.language["button-transfer"]}</button>
-                {(this.state.ledgerIndex === undefined) ? (<div className="contentTitle">{this.props.language["hycon-address"]}</div>) : (<div className="contentTitle">{this.props.language["ledger-wallet"]}</div>)}
+                {(this.state.accountIndex === undefined) ? (<div className="contentTitle">{this.props.language["hycon-address"]}</div>) : (<div className="contentTitle">{this.state.name}</div>)}
                 <div className="sumTablesDiv">
                     <table className="tablesInRow twoTablesInRow">
                         <thead>
@@ -114,7 +125,7 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
                         {this.state.pendings.map((tx: ITxProp) => {
                             return (
                                 <div key={count++}>
-                                    <TxLine tx={tx} rest={this.state.rest} address={this.state.address} />
+                                    <TxLine tx={tx} rest={this.state.rest} index={this.state.accountIndex} address={this.state.hash} walletType={this.state.walletType} language={this.props.language}/>
                                     <div>
                                         {tx.from === this.state.hash
                                             ? (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent txAmtBtn">-{tx.amount} HYCON</button>)
@@ -126,7 +137,7 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
                         {this.state.txs.map((tx: ITxProp) => {
                             return (
                                 <div key={count++}>
-                                    <TxLine tx={tx} rest={this.state.rest} address={this.state.address} />
+                                    <TxLine tx={tx} rest={this.state.rest} address={this.state.hash} language={this.props.language} />
                                     <div>
                                         {tx.from === this.state.hash
                                             ? (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent txAmtBtn">-{tx.amount} HYCON</button>)

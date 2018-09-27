@@ -4,7 +4,7 @@ import { CircularProgress } from "material-ui"
 import * as React from "react"
 import update = require("react-addons-update")
 import { Redirect } from "react-router"
-import { IHyconWallet } from "./rest"
+import { IHyconWallet } from "../rest"
 
 export class MultipleLedgerView extends React.Component<any, any> {
     public mounted = false
@@ -18,6 +18,7 @@ export class MultipleLedgerView extends React.Component<any, any> {
             isLoad: false,
             ledgerAccounts: [],
             ledgerStartIndex: 0,
+            moreLoading: false,
             redirect: false,
             rest: props.rest,
             selectFunction: props.selectFunction,
@@ -90,10 +91,11 @@ export class MultipleLedgerView extends React.Component<any, any> {
                         </tbody>
                     </table>
                 </div>
-                <Grid container direction={"row"} justify={"flex-end"} alignItems={"flex-end"}>
-                    <Button variant="outlined" onClick={this.getLedgerAccounts}>{this.props.language["load-more"]}</Button>
+                <Grid container direction={"row"} justify={"flex-end"} alignItems={"flex-end"} style={{ marginTop: "1%" }}>
+                    <Button variant="outlined" style={{ display: `${this.state.moreLoading ? ("none") : ("block")}`, width: "100%" }} onClick={this.getLedgerAccounts}>{this.props.language["load-more"]}</Button>
+                    <Button variant="outlined" style={{ display: `${this.state.moreLoading ? ("block") : ("none")}`, width: "100%" }} onClick={this.getLedgerAccounts} disabled ><CircularProgress size={15} /> {this.props.language["load-more"]}</Button>
                 </Grid>
-                <Grid container direction={"row"} justify={"center"} alignItems={"center"}>
+                <Grid container direction={"row"} justify={"center"} alignItems={"center"} style={{ marginTop: "1%" }}>
                     <Button onClick={this.handleCancel}>{this.props.language["button-cancel"]}</Button>
                     <Button onClick={() => { this.selectFunction() }}>{this.props.language["button-next"]}</Button>
                 </Grid>
@@ -102,6 +104,7 @@ export class MultipleLedgerView extends React.Component<any, any> {
     }
 
     private getLedgerAccounts() {
+        this.setState({ moreLoading: true })
         this.state.rest.getLedgerWallet(this.state.ledgerStartIndex, 10).then((result: IHyconWallet[] | number) => {
             if (this.mounted) {
                 if (typeof (result) !== "number") {
@@ -113,6 +116,7 @@ export class MultipleLedgerView extends React.Component<any, any> {
                     window.location.reload()
                 }
             }
+            this.setState({ moreLoading: false })
             this.state.rest.setLoading(false)
         })
     }
