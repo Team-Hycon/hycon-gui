@@ -1,6 +1,8 @@
 import * as React from "react"
 import { Link } from "react-router-dom"
-import { IMinedInfo } from "../rest"
+import { IBlock, IMinedInfo, IRest } from "../rest"
+import { BlockLine } from "./blockLine"
+import { hyconfromString, hycontoString } from "./stringUtil"
 
 interface IMinedBlockLineProps {
     minedInfo: IMinedInfo

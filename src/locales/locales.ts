@@ -31,6 +31,7 @@ export interface IText {
     "button-forget": string,
     "button-close": string,
     "button-submit": string,
+    "button-download": string,
 
     "wallet-list": string,
     "load-key-from-file": string,
@@ -175,4 +176,6 @@ export interface IText {
     "alert-disable-totp-fail": string,
     "transaction-totp": string,
     "alert-invalid-code-password": string,
+
+    "currency": string,
 }

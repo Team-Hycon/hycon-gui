@@ -1,4 +1,3 @@
-import * as utils from "@glosfer/hyconjs-util"
 import { CircularProgress, Dialog, DialogTitle, FormControl, Input, InputLabel, Select } from "@material-ui/core"
 import Button from "@material-ui/core/Button"
 import CardContent from "@material-ui/core/CardContent"
@@ -12,6 +11,7 @@ import { IText } from "../locales/locales"
 import { IHyconWallet, IRest, IWalletAddress } from "../rest"
 import { AddressBook } from "./addressBook"
 import { MultipleAccountsView } from "./multipleAccountsView"
+import { hyconfromString } from "./stringUtil"
 interface IMakeTransactionProps {
     rest: IRest
     language: IText
@@ -27,7 +27,6 @@ export class MakeTransaction extends React.Component<IMakeTransactionProps, any>
 
     constructor(props: IMakeTransactionProps) {
         super(props)
-
         this.state = {
             address: "",
             amount: 0,
@@ -160,11 +159,11 @@ export class MakeTransaction extends React.Component<IMakeTransactionProps, any>
             alert(`${this.props.language["alert-decimal-overflow"]}`)
             return
         }
-        if (this.state.nonce === undefined && utils.hyconfromString(this.state.amount).add(utils.hyconfromString(this.state.minerFee)).greaterThan(utils.hyconfromString(this.state.piggyBank).sub(utils.hyconfromString(this.state.pendingAmount)))) {
+        if (this.state.nonce === undefined && hyconfromString(this.state.amount).add(hyconfromString(this.state.minerFee)).greaterThan(hyconfromString(this.state.piggyBank).sub(hyconfromString(this.state.pendingAmount)))) {
             alert(`${this.props.language["alert-insufficient-funds"]}`)
             return
         }
-        if (utils.hyconfromString(this.state.minerFee).compare(utils.hyconfromString("0")) === 0) {
+        if (hyconfromString(this.state.minerFee).compare(hyconfromString("0")) === 0) {
             alert(`${this.props.language["alert-miner-fee"]}`)
             return
         }
@@ -254,8 +253,10 @@ export class MakeTransaction extends React.Component<IMakeTransactionProps, any>
     public render() {
         let walletIndex = 0
         if (this.state.redirect) {
-            if (this.state.walletType === "local" || this.state.walletType === "hdwallet") {
+            if (this.state.walletType === "local") {
                 return <Redirect to={`/wallet/detail/${this.state.name}`} />
+            } else if (this.state.walletType === "hdwallet") {
+                return <Redirect to={`/address/${this.state.fromAddress}/hdwallet/${this.state.name}/${this.state.selectedAccount}`} />
             } else {
                 return <Redirect to={`/address/${this.state.fromAddress}/${this.state.walletType}/${this.state.selectedAccount}`} />
             }
@@ -264,7 +265,7 @@ export class MakeTransaction extends React.Component<IMakeTransactionProps, any>
             return <Redirect to={`/wallet`} />
         }
         return (
-            <div style={{ width: "80%", margin: "auto" }}>
+            <div style={{ width: "50%", margin: "auto" }}>
                 <Card>
                     <h3 style={{ color: "grey", textAlign: "center" }}><Icon style={{ transform: "rotate(-25deg)", marginRight: "10px", color: "grey" }}>send</Icon>{this.props.language["send-transaction"]}</h3><br />
                     {this.state.txStep ?

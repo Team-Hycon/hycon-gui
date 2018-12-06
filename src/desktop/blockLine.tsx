@@ -1,6 +1,16 @@
 import * as React from "react"
 import { Link } from "react-router-dom"
-
+import { IBlock, IRest } from "../rest"
+interface IBlockLineView {
+    block: IBlock
+    age?: IAge
+}
+interface IAge {
+    diffDate: number
+    diffHour: number
+    diffMin: number
+    diffSec: number
+}
 export class BlockLine extends React.Component<any, any> {
     public intervalId: any // NodeJS.Timer
     constructor(props: any) {

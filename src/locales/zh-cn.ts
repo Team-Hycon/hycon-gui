@@ -9,6 +9,7 @@ export default {
     "button-forget": "忘记",
     "button-close": "关闭",
     "button-submit": "提交",
+    "button-download": "DOWNLOAD",
 
     "wallet-list": "钱包列表",
     "load-key-from-file": "从文件载入密匙",
@@ -153,4 +154,6 @@ export default {
     "alert-disable-totp-fail": "关闭交易OTP失败",
     "transaction-totp": "请输入Google Authenticator应用的6位码",
     "alert-invalid-code-password": "请查看Google Authenticator代码 / OTP密码",
+
+    "currency": "CNY",
 }

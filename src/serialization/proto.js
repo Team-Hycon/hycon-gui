@@ -230,6 +230,9 @@ $root.Tx = (function() {
      * @property {number|null} [nonce] Tx nonce
      * @property {Uint8Array|null} [signature] Tx signature
      * @property {number|null} [recovery] Tx recovery
+     * @property {Uint8Array|null} [transitionSignature] Tx transitionSignature
+     * @property {number|null} [transitionRecovery] Tx transitionRecovery
+     * @property {string|null} [networkid] Tx networkid
      */
 
     /**
@@ -304,6 +307,30 @@ $root.Tx = (function() {
     Tx.prototype.recovery = 0;
 
     /**
+     * Tx transitionSignature.
+     * @member {Uint8Array} transitionSignature
+     * @memberof Tx
+     * @instance
+     */
+    Tx.prototype.transitionSignature = $util.newBuffer([]);
+
+    /**
+     * Tx transitionRecovery.
+     * @member {number} transitionRecovery
+     * @memberof Tx
+     * @instance
+     */
+    Tx.prototype.transitionRecovery = 0;
+
+    /**
+     * Tx networkid.
+     * @member {string} networkid
+     * @memberof Tx
+     * @instance
+     */
+    Tx.prototype.networkid = "";
+
+    /**
      * Creates a new Tx instance using the specified properties.
      * @function create
      * @memberof Tx
@@ -341,6 +368,12 @@ $root.Tx = (function() {
             writer.uint32(/* id 6, wireType 2 =*/50).bytes(message.signature);
         if (message.recovery != null && message.hasOwnProperty("recovery"))
             writer.uint32(/* id 7, wireType 0 =*/56).uint32(message.recovery);
+        if (message.transitionSignature != null && message.hasOwnProperty("transitionSignature"))
+            writer.uint32(/* id 8, wireType 2 =*/66).bytes(message.transitionSignature);
+        if (message.transitionRecovery != null && message.hasOwnProperty("transitionRecovery"))
+            writer.uint32(/* id 9, wireType 0 =*/72).uint32(message.transitionRecovery);
+        if (message.networkid != null && message.hasOwnProperty("networkid"))
+            writer.uint32(/* id 10, wireType 2 =*/82).string(message.networkid);
         return writer;
     };
 
@@ -395,6 +428,15 @@ $root.Tx = (function() {
                 break;
             case 7:
                 message.recovery = reader.uint32();
+                break;
+            case 8:
+                message.transitionSignature = reader.bytes();
+                break;
+            case 9:
+                message.transitionRecovery = reader.uint32();
+                break;
+            case 10:
+                message.networkid = reader.string();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -452,6 +494,15 @@ $root.Tx = (function() {
         if (message.recovery != null && message.hasOwnProperty("recovery"))
             if (!$util.isInteger(message.recovery))
                 return "recovery: integer expected";
+        if (message.transitionSignature != null && message.hasOwnProperty("transitionSignature"))
+            if (!(message.transitionSignature && typeof message.transitionSignature.length === "number" || $util.isString(message.transitionSignature)))
+                return "transitionSignature: buffer expected";
+        if (message.transitionRecovery != null && message.hasOwnProperty("transitionRecovery"))
+            if (!$util.isInteger(message.transitionRecovery))
+                return "transitionRecovery: integer expected";
+        if (message.networkid != null && message.hasOwnProperty("networkid"))
+            if (!$util.isString(message.networkid))
+                return "networkid: string expected";
         return null;
     };
 
@@ -504,6 +555,15 @@ $root.Tx = (function() {
                 message.signature = object.signature;
         if (object.recovery != null)
             message.recovery = object.recovery >>> 0;
+        if (object.transitionSignature != null)
+            if (typeof object.transitionSignature === "string")
+                $util.base64.decode(object.transitionSignature, message.transitionSignature = $util.newBuffer($util.base64.length(object.transitionSignature)), 0);
+            else if (object.transitionSignature.length)
+                message.transitionSignature = object.transitionSignature;
+        if (object.transitionRecovery != null)
+            message.transitionRecovery = object.transitionRecovery >>> 0;
+        if (object.networkid != null)
+            message.networkid = String(object.networkid);
         return message;
     };
 
@@ -536,6 +596,9 @@ $root.Tx = (function() {
             object.nonce = 0;
             object.signature = options.bytes === String ? "" : [];
             object.recovery = 0;
+            object.transitionSignature = options.bytes === String ? "" : [];
+            object.transitionRecovery = 0;
+            object.networkid = "";
         }
         if (message.from != null && message.hasOwnProperty("from"))
             object.from = options.bytes === String ? $util.base64.encode(message.from, 0, message.from.length) : options.bytes === Array ? Array.prototype.slice.call(message.from) : message.from;
@@ -557,6 +620,12 @@ $root.Tx = (function() {
             object.signature = options.bytes === String ? $util.base64.encode(message.signature, 0, message.signature.length) : options.bytes === Array ? Array.prototype.slice.call(message.signature) : message.signature;
         if (message.recovery != null && message.hasOwnProperty("recovery"))
             object.recovery = message.recovery;
+        if (message.transitionSignature != null && message.hasOwnProperty("transitionSignature"))
+            object.transitionSignature = options.bytes === String ? $util.base64.encode(message.transitionSignature, 0, message.transitionSignature.length) : options.bytes === Array ? Array.prototype.slice.call(message.transitionSignature) : message.transitionSignature;
+        if (message.transitionRecovery != null && message.hasOwnProperty("transitionRecovery"))
+            object.transitionRecovery = message.transitionRecovery;
+        if (message.networkid != null && message.hasOwnProperty("networkid"))
+            object.networkid = message.networkid;
         return object;
     };
 

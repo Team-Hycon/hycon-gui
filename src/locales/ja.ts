@@ -9,6 +9,7 @@ export default {
     "button-forget": "削除",
     "button-close": "クローズ",
     "button-submit": "提出",
+    "button-download": "DOWNLOAD",
 
     "wallet-list": "ウォレットリスト",
     "load-key-from-file": "キーファイル読み込み",
@@ -153,4 +154,6 @@ export default {
     "alert-disable-totp-fail": "Fail to disable Transaction OTP",
     "transaction-totp": "Enter the 6 digit code of the Google Authenticator App",
     "alert-invalid-code-password": "Please check the Google Authenticator code / OTP Password",
+
+    "currency": "JPY",
 }

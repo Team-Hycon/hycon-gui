@@ -1,0 +1,238 @@
+import * as React from "react"
+import { Redirect, RouteComponentProps } from "react-router"
+import { RouteConfig } from "react-router-config"
+import { Link, Route, Switch } from "react-router-dom"
+
+import { AddressInfo } from "./desktop/addressInfo"
+import { AddWallet } from "./desktop/addWallet"
+import { BlockView } from "./desktop/blockView"
+import { Home } from "./desktop/home"
+import { LedgerView } from "./desktop/ledgerView"
+import { MakeTransaction } from "./desktop/makeTransaction"
+import { MinerView } from "./desktop/minerView"
+import { PeersView } from "./desktop/peersView"
+import { RecoverWallet } from "./desktop/recoverWallet"
+import { Transaction } from "./desktop/transaction"
+import { TxPoolList } from "./desktop/txPoolList"
+import { TxView } from "./desktop/txView"
+import { WalletDetail } from "./desktop/walletDetail"
+import { WalletView } from "./desktop/walletView"
+import { IRest } from "./rest"
+
+import { HardwareWalletView } from "./desktop/hardwareWalletView"
+import { getLocale, IText } from "./locales/locales"
+
+export const routes: RouteConfig[] = [
+    { exact: true, path: "/" },
+    { exact: true, path: "/tx/:hash" },
+    { exact: true, path: "/block/:hash" },
+    { exact: true, path: "/txPool" },
+    { exact: true, path: "/address/:hash" },
+    { exact: true, path: "/wallet" },
+    { exact: true, path: "/wallet/addWallet" },
+    { exact: true, path: "/wallet/recoverWallet" },
+    { exact: true, path: "/wallet/detail/:name" },
+    { exact: true, path: "/transaction/:name" },
+    { exact: true, path: "/transaction/:name/:nonce" },
+    { exact: true, path: "/maketransaction/:walletType" },
+    { exact: true, path: "/maketransactionIndex/:walletType/:selectedAccount" },
+    { exact: true, path: "/maketransactionIndex/:walletType/:selectedAccount/:nonce" },
+    { exact: true, path: "/maketransactionAddress/:walletType/:address/:selectedAccount" },
+    { exact: true, path: "/maketransactionAddress/:walletType/:address/:selectedAccount/:nonce" },
+    { exact: true, path: "/maketransactionHDWallet/:walletType/:name/:address/:selectedAccount" },
+    { exact: true, path: "/maketransactionHDWallet/:walletType/:name/:address/:selectedAccount/:nonce" },
+    { exact: true, path: "/peersView" },
+    { exact: true, path: "/minerView" },
+    { exact: true, path: "/peer/:hash" },
+    { exact: true, path: "/hardwareWallet/:walletType" },
+    { exact: true, path: "/address/:hash/:walletType/:selectedAccount" },
+    { exact: true, path: "/address/:hash/:walletType/:name/:selectedAccount" },
+]
+
+// tslint:disable:no-shadowed-variable
+export class FullNode extends React.Component<{ rest: IRest }, any> {
+    public errMsg1: string = "Please enter a valid Hash value consisting of numbers and English"
+    public rest: IRest
+    public language: IText
+    public blockView: ({ match }: RouteComponentProps<{ hash: string }>) => JSX.Element
+    public home: ({ match }: RouteComponentProps<{}>) => JSX.Element
+    public addressInfo: (
+        { match }: RouteComponentProps<{ hash: string }>,
+    ) => JSX.Element
+    public txView: ({ match }: RouteComponentProps<{ hash: string }>) => JSX.Element
+    public txPool: ({ match }: RouteComponentProps<{}>) => JSX.Element
+
+    public transaction: ({ match }: RouteComponentProps<{ name: string, nonce: number }>) => JSX.Element
+    public maketransaction: ({ match }: RouteComponentProps<{ walletType: string, nonce: number }>) => JSX.Element
+    public maketransactionIndex: ({ match }: RouteComponentProps<{ walletType: string, address: string, selectedAccount: string, nonce: number }>) => JSX.Element
+    public maketransactionHDWallet: ({ match }: RouteComponentProps<{ walletType: string, name: string, address: string, selectedAccount: string, nonce: number }>) => JSX.Element
+    public peersView: ({ match }: RouteComponentProps<{}>) => JSX.Element
+
+    public wallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
+    public addWallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
+    public recoverWallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
+    public walletDetail: ({ match }: RouteComponentProps<{ name: string }>) => JSX.Element
+    public minerView: ({ match }: RouteComponentProps<{ name: string }>) => JSX.Element
+    public hardwareWalletView: ({ match }: RouteComponentProps<{ walletType: string }>) => JSX.Element
+    public hardwareAddressView: ({ match }: RouteComponentProps<{ walletType: string, hash: string, selectedAccount: string }>) => JSX.Element
+    public hdwalletAddressView: ({ match }: RouteComponentProps<{ walletType: string, hash: string, name: string, selectedAccount: string }>) => JSX.Element
+    public notFound: boolean
+
+    constructor(props: any) {
+        super(props)
+        this.state = {
+            block: "block",
+            blockHash: undefined,
+            isParity: false,
+            loading: false,
+            name: "BlockExplorer",
+            redirect: false,
+            tx: "Tx 1",
+        }
+        this.rest = props.rest
+        this.language = getLocale(navigator.language)
+        this.rest.loadingListener((loading: boolean) => {
+            this.state = ({ loading })
+        })
+        this.blockView = ({ match }: RouteComponentProps<{ hash: string }>) => (
+            <BlockView hash={match.params.hash} rest={this.rest} notFound={this.notFound} />
+        )
+        this.home = ({ match }: RouteComponentProps<{}>) => (
+            <Home rest={props.rest} />
+        )
+        this.addressInfo = ({ match }: RouteComponentProps<{ hash: string }>) => (
+            <AddressInfo hash={match.params.hash} rest={this.rest} language={this.language} />
+        )
+        this.txView = ({ match }: RouteComponentProps<{ hash: string }>) => (
+            <TxView hash={match.params.hash} rest={this.rest} />
+        )
+        this.txPool = ({ match }: RouteComponentProps<{}>) => (
+            <TxPoolList rest={this.rest} />
+        )
+        this.transaction = ({ match }: RouteComponentProps<{ name: string, nonce: number }>) => (
+            <Transaction name={match.params.name} rest={this.rest} nonce={match.params.nonce} />
+        )
+        this.maketransaction = ({ match }: RouteComponentProps<{ walletType: string, nonce: number }>) => (
+            <MakeTransaction walletType={match.params.walletType} rest={this.rest} nonce={match.params.nonce} language={this.language} />
+        )
+        this.maketransactionIndex = ({ match }: RouteComponentProps<{ walletType: string, address: string, selectedAccount: string, nonce: number }>) => (
+            <MakeTransaction walletType={match.params.walletType} rest={this.rest} address={match.params.address} selectedAccount={match.params.selectedAccount} nonce={match.params.nonce} language={this.language} />
+        )
+        this.maketransactionHDWallet = ({ match }: RouteComponentProps<{ walletType: string, name: string, address: string, selectedAccount: string, nonce: number }>) => (
+            <MakeTransaction rest={this.rest} walletType={match.params.walletType} name={match.params.name} address={match.params.address} selectedAccount={match.params.selectedAccount} nonce={match.params.nonce} language={this.language} />
+        )
+        this.peersView = ({ match }: RouteComponentProps<{}>) => (
+            <PeersView rest={props.rest} />
+        )
+        // this.peerDetails = ({ match }: RouteComponentProps<{ hash: string }>) => (
+        //     <PeerDetailsView hash={match.params.hash} rest={this.rest} />
+        // )
+        this.wallet = ({ match }: RouteComponentProps<{}>) => (
+            <WalletView rest={props.rest} />
+        )
+        this.addWallet = ({ match }: RouteComponentProps<{}>) => (
+            <AddWallet rest={props.rest} />
+        )
+        this.recoverWallet = ({ match }: RouteComponentProps<{}>) => (
+            <RecoverWallet rest={props.rest} />
+        )
+        this.walletDetail = ({ match }: RouteComponentProps<{ name: string }>) => (
+            <WalletDetail name={match.params.name} rest={this.rest} notFound={this.notFound} />
+        )
+
+        this.minerView = ({ match }: RouteComponentProps<{}>) => (
+            <MinerView rest={this.rest} />
+        )
+
+        this.hardwareWalletView = ({ match }: RouteComponentProps<{ walletType: string }>) => (
+            <HardwareWalletView rest={this.rest} walletType={match.params.walletType} language={this.language} />
+        )
+        this.hardwareAddressView = ({ match }: RouteComponentProps<{ walletType: string, hash: string, selectedAccount: string }>) => (
+            <AddressInfo hash={match.params.hash} walletType={match.params.walletType} rest={this.rest} selectedAccount={match.params.selectedAccount} language={this.language} />
+        )
+        this.hdwalletAddressView = ({ match }: RouteComponentProps<{ walletType: string, hash: string, name: string, selectedAccount: string }>) => (
+            <AddressInfo hash={match.params.hash} walletType={match.params.walletType} rest={this.rest} name={match.params.name} selectedAccount={match.params.selectedAccount} language={this.language} />
+        )
+    }
+    public handleBlockHash(data: any) {
+        this.setState({ blockHash: data.target.value })
+    }
+    public searchBlock(event: any) {
+        if (this.state.blockHash === undefined) {
+            event.preventDefault()
+        } else if (!/^[a-zA-Z0-9]+$/.test(this.state.blockHash)) {
+            event.preventDefault()
+            if (alert(this.errMsg1)) { window.location.reload() }
+        } else {
+            this.setState({ redirect: true })
+        }
+    }
+    public render() {
+        if (this.state.redirect) {
+            return <Redirect to={`/block/${this.state.blockHash}`} />
+        }
+        return (
+            <div className="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+                <header className="mdl-layout__header" >
+                    <div className="mdl-layout__header-row">
+                        <span className="mdl-layout-title">Hycon Blockexplorer</span>
+                        <div className="mdl-layout-spacer" />
+                        <nav className="mdl-navigation">
+                            <div className="mdl-textfield mdl-js-textfield mdl-textfield--expandable">
+                                <label className="mdl-button mdl-js-button mdl-button--icon">
+                                    <i className="material-icons">search</i>
+                                </label>
+                                <form>
+                                    <div className="mdl-textfield__expandable-holder">
+                                        <input
+                                            className="mdl-textfield__input searchBox" type="text" placeholder="Block Hash"
+                                            onChange={(data) => this.handleBlockHash(data)}
+                                            onKeyPress={(event) => { if (event.key === "Enter") { this.searchBlock(event) } }}
+                                        />
+                                    </div>
+                                </form>
+                            </div>
+                            <Link className="mdl-navigation__link navMargin" to="/">Home</Link>
+                            {/* <Link className="mdl-navigation__link" to="/block">Block</Link> */}
+                            <Link className="mdl-navigation__link" to="/txPool">Tx</Link>
+                            <Link className="mdl-navigation__link" to="/wallet">Wallet</Link>
+                            <Link className="mdl-navigation__link" to="/peersView">Peers List</Link>
+                            <Link className="mdl-navigation__link" to="/minerView">Miner</Link>
+                        </nav>
+                    </div>
+                    <div className={`mdl-progress mdl-js-progress mdl-progress__indeterminate progressBar ${this.state.loading ? "" : "hide"}`} />
+                </header>
+                <main className="mdl-layout__content main">
+                    <div className="page-content">
+                        <Switch>
+                            {/* <Route exact path='/' component={() => { return <Home name={this.state.name} /> }} /> */}
+                            <Route exact path="/" component={this.home} />
+                            <Route exact path="/tx/:hash" component={this.txView} />
+                            <Route exact path="/block/:hash" component={this.blockView} />
+                            <Route exact path="/txPool" component={this.txPool} />
+                            <Route exact path="/address/:hash" component={this.addressInfo} />
+                            <Route exact path="/transaction/:name" component={this.transaction} />
+                            <Route exact path="/transaction/:name/:nonce" component={this.transaction} />
+                            <Route exact path="/maketransaction/:walletType" component={this.maketransaction} />
+                            <Route exact path="/maketransactionIndex/:walletType/:selectedAccount" component={this.maketransactionIndex} />
+                            <Route exact path="/maketransactionIndex/:walletType/:selectedAccount/:nonce" component={this.maketransactionIndex} />
+                            <Route exact path="/maketransactionAddress/:walletType/:address/:selectedAccount" component={this.maketransactionIndex} />
+                            <Route exact path="/maketransactionAddress/:walletType/:address/:selectedAccount/:nonce" component={this.maketransactionIndex} />
+                            <Route exact path="/maketransactionHDwallet/:walletType/:name/:address/:selectedAccount" component={this.maketransactionHDWallet} />
+                            <Route exact path="/maketransactionHDwallet/:walletType/:name/:address/:selectedAccount/:nonce" component={this.maketransactionHDWallet} />
+                            <Route exact path="/wallet/addWallet" component={this.addWallet} />
+                            <Route exact path="/wallet" component={this.wallet} />
+                            <Route exact path="/wallet/recoverWallet" component={this.recoverWallet} />
+                            <Route exact path="/wallet/detail/:name" component={this.walletDetail} />
+                            <Route exact path="/peersView" component={this.peersView} />
+                            <Route exact path="/minerView" component={this.minerView} />
+                            <Route exact path="/hardwareWallet/:walletType" component={this.hardwareWalletView} />
+                            <Route exact path="/address/:hash/:walletType/:selectedAccount" component={this.hardwareAddressView} />
+                            <Route exact path="/address/:hash/:walletType/:name/:selectedAccount" component={this.hdwalletAddressView} />
+                        </Switch>
+                    </div>
+                </main>
+            </div >
+        )
+    }
+}

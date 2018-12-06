@@ -2,7 +2,7 @@ import { Button, Dialog, DialogTitle, Grid, Icon, IconButton } from "@material-u
 import * as React from "react"
 import { Link, Redirect } from "react-router-dom"
 import { IText } from "../locales/locales"
-import { IRest, ITxProp } from "../rest"
+import { IRest, ITxProp, IWalletAddress } from "../rest"
 interface ITxLineProps {
     rest: IRest
     tx: ITxProp
@@ -27,15 +27,22 @@ interface ITxLineView {
 export class TxLine extends React.Component<ITxLineProps, ITxLineView> {
     constructor(props: ITxLineProps) {
         super(props)
-        this.state = { address: props.address, tx: props.tx, rest: props.rest, name: props.name, redirect: false, index: props.index, redirectWithHardwareWallet: false, redirectWithHDWallet: false, walletType: props.walletType }
+        this.state = {
+            address: props.address,
+            index: props.index,
+            name: props.name,
+            redirect: false,
+            redirectWithHDWallet: false,
+            redirectWithHardwareWallet: false,
+            rest: this.props.rest,
+            tx: props.tx,
+            walletType: props.walletType,
+        }
     }
     public componentWillReceiveProps(newProps: ITxLineProps) {
         this.setState(newProps)
     }
     public render() {
-        if (this.state.redirect) {
-            return <Redirect to={`/transaction/${this.state.name}/${this.state.tx.nonce}`} />
-        }
         if (this.state.redirectWithHardwareWallet) {
             return <Redirect to={`/maketransactionAddress/${this.state.walletType}/${this.state.address}/${this.state.index}/${this.state.tx.nonce}`} />
         }

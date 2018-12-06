@@ -7,19 +7,24 @@ import * as React from "react"
 import update = require("react-addons-update")
 import * as CopyToClipboard from "react-copy-to-clipboard"
 import { Redirect } from "react-router"
-import { IHyconWallet, IMinedInfo, IResponseError, ITxProp, IWalletAddress } from "../rest"
+import { IHyconWallet, IMinedInfo, IResponseError, ITxProp } from "../rest"
+import { IStoredWallet } from "../restChrome"
 import { Login } from "./login"
 import { MinedBlockLine } from "./minedBlockLine"
 import { MultipleAccountsView } from "./multipleAccountsView"
 import { NotFound } from "./notFound"
 import { ProgressBar } from "./progressBar"
+import { hyconIntfromString } from "./stringUtil"
 import { TxLine } from "./txLine"
+// tslint:disable-next-line:no-var-requires
+const fileDownload = require("js-file-download")
 export class WalletDetail extends React.Component<any, any> {
     public mounted: boolean = false
     constructor(props: any) {
         super(props)
         this.state = {
             address: "",
+            currencyPrice: props.price,
             hasMore: true,
             hasMoreMinedInfo: true,
             index: 1,
@@ -32,6 +37,8 @@ export class WalletDetail extends React.Component<any, any> {
             name: props.name,
             notFound: false,
             pendings: [],
+            price: "",
+            redirectHDwalletView: false,
             rest: props.rest,
             selectedAccount: "",
             showDialog1: false,
@@ -62,9 +69,28 @@ export class WalletDetail extends React.Component<any, any> {
                 }
                 this.setState({ showDialog1: true, isLoad: true, wallet: data, address: "", walletType: "hdwallet" })
             }
+
+            this.props.rest.getPrice(this.props.language.currency).then((price: number) => {
+                const amount: number = hyconIntfromString(this.state.wallet.balance)
+                this.setState({
+                    currencyPrice: price,
+                    price: (amount * price).toFixed(2),
+                })
+            }).catch((e: Error) => {
+                alert(e)
+            })
         }).catch((e: Error) => {
             alert(e)
         })
+    }
+
+    public componentWillReceiveProps(nextProps: any) {
+        if (this.state.currencyPrice !== nextProps.price) {
+            this.setState({
+                currencyPrice: nextProps.price,
+                price: (hyconIntfromString(this.state.wallet.balance) * nextProps.price).toFixed(2),
+            })
+        }
     }
     public deleteWallet() {
         if (confirm(this.props.language["alert-delete-wallet"])) {
@@ -96,20 +122,15 @@ export class WalletDetail extends React.Component<any, any> {
         this.setState({ login: true })
     }
 
-    public accountSelected(index: string, account: IHyconWallet) {
-        this.state.rest.setLoading(true)
-        this.state.rest.getAddressInfo(account.address).then((result: IWalletAddress) => {
-            this.setState({
-                address: account.address,
-                minedBlocks: result.minedBlocks,
-                pendings: result.pendings,
-                selectedAccount: index,
-                showDialog1: false,
-                txs: result.txs,
-                wallet: result,
-            })
-            this.state.rest.setLoading(false)
+    public downloadKey() {
+        this.state.rest.getWallet(this.state.wallet.name).then((storeWallet: IStoredWallet) => {
+            const key = storeWallet.hint + ":" + storeWallet.iv + ":" + storeWallet.data
+            fileDownload(key, "skey.txt")
         })
+    }
+
+    public accountSelected(index: string, account: IHyconWallet) {
+        this.setState({ redirectHDwalletView: true, address: account.address, selectedAccount: index })
     }
     public render() {
         let accountIndex = 0
@@ -120,11 +141,14 @@ export class WalletDetail extends React.Component<any, any> {
         if (this.state.notFound) {
             return <NotFound />
         }
-        if (!this.state.notFound && this.state.wallet === undefined) {
-            return null
+        if (!this.state.notFound && !this.state.isLoad) {
+            return <div></div>
         }
         if (this.state.redirect) {
             return <Redirect to="/wallet" />
+        }
+        if (this.state.redirectHDwalletView) {
+            return <Redirect to={`/address/${this.state.address}/hdwallet/${this.state.name}/${this.state.selectedAccount}`} />
         }
         if (this.state.isTransfer) {
             if (this.state.selectedAccount !== "") {
@@ -138,6 +162,8 @@ export class WalletDetail extends React.Component<any, any> {
                     <thead>
                         <tr>
                             <td colSpan={2} className="walletDetailFunctionTd">
+                                <button onClick={() => { this.downloadKey() }} className="mdl-button">
+                                    <i className="material-icons">archive</i>{this.props.language["button-download"]}</button>
                                 <button onClick={() => { this.login() }} className="mdl-button">
                                     <i className="material-icons">assignment_ind</i>{this.props.language["button-claim"]}</button>
                                 <button onClick={() => { this.transfer() }} className="mdl-button">
@@ -166,7 +192,7 @@ export class WalletDetail extends React.Component<any, any> {
                                                     <i className="material-icons">account_balance</i>
                                                 </span>
                                                 <span style={{ fontSize: "17px" }} className="walletName">
-                                                    {this.state.wallet.balance} HYCON
+                                                    {this.state.wallet.balance} HYCON ({this.state.price} {this.props.language.currency})
                                                 </span><br />
                                                 <span style={{ marginLeft: "25px", fontSize: "14px" }} className="walletName">
                                                     pending: {this.state.wallet.pendingAmount} HYCON
@@ -203,10 +229,9 @@ export class WalletDetail extends React.Component<any, any> {
                             return (
                                 <div key={accountIndex++}>
                                     <TxLine tx={tx} rest={this.state.rest} address={this.state.address} name={this.state.name} index={this.state.selectedAccount} walletType={this.state.walletType} language={this.props.language} />
-                                    {tx.from === this.state.address ?
-                                        (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent txAmtBtn">-{tx.estimated} HYCON</button>)
-                                        :
-                                        (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored txAmtBtn">{tx.amount} HYCON</button>)}
+                                    {tx.from === this.state.address
+                                        ? (<button className="disableBtn mdl-button mdl-js-button mdl-button--raised mdl-button--accent txAmtBtn">-{tx.estimated} HYCON</button>)
+                                        : (<button className="disableBtn mdl-button mdl-js-button mdl-button--raised mdl-button--colored txAmtBtn">{tx.amount} HYCON</button>)}
                                 </div>
                             )
                         })}
@@ -214,10 +239,9 @@ export class WalletDetail extends React.Component<any, any> {
                             return (
                                 <div key={accountIndex++}>
                                     <TxLine tx={tx} rest={this.state.rest} address={this.state.address} language={this.props.language} />
-                                    {tx.from === this.state.address ?
-                                        (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent txAmtBtn">-{tx.estimated} HYCON</button>)
-                                        :
-                                        (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored txAmtBtn">{tx.amount} HYCON</button>)}
+                                    {tx.from === this.state.address
+                                        ? (<button className="disableBtn mdl-button mdl-js-button mdl-button--raised mdl-button--accent txAmtBtn">-{tx.estimated} HYCON</button>)
+                                        : (<button className="disableBtn mdl-button mdl-js-button mdl-button--raised mdl-button--colored txAmtBtn">{tx.amount} HYCON</button>)}
                                 </div>
                             )
                         })}

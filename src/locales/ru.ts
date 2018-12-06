@@ -9,6 +9,7 @@ export default {
     "button-forget": "Забыть",
     "button-close": "Закрыть",
     "button-submit": "отправить форму",
+    "button-download": "DOWNLOAD",
 
     "wallet-list": "Список кошельков",
     "load-key-from-file": "Загрузить ключ из файла",
@@ -153,4 +154,6 @@ export default {
     "alert-disable-totp-fail": "Fail to disable Transaction OTP",
     "transaction-totp": "Enter the 6 digit code of the Google Authenticator App",
     "alert-invalid-code-password": "Please check the Google Authenticator code / OTP Password",
+
+    "currency": "RUB",
 }

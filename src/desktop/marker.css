@@ -1,4 +1,13 @@
 .marker {
+  /* position: 'absolute';
+    width: 40px ;
+    height: 40px ;
+    background-color: white;
+    border: '5px solid #f44336' ;
+    color: '#3f51b5';
+    font-size: 14px;
+    padding: 0.5em ; */
+
   position: absolute;
   width: 20px;
   height: 20px;

@@ -360,6 +360,9 @@ table {
   margin-left: 1em !important;
   width: 21% !important;
 }
+/* .selectAccountDiv{
+    padding: 1em 2em 1em 2em;
+} */
 
 .led-green {
   width: 10px;
@@ -407,4 +410,8 @@ table {
 
 .table_content{
   font-size: 0.9em;
+}
+
+.disableBtn{
+  pointer-events: none;
 }

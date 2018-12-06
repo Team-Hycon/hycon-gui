@@ -9,6 +9,7 @@ export default {
     "button-forget": "Bỏ đi",
     "button-close": "Đóng",
     "button-submit": "Xác nhận",
+    "button-download": "DOWNLOAD",
 
     "wallet-list": "Danh sách Ví",
     "load-key-from-file": "Tải chìa khoá từ tệp tin",
@@ -153,4 +154,6 @@ export default {
     "alert-disable-totp-fail": "Vô hiệu hoá Giao dịch OTP thành công",
     "transaction-totp": "Mời bạn nhập mã 6 số của phần mềm Google Authenticator",
     "alert-invalid-code-password": "Mời bạn kiểm tra lại mã Google Authenticator / Mã mật khẩu OTP",
+
+    "currency": "USD",
 }

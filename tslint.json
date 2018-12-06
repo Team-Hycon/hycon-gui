@@ -9,6 +9,7 @@
             true,
             "never"
         ],
+        "no-console": false,
         "no-empty": false,
         "max-line-length": false
     },

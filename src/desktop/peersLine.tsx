@@ -1,4 +1,11 @@
 import * as React from "react"
+import { Link } from "react-router-dom"
+import { IPeer, IRest } from "../rest"
+
+interface IPeersLineView {
+    rest: IRest
+    peer: IPeer
+}
 
 export class PeersLine extends React.Component<any, any> {
     constructor(props: any) {

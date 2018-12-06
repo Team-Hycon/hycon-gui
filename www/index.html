@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0x
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html style="height: 100%;">
+
+<head>
+    <!--
+        Customize this policy to fit your own app's needs. For more guidance, see:
+            https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
+        Some notes:
+            * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+                * Enable inline JS: add 'unsafe-inline' to default-src
+        -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self' hyconwallet: data: gap: https://ssl.gstatic.com 'unsafe-inline' 'unsafe-eval';
+        style-src 'self'  https://fonts.googleapis.com 'unsafe-inline';
+        font-src 'self' https://fonts.gstatic.com 'unsafe-inline';
+        media-src *;
+        img-src 'self' https://hycon.io data: content:;
+        connect-src https://network.hycon.io https://wallet.hycon.io https://api.coingecko.com;">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta 
+        name="viewport" 
+        content="user-scalable=no, initial-scale=1, viewport-fit=auto"
+    >
+    <meta charset="UTF-8" />
+    <title>Hycon Wallet</title>
+    <link rel="stylesheet" href="css/styles.css" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600" rel="stylesheet">
+</head>
+
+<body style="
+        background-color: #FFF;
+    ">
+    <section 
+        id="blockexplorer" 
+        style="
+            min-height: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            background-color: #FFF;
+            overflow-y: scroll;
+            -webkit-overflow-scrolling: touch;" />
+
+    <script type="text/javascript" src="cordova.js"></script>
+    <script>
+        var storage = window.localStorage;
+        storage.removeItem("hpay")
+
+        window.handleOpenURL = function (url) {
+            setTimeout(function () {
+                console.log(">>>>>>>>>>>>>>" + url);
+                storage.setItem("hpay", url.split("//")[1]);
+                console.log("url saved : " + storage.getItem("hpay"));
+                console.log("window.handleOpenURLStaged = " + url);
+            })
+        }
+    </script>
+    <script type="text/javascript" src="js/bundle.js"></script>
+    <script type="text/javascript" src="js/plugins/LaunchMyApp.js"></script>
+
+</body>
+
+</html>
