@@ -9,6 +9,7 @@ export default {
     "button-forget": "忘記",
     "button-close": "關閉",
     "button-submit": "提交",
+    "button-download": "DOWNLOAD",
 
     "wallet-list": "錢包列表",
     "load-key-from-file": "從文件載入密匙",
@@ -153,4 +154,6 @@ export default {
     "alert-disable-totp-fail": "關閉交易OTP失敗",
     "transaction-totp": "請輸入Google Authenticator應用的6位碼",
     "alert-invalid-code-password": "請查看Google Authenticator代碼 / OTP密碼",
+
+    "currency": "HKD",
 }

@@ -3,6 +3,7 @@ import update = require("react-addons-update")
 import { Link } from "react-router-dom"
 import { IBlock, IResponseError, IRest, ITxProp } from "../rest"
 import { NotFound } from "./notFound"
+import { hyconfromString, hycontoString } from "./stringUtil"
 import { TxLine } from "./txLine"
 interface IBlockProps {
     rest: IRest

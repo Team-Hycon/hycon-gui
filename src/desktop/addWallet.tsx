@@ -1,8 +1,8 @@
-import * as utils from "@glosfer/hyconjs-util"
 import { Button, CardContent, Checkbox, FormControl, FormControlLabel, Grid, Icon, Input, InputLabel, MenuItem, Select, Step, StepLabel, Stepper } from "@material-ui/core"
 import { Card, Dialog, IconButton, TextField } from "material-ui"
 import * as React from "react"
 import { Redirect } from "react-router"
+import { encodingMnemonic } from "./stringUtil"
 
 export class AddWallet extends React.Component<any, any> {
     public mounted: boolean = false
@@ -129,8 +129,8 @@ export class AddWallet extends React.Component<any, any> {
         if (this.state.confirmMnemonic === "") {
             alert(this.props.language["title-check-mnemonic"])
         } else {
-            const mnemonicString = utils.encodingMnemonic(this.state.mnemonic)
-            const confirmMnemonicString = utils.encodingMnemonic(this.state.confirmMnemonic)
+            const mnemonicString = encodingMnemonic(this.state.mnemonic)
+            const confirmMnemonicString = encodingMnemonic(this.state.confirmMnemonic)
             if (mnemonicString === confirmMnemonicString) {
                 this.setState({ activeStep: this.state.activeStep + 1 })
             } else {
@@ -143,8 +143,8 @@ export class AddWallet extends React.Component<any, any> {
             alert(this.props.language["title-check-mnemonic"])
             return
         }
-        const mnemonicString = utils.encodingMnemonic(this.state.mnemonic)
-        const typedMnemonicString = utils.encodingMnemonic(this.state.typedMnemonic)
+        const mnemonicString = encodingMnemonic(this.state.mnemonic)
+        const typedMnemonicString = encodingMnemonic(this.state.typedMnemonic)
         if (mnemonicString !== typedMnemonicString) {
             alert(this.props.language["title-check-mnemonic"])
             return
@@ -166,8 +166,8 @@ export class AddWallet extends React.Component<any, any> {
             alert(this.props.language["title-check-mnemonic"])
             return
         }
-        const mnemonicString = utils.encodingMnemonic(this.state.mnemonic)
-        const typedMnemonicString = utils.encodingMnemonic(this.state.typedMnemonic)
+        const mnemonicString = encodingMnemonic(this.state.mnemonic)
+        const typedMnemonicString = encodingMnemonic(this.state.typedMnemonic)
         if (mnemonicString !== typedMnemonicString) {
             alert(this.props.language["title-check-mnemonic"])
             return
@@ -283,16 +283,16 @@ export class AddWallet extends React.Component<any, any> {
                     </Button>
                     <Button onClick={this.createHDWallet.bind(this)} style={{ display: `${this.state.activeStep === steps.length - 1 ? "unset" : "none"}` }}>
                         {this.props.language["create-hdwallet"]}</Button>
-                </Grid>
+                </Grid >
 
                 {/* HELP - ADVANCED OPTIONS */}
-                <Dialog className="dialog" open={this.state.dialog} contentStyle={{ width: "70%", maxWidth: "none" }}>
+                < Dialog className = "dialog" open = {this.state.dialog} contentStyle = {{ width: "70%", maxWidth: "none" }} >
                     <h3 style={{ color: "grey" }}>{this.props.language["advanced-option-tooltip-title"]}</h3>
-                    <div className="mdl-dialog__content dialogContent">{this.props.language["advanced-option-tooltip1"]}<br /><strong>{this.props.language["advanced-option-tooltip2"]}</strong></div><br />
+                    <div className="mdl-dialog__content dialogContent">{this.props.language["advanced-option-tooltip1"]}<br /><strong>{this.props.language["advanced-option-tooltip2"]}</strong></div> <br />
                     <Grid container direction={"row"} justify={"center"} alignItems={"center"}>
                         <Button variant="raised" style={{ backgroundColor: "rgb(225, 0, 80)", color: "white", margin: "0 10px" }} onClick={() => { this.setState({ dialog: false }) }}>{this.props.language["button-close"]}</Button>
                     </Grid>
-                </Dialog>
+                </Dialog >
             </div >
         )
     }

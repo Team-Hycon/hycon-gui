@@ -2,6 +2,8 @@ import { Button, Dialog, DialogTitle, Grid, Icon, List, ListItem, ListItemText }
 import CardContent from "@material-ui/core/CardContent"
 import { Card, CircularProgress } from "material-ui"
 import * as React from "react"
+import update = require("react-addons-update")
+import { Link } from "react-router-dom"
 import { IHyconWallet, IMiner, IRest } from "../rest"
 interface IMinerViewProps {
     rest: IRest

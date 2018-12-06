@@ -1,4 +1,3 @@
-import * as utils from "@glosfer/hyconjs-util"
 import { CircularProgress, Dialog, DialogTitle } from "@material-ui/core"
 import Button from "@material-ui/core/Button"
 import CardContent from "@material-ui/core/CardContent"
@@ -7,9 +6,10 @@ import Icon from "@material-ui/core/Icon"
 import { Card, TextField } from "material-ui"
 import * as React from "react"
 import { Redirect } from "react-router"
-import { IHyconWallet } from "../rest"
+import { IHyconWallet, IRest } from "../rest"
 import { AddressBook } from "./addressBook"
 import { ProgressBar } from "./progressBar"
+import { hyconfromString } from "./stringUtil"
 
 export class Transaction extends React.Component<any, any> {
     public mounted = false
@@ -97,11 +97,11 @@ export class Transaction extends React.Component<any, any> {
             alert(`${this.props.language["alert-decimal-overflow"]}`)
             return
         }
-        if (this.state.nonce === undefined && utils.hyconfromString(this.state.amount).add(utils.hyconfromString(this.state.minerFee)).greaterThan(utils.hyconfromString(this.state.piggyBank).sub(utils.hyconfromString(this.state.pendingAmount)))) {
+        if (this.state.nonce === undefined && hyconfromString(this.state.amount).add(hyconfromString(this.state.minerFee)).greaterThan(hyconfromString(this.state.piggyBank).sub(hyconfromString(this.state.pendingAmount)))) {
             alert(`${this.props.language["alert-insufficient-funds"]}`)
             return
         }
-        if (utils.hyconfromString(this.state.minerFee).compare(utils.hyconfromString("0")) === 0) {
+        if (hyconfromString(this.state.minerFee).compare(hyconfromString("0")) === 0) {
             alert(`${this.props.language["alert-miner-fee"]}`)
             return
         }

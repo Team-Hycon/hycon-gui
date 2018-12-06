@@ -1,0 +1,25 @@
+import getMuiTheme from "material-ui/styles/getMuiTheme"
+import MuiThemeProvider from "material-ui/styles/MuiThemeProvider"
+import * as React from "react"
+import * as ReactDOM from "react-dom"
+import { BrowserRouter } from "react-router-dom"
+import { FullNode } from "../fullnode"
+import { RestClient } from "../restClient"
+
+import "material-design-lite"
+import "material-design-lite/material.css"
+import "./blockexplorer.css"
+import "./marker.css"
+import "./material.css"
+import "./transaction.css"
+
+const rest = new RestClient()
+
+ReactDOM.hydrate(
+    <MuiThemeProvider muiTheme={getMuiTheme()}>
+        <BrowserRouter>
+            <FullNode rest={rest} />
+        </BrowserRouter>
+    </MuiThemeProvider>,
+    document.getElementById("blockexplorer"),
+)

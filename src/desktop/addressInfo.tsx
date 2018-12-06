@@ -6,26 +6,33 @@ import { Redirect } from "react-router"
 import { IText } from "../locales/locales"
 import { IMinedInfo, IRest, ITxProp, IWalletAddress } from "../rest"
 import { MinedBlockLine } from "./minedBlockLine"
+import { NotFound } from "./notFound"
+import { hyconIntfromString } from "./stringUtil"
 import { TxLine } from "./txLine"
 interface IAddressProps {
     rest: IRest
     hash: string
     language: IText
+    name?: string
+    price?: number
     selectedAccount?: string
     walletType?: string
 }
 interface IAddressView {
+    currencyPrice: number
     rest: IRest
     redirectTxView: boolean
     hash: string
     txs: ITxProp[],
-    pendings: ITxProp[],
+    pendings: ITxProp[]
+    price: string
     hasMore: boolean,
-    hasMoreMinedInfo: boolean,
+    hasMoreMinedInfo: boolean
     index: number,
-    minedBlocks: IMinedInfo[],
+    minedBlocks: IMinedInfo[]
     minerIndex: number,
     name: string,
+    notFound: boolean,
     address?: IWalletAddress
     accountIndex?: string
     walletType?: string
@@ -36,14 +43,17 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
         super(props)
         this.state = {
             accountIndex: props.selectedAccount,
+            currencyPrice: props.price,
             hasMore: true,
             hasMoreMinedInfo: true,
             hash: props.hash,
             index: 1,
             minedBlocks: [],
             minerIndex: 1,
-            name: "",
+            name: props.name ? props.name : "",
+            notFound: false,
             pendings: [],
+            price: "",
             redirectTxView: false,
             rest: props.rest,
             txs: [],
@@ -58,6 +68,9 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
         this.setState({ hash: newProps.hash })
         this.state.rest.setLoading(true)
         this.state.rest.getAddressInfo(newProps.hash).then((data: IWalletAddress) => {
+            if (data.hash === undefined) {
+                this.setState({ notFound: true })
+            }
             this.setState({
                 address: data,
                 minedBlocks: data.minedBlocks,
@@ -65,12 +78,22 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
                 txs: data.txs,
             })
             this.state.rest.setLoading(false)
+
+            if (this.state.currencyPrice !== newProps.price) {
+                this.setState({
+                    currencyPrice: newProps.price,
+                    price: (hyconIntfromString(data.balance) * newProps.price).toFixed(2),
+                })
+            }
         })
     }
     public componentDidMount() {
         this.mounted = true
         this.state.rest.setLoading(true)
         this.state.rest.getAddressInfo(this.state.hash).then((data: IWalletAddress) => {
+            if (data.hash === undefined) {
+                this.setState({ notFound: true })
+            }
             if (this.mounted) {
                 this.setState({ address: data, minedBlocks: data.minedBlocks, pendings: data.pendings, txs: data.txs })
                 switch (this.state.walletType) {
@@ -79,16 +102,33 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
                 }
             }
             this.state.rest.setLoading(false)
+
+            this.props.rest.getPrice(this.props.language.currency).then((price: number) => {
+                const amount: number = hyconIntfromString(data.balance)
+                this.setState({
+                    currencyPrice: price,
+                    price: (amount * price).toFixed(2),
+                })
+            }).catch((e: Error) => {
+                alert(e)
+            })
         })
     }
+
     public makeTransaction() {
         this.setState({ redirectTxView: true })
     }
     public render() {
-        if (this.state.address === undefined) {
+        if (this.state.notFound) {
+            return <NotFound />
+        }
+        if (!this.state.notFound && this.state.address === undefined) {
             return null
         }
         if (this.state.redirectTxView) {
+            if (this.state.walletType === "hdwallet") {
+                return <Redirect to={`/maketransactionHDWallet/hdwallet/${this.state.name}/${this.state.hash}/${this.state.accountIndex}`} />
+            }
             return <Redirect to={`/maketransactionAddress/${this.state.walletType}/${this.state.hash}/${this.state.accountIndex}`} />
         }
         let count = 0
@@ -97,7 +137,7 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
             <div>
                 <button onClick={() => { this.makeTransaction() }} className="mdl-button" style={{ display: `${this.state.accountIndex === undefined ? ("none") : ("block")}`, float: "right" }}>
                     <i className="material-icons">send</i>{this.props.language["button-transfer"]}</button>
-                {(this.state.accountIndex === undefined) ? (<div className="contentTitle">{this.props.language["hycon-address"]}</div>) : (<div className="contentTitle">{this.state.name}</div>)}
+                    {(this.state.accountIndex === undefined) ? (<div className="contentTitle">{this.props.language["hycon-address"]}</div>) : (<div className="contentTitle">{this.state.name}</div>)}
                 <div className="sumTablesDiv">
                     <table className="tablesInRow twoTablesInRow">
                         <thead>
@@ -112,7 +152,7 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
                             </tr>
                             <tr>
                                 <td className="tdSubTitle subTitle_width40">{this.props.language["final-balance"]}</td>
-                                <td>{this.state.address.balance}</td>
+                                <td>{this.state.address.balance} HYCON {this.state.accountIndex === undefined ? `` : `(${this.state.price} ${this.props.language.currency})`} </td>
                             </tr>
                         </tbody>
                     </table>
@@ -125,7 +165,7 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
                         {this.state.pendings.map((tx: ITxProp) => {
                             return (
                                 <div key={count++}>
-                                    <TxLine tx={tx} rest={this.state.rest} index={this.state.accountIndex} address={this.state.hash} walletType={this.state.walletType} language={this.props.language}/>
+                                    <TxLine tx={tx} rest={this.state.rest} index={this.state.accountIndex} address={this.state.hash} name={this.state.name} walletType={this.state.walletType} language={this.props.language} />
                                     <div>
                                         {tx.from === this.state.hash
                                             ? (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent txAmtBtn">-{tx.amount} HYCON</button>)
@@ -137,7 +177,7 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
                         {this.state.txs.map((tx: ITxProp) => {
                             return (
                                 <div key={count++}>
-                                    <TxLine tx={tx} rest={this.state.rest} address={this.state.hash} language={this.props.language} />
+                                    <TxLine tx={tx} rest={this.state.rest} address={this.state.hash} language={this.props.language} name={this.state.name} />
                                     <div>
                                         {tx.from === this.state.hash
                                             ? (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent txAmtBtn">-{tx.amount} HYCON</button>)

@@ -38,6 +38,7 @@ export const routes: RouteConfig[] = [
     { exact: true, path: "/maketransactionHDWallet/:walletType/:name/:address/:selectedAccount/:nonce" },
     { exact: true, path: "/hardwareWallet/:walletType" },
     { exact: true, path: "/address/:hash/:walletType/:selectedAccount" },
+    { exact: true, path: "/address/:hash/:walletType/:name/:selectedAccount" },
 ]
 
 // tslint:disable:no-shadowed-variable
@@ -50,16 +51,17 @@ export class LiteClient extends React.Component<any, any> {
         { match }: RouteComponentProps<{ hash: string }>,
     ) => JSX.Element
     public txView: ({ match }: RouteComponentProps<{ hash: string }>) => JSX.Element
-    public transaction: ({ match }: RouteComponentProps<{ name: string, nonce: string }>) => JSX.Element
-    public maketransaction: ({ match }: RouteComponentProps<{ walletType: string, nonce: string }>) => JSX.Element
-    public maketransactionIndex: ({ match }: RouteComponentProps<{ walletType: string, address: string, selectedAccount: string, nonce: string }>) => JSX.Element
-    public maketransactionHDWallet: ({ match }: RouteComponentProps<{ walletType: string, name: string, address: string, selectedAccount: string, nonce: string }>) => JSX.Element
+    public transaction: ({ match }: RouteComponentProps<{ name: string, nonce: number }>) => JSX.Element
+    public maketransaction: ({ match }: RouteComponentProps<{ walletType: string, nonce: number }>) => JSX.Element
+    public maketransactionIndex: ({ match }: RouteComponentProps<{ walletType: string, address: string, selectedAccount: string, nonce: number }>) => JSX.Element
+    public maketransactionHDWallet: ({ match }: RouteComponentProps<{ walletType: string, name: string, address: string, selectedAccount: string, nonce: number }>) => JSX.Element
     public wallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
     public addWallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
     public recoverWallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
     public walletDetail: ({ match }: RouteComponentProps<{ name: string }>) => JSX.Element
     public hardwareWalletView: ({ match }: RouteComponentProps<{ walletType: string }>) => JSX.Element
     public hardwareAddressView: ({ match }: RouteComponentProps<{ walletType: string, hash: string, selectedAccount: string }>) => JSX.Element
+    public hdwalletAddressView: ({ match }: RouteComponentProps<{ walletType: string, hash: string, name: string, selectedAccount: string }>) => JSX.Element
     public notFound: boolean
 
     constructor(props: any) {
@@ -80,6 +82,7 @@ export class LiteClient extends React.Component<any, any> {
             load: false,
             loading: false,
             possibilityLedger: false,
+            price: "",
             totp: false,
             totpPw1: "",
             totpPw2: "",
@@ -104,17 +107,17 @@ export class LiteClient extends React.Component<any, any> {
         this.txView = ({ match }: RouteComponentProps<{ hash: string }>) => (
             <TxView hash={match.params.hash} rest={this.rest} />
         )
-        this.transaction = ({ match }: RouteComponentProps<{ name: string, nonce: string }>) => (
-            <Transaction name={match.params.name} rest={this.rest} language={this.language} nonce={parseInt(match.params.nonce, 10)} />
+        this.transaction = ({ match }: RouteComponentProps<{ name: string, nonce: number }>) => (
+            <Transaction name={match.params.name} rest={this.rest} language={this.language} nonce={match.params.nonce} />
         )
-        this.maketransaction = ({ match }: RouteComponentProps<{ walletType: string, nonce: string }>) => (
-            <MakeTransaction walletType={match.params.walletType} rest={this.rest} nonce={parseInt(match.params.nonce, 10)} language={this.language} />
+        this.maketransaction = ({ match }: RouteComponentProps<{ walletType: string, nonce: number }>) => (
+            <MakeTransaction walletType={match.params.walletType} rest={this.rest} nonce={match.params.nonce} language={this.language} />
         )
-        this.maketransactionIndex = ({ match }: RouteComponentProps<{ walletType: string, address: string, selectedAccount: string, nonce: string }>) => (
-            <MakeTransaction walletType={match.params.walletType} rest={this.rest} address={match.params.address} selectedAccount={match.params.selectedAccount} nonce={parseInt(match.params.nonce, 10)} language={this.language} />
+        this.maketransactionIndex = ({ match }: RouteComponentProps<{ walletType: string, address: string, selectedAccount: string, nonce: number }>) => (
+            <MakeTransaction walletType={match.params.walletType} rest={this.rest} address={match.params.address} selectedAccount={match.params.selectedAccount} nonce={match.params.nonce} language={this.language} />
         )
-        this.maketransactionHDWallet = ({ match }: RouteComponentProps<{ walletType: string, name: string, address: string, selectedAccount: string, nonce: string }>) => (
-            <MakeTransaction rest={this.rest} walletType={match.params.walletType} name={match.params.name} address={match.params.address} selectedAccount={match.params.selectedAccount} nonce={parseInt(match.params.nonce, 10)} language={this.language} />
+        this.maketransactionHDWallet = ({ match }: RouteComponentProps<{ walletType: string, name: string, address: string, selectedAccount: string, nonce: number }>) => (
+            <MakeTransaction rest={this.rest} walletType={match.params.walletType} name={match.params.name} address={match.params.address} selectedAccount={match.params.selectedAccount} nonce={match.params.nonce} language={this.language} />
         )
         this.wallet = ({ match }: RouteComponentProps<{}>) => (
             <WalletView rest={props.rest} language={this.language} />
@@ -126,13 +129,17 @@ export class LiteClient extends React.Component<any, any> {
             <RecoverWallet rest={props.rest} language={this.language} />
         )
         this.walletDetail = ({ match }: RouteComponentProps<{ name: string }>) => (
-            <WalletDetail name={match.params.name} rest={this.rest} language={this.language} notFound={this.notFound} />
+            <WalletDetail name={match.params.name} rest={this.rest} language={this.language} notFound={this.notFound} price={this.state.price} />
         )
         this.hardwareWalletView = ({ match }: RouteComponentProps<{ walletType: string }>) => (
             <HardwareWalletView rest={this.rest} walletType={match.params.walletType} />
         )
         this.hardwareAddressView = ({ match }: RouteComponentProps<{ walletType: string, hash: string, selectedAccount: string }>) => (
-            <AddressInfo hash={match.params.hash} walletType={match.params.walletType} rest={this.rest} selectedAccount={match.params.selectedAccount} language={this.language} />
+            <AddressInfo hash={match.params.hash} walletType={match.params.walletType} rest={this.rest} selectedAccount={match.params.selectedAccount} language={this.language} price={this.state.price} />
+        )
+
+        this.hdwalletAddressView = ({ match }: RouteComponentProps<{ walletType: string, hash: string, name: string, selectedAccount: string }>) => (
+            <AddressInfo hash={match.params.hash} walletType={match.params.walletType} rest={this.rest} name={match.params.name} selectedAccount={match.params.selectedAccount} language={this.language} price={this.state.price} />
         )
     }
 
@@ -149,10 +156,17 @@ export class LiteClient extends React.Component<any, any> {
                 this.setState({ totp: false })
             }
         })
+
+        this.rest.getPrice(this.language.currency).then((price: number) => {
+            this.setState({ price })
+        })
     }
     public languageChange = (event: any) => {
         this.language = getLocale(event.target.value)
         this.setState({ [event.target.name]: event.target.value })
+        this.rest.getPrice(this.language.currency).then((price: number) => {
+            this.setState({ price })
+        })
     }
 
     public toggleDrawer(open: boolean) {
@@ -272,6 +286,7 @@ export class LiteClient extends React.Component<any, any> {
                             <Route exact path="/wallet/detail/:name" component={this.walletDetail} />
                             <Route exact path="/hardwareWallet/:walletType" component={this.hardwareWalletView} />
                             <Route exact path="/address/:hash/:walletType/:selectedAccount" component={this.hardwareAddressView} />
+                            <Route exact path="/address/:hash/:walletType/:name/:selectedAccount" component={this.hdwalletAddressView} />
                         </Switch>
                     </div>
                 </main>

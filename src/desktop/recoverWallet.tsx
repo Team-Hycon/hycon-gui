@@ -1,8 +1,8 @@
-import * as utils from "@glosfer/hyconjs-util"
 import { Button, Card, CardContent, Checkbox, FormControl, FormControlLabel, Grid, Icon, Input, InputLabel, Select } from "@material-ui/core"
 import { Dialog, IconButton, MenuItem, TextField } from "material-ui"
 import * as React from "react"
 import { Redirect } from "react-router"
+import { encodingMnemonic } from "./stringUtil"
 
 export class RecoverWallet extends React.Component<any, any> {
     public mounted: boolean = false
@@ -90,7 +90,7 @@ export class RecoverWallet extends React.Component<any, any> {
     public recoverWallet() {
         if (!this.checkParam()) { return }
 
-        const mnemonic = utils.encodingMnemonic(this.state.mnemonic)
+        const mnemonic = encodingMnemonic(this.state.mnemonic)
         this.state.rest.recoverWallet({
             language: this.state.language,
             mnemonic,
@@ -122,7 +122,7 @@ export class RecoverWallet extends React.Component<any, any> {
     public recoverHDWallet() {
         if (!this.checkParam()) { return }
 
-        const mnemonic = utils.encodingMnemonic(this.state.mnemonic)
+        const mnemonic = encodingMnemonic(this.state.mnemonic)
         this.state.rest.recoverHDWallet({
             language: this.state.language,
             mnemonic,

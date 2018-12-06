@@ -13,4 +13,7 @@ message Tx {
   uint32 nonce = 5;
   bytes signature = 6;
   uint32 recovery = 7;
+  bytes transitionSignature = 8;
+  uint32 transitionRecovery = 9;
+  string networkid = 10;
 }

@@ -113,6 +113,15 @@ export interface ITx {
 
     /** Tx recovery */
     recovery?: (number|null);
+
+    /** Tx transitionSignature */
+    transitionSignature?: (Uint8Array|null);
+
+    /** Tx transitionRecovery */
+    transitionRecovery?: (number|null);
+
+    /** Tx networkid */
+    networkid?: (string|null);
 }
 
 /** Represents a Tx. */
@@ -144,6 +153,15 @@ export class Tx implements ITx {
 
     /** Tx recovery. */
     public recovery: number;
+
+    /** Tx transitionSignature. */
+    public transitionSignature: Uint8Array;
+
+    /** Tx transitionRecovery. */
+    public transitionRecovery: number;
+
+    /** Tx networkid. */
+    public networkid: string;
 
     /**
      * Creates a new Tx instance using the specified properties.

@@ -78,6 +78,7 @@ const styles = ({
 })
 
 export class Login extends React.Component<any, any> {
+    public readonly isDev: boolean = (process.env.NODE_ENV === "development")
 
     constructor(props: any) {
         super(props)
@@ -104,6 +105,7 @@ export class Login extends React.Component<any, any> {
             claimLockAmt: "",
             claimPendingAmt: "",
         }
+        // this.handleSubmit = this.handleSubmit.bind(this)
         this.completeClaim = this.completeClaim.bind(this)
         this.handleLogin = this.handleLogin.bind(this)
         this.handleUpdateAddress = this.handleUpdateAddress.bind(this)
@@ -354,7 +356,7 @@ export class Login extends React.Component<any, any> {
             return res.json()
         } catch (e) {
             // tslint:disable-next-line:no-console
-            // console.log(e)
+            if (this.isDev) { console.log(e) }
         }
     }
 
@@ -375,7 +377,7 @@ export class Login extends React.Component<any, any> {
             return res.json()
         } catch (e) {
             // tslint:disable-next-line:no-console
-            // console.log(e)
+            if (this.isDev) { console.log(e) }
         }
     }
 

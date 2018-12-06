@@ -9,6 +9,7 @@ export default {
     "button-forget": "지우기",
     "button-close": "닫기",
     "button-submit": "제출",
+    "button-download": "다운로드",
 
     "wallet-list": "지갑 목록",
     "load-key-from-file": "키 파일 불러오기",
@@ -153,4 +154,6 @@ export default {
     "alert-disable-totp-fail": "트랜잭션 OTP 비활성화에 실패했습니다",
     "transaction-totp": "Google Authenticator 앱의 6자리 코드를 입력해 주세요",
     "alert-invalid-code-password": "Google Authenticator 코드 / OTP 패스워드를 확인해 주세요",
+
+    "currency": "KRW",
 }

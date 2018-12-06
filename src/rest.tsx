@@ -1,4 +1,16 @@
 // tslint:disable:ban-types
+export interface ISignedTx {
+    amount: string,
+    fee: string,
+    from: string,
+    nonce: number
+    recovery: number,
+    signature: string,
+    transitionRecovery?: number,
+    transitionSignature?: string,
+    to: string,
+}
+
 export interface IResponseError {
     status: number,
     timestamp: number,
@@ -58,11 +70,12 @@ export interface IPeer {
     lastSeen?: string
     failCount?: number
     lastAttempt?: string
-    active?: boolean
+    active?: number
     currentQueue?: number
     location?: string
     latitude?: number
     longitude?: number
+    successCount?: number
 }
 
 export interface ILocationDetails {
@@ -70,6 +83,13 @@ export interface ILocationDetails {
     lat: number
     lng: number
     count: number
+}
+
+export interface ICreateWallet {
+    passphrase?: string
+    mnemonic?: string
+    language?: string
+    privateKey?: string
 }
 
 export interface IHyconWallet {
@@ -85,6 +105,7 @@ export interface IHyconWallet {
     language?: string
     pendingAmount?: string
     minedBlocks?: IMinedInfo[]
+    index?: number
 }
 
 export interface IMinedInfo {
@@ -97,8 +118,15 @@ export interface IMinedInfo {
 export interface IMiner {
     cpuHashRate: number
     cpuCount: number
-    networkHashRate: number
+    networkHashRate: string
     currentMinerAddress: string
+}
+
+export interface ILogin {
+    email: string
+    password: string
+    tfa_token?: string
+    tfa_pin?: number
 }
 
 export interface IRest {
@@ -117,8 +145,8 @@ export interface IRest {
     // [Depreciated] changeAccount(name: string, represent: number): Promise<boolean>
     deleteWallet(name: string): Promise<boolean>
     generateWallet(Hwallet: IHyconWallet): Promise<string>
-    getAddressInfo(address: string): Promise<IWalletAddress>
-    getAllAccounts(name: string): Promise<{ represent: number, accounts: Array<{ address: string, balance: string }> } | boolean>
+    getAddressInfo(address: string): Promise<IWalletAddress | IResponseError>
+    getAllAccounts(name: string, password: string, startIndex: number): Promise<Array<{ address: string, balance: string }> | boolean>
     getBlock(hash: string): Promise<IBlock | IResponseError>
     getBlockList(index: number): Promise<{ blocks: IBlock[], length: number }>
     getTopTipHeight(): Promise<{ height: number }>
@@ -147,13 +175,15 @@ export interface IRest {
     addFavorite(alias: string, address: string): Promise<boolean>
     deleteFavorite(alias: string): Promise<boolean>
     addWalletFile(name: string, password: string, key: string): Promise<boolean>
-    getLedgerWallet(startIndex: number): Promise<IHyconWallet[] | number>
+    getLedgerWallet(startIndex: number, count: number): Promise<IHyconWallet[] | number>
     sendTxWithLedger(index: number, from: string, to: string, amount: string, fee: string, txNonce?: number, queueTx?: Function): Promise<{ res: boolean, case?: number }>
     possibilityLedger(): Promise<boolean>
+    getMarketCap(): Promise<{ totalSupply: string, circulatingSupply: string }>
     getTOTP(): Promise<{ iv: string, data: string } | boolean>
     saveTOTP(secret: string, totpPw: string): Promise<boolean>
     deleteTOTP(totpPw: string): Promise<{ res: boolean, case?: number }>
     verifyTOTP(token: string, totpPw: string, secret?: string): Promise<boolean>
+    login(data: ILogin): Promise<any>
     getHDWallet(name: string, password: string, index: number, count: number): Promise<IHyconWallet[] | IResponseError>
     sendTxWithHDWallet(tx: { name: string, password: string, address: string, amount: string, minerFee: string, nonce?: number }, index: number, queueTx?: Function): Promise<{ res: boolean, case?: number }>
     generateHDWallet(Hwallet: IHyconWallet): Promise<string>
@@ -162,6 +192,20 @@ export interface IRest {
     checkWalletBitbox(password: string): Promise<boolean | number | { error: number, remain_attemp: string }>
     getBitboxWallet(password: string, startIndex: number, count: number): Promise<IHyconWallet[] | number>
     sendTxWithBitbox(tx: { from: string, password: string, address: string, amount: string, minerFee: string, nonce?: number }, index: number, queueTx?: Function): Promise<{ res: boolean, case?: (number | { error: number, remain_attemp: string }) }>
-    setBitboxPassword(password: string): Promise<boolean | number>
+    setBitboxPassword(password: string): Promise<number | boolean>
+    createBitboxWallet(name: string, password: string): Promise<boolean | number>
+    updateBitboxPassword(originalPwd: string, newPwd: string): Promise<boolean | number | { error: number, remain_attemp: string }>
+    isUncleBlock(blockHash: string): Promise<boolean | IResponseError>
+    getMiningReward(minerAddress: string, blockHash: string): Promise<string | IResponseError>
+    getPrice(currency: string): Promise<number>
+    login(data: ILogin): Promise<{ response: string } | IResponseError>
+    getHDWallet(name: string, password: string, index: number, count: number): Promise<IHyconWallet[] | IResponseError>
+    sendTxWithHDWallet(tx: { name: string, password: string, address: string, amount: string, minerFee: string, nonce?: number }, index: number, queueTx?: Function): Promise<{ res: boolean, case?: number }>
+    generateHDWallet(Hwallet: IHyconWallet): Promise<string>
+    recoverHDWallet(Hwallet: IHyconWallet): Promise<string | boolean>
+    checkPasswordBitbox(): Promise<boolean | number>
+    checkWalletBitbox(password: string): Promise<boolean | number | { error: number, remain_attemp: string }>
+    getBitboxWallet(password: string, startIndex: number, count: number): Promise<IHyconWallet[] | number>
+    sendTxWithBitbox(tx: { from: string, password: string, address: string, amount: string, minerFee: string, nonce?: number }, index: number, queueTx?: Function): Promise<{ res: boolean, case?: (number | { error: number, remain_attemp: string }) }>
     createBitboxWallet(name: string, password: string): Promise<boolean | number>
 }
