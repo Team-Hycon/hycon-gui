@@ -221,7 +221,6 @@ export class RestElectron implements IRest {
         const wordlist = getBip39Wordlist(language)
         return Promise.resolve(bip39.generateMnemonic(128, undefined, wordlist))
     }
-
     public async getWalletDetail(name: string): Promise<IHyconWallet | IResponseError> {
         const wallet = await this.getWallet(name)
         if (!wallet.address || wallet.address === "") { return { name, address: "" } }

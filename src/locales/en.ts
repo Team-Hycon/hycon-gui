@@ -10,6 +10,7 @@ export default {
     "button-close": "CLOSE",
     "button-submit": "SUBMIT",
     "button-download": "DOWNLOAD",
+    "button-continue": "CONTINUE",
 
     "wallet-list": "Wallet List",
     "load-key-from-file": "Load Key from File",
@@ -118,6 +119,8 @@ export default {
     "alert-invalid-password": "Invalid password",
     "alert-invalid-address": "Invalid address",
     "alert-send-failed": "Failed to transfer HYCON",
+    "alert-abnormal-fee-title": "Abnormal Fee Amount",
+    "alert-abnormal-fee-description": "Your current fee is greater than the amount you're sending. Are you sure you want to continue sending this transaction?",
     "wallet-type-select": "Select wallet to use",
     "local-wallet": "Wallet list",
     "Hardware-wallet": "Hardware Wallet (Ledger)",

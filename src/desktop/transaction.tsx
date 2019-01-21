@@ -1,4 +1,4 @@
-import { CircularProgress, Dialog, DialogTitle } from "@material-ui/core"
+import { CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@material-ui/core"
 import Button from "@material-ui/core/Button"
 import CardContent from "@material-ui/core/CardContent"
 import Grid from "@material-ui/core/Grid"
@@ -22,11 +22,12 @@ export class Transaction extends React.Component<any, any> {
             amount: 0,
             dialog: false,
             dialogTOTP: false,
+            dialogFee: false,
             errorText: "",
             favorites: [],
             fromAddress: "",
             isLoading: true,
-            minerFee: 1,
+            minerFee: "0.000000001",
             name: props.name,
             nonce: props.nonce,
             password: "",
@@ -111,6 +112,10 @@ export class Transaction extends React.Component<any, any> {
         }
         if (this.state.address === "" || this.state.address === undefined) {
             alert(`${this.props.language["alert-address-empty"]}`)
+            return
+        }
+        if (hyconfromString(this.state.minerFee) > hyconfromString(this.state.amount)) {
+            this.setState({ dialogFee: true })
             return
         }
         return true
@@ -212,6 +217,23 @@ export class Transaction extends React.Component<any, any> {
                 {/* ADDRESS BOOK */}
                 <Dialog open={this.state.dialog} onClose={() => { this.setState({ dialog: false }) }}>
                     <AddressBook rest={this.state.rest} favorites={this.state.favorites} isWalletView={false} language={this.props.language} callback={(address: string) => { this.handleListItemClick(address) }} />
+                </Dialog>
+
+                {/* LARGE FEE ALERT */}
+                <Dialog open={this.state.dialogFee} onClose={() => { this.setState({ dialogFee: false }) }}>
+                    <DialogTitle id="alert-dialog-fee-title">{this.props.language["alert-abnormal-fee-title"]}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-fee-description">
+                            {this.props.language["alert-abnormal-fee-description"]}
+                        </DialogContentText>
+                        <DialogActions>
+                            <Button variant="contained" color="primary" onClick={() => { this.setState({ dialogFee: false }) }}>{this.props.language["button-cancel"]}</Button>
+                            <Button color="secondary" onClick={() => {
+                                this.setState({ dialogFee: false })
+                                this.handleSubmit(event)
+                            }}>{this.props.language["button-continue"]}</Button>
+                        </DialogActions>
+                    </DialogContent>
                 </Dialog>
 
                 {/* LOADING */}

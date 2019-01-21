@@ -10,6 +10,7 @@ export default {
     "button-close": "닫기",
     "button-submit": "제출",
     "button-download": "다운로드",
+    "button-continue": "계속",
 
     "wallet-list": "지갑 목록",
     "load-key-from-file": "키 파일 불러오기",
@@ -118,6 +119,8 @@ export default {
     "alert-invalid-password": "패스워드가 유효하지 않습니다.",
     "alert-invalid-address": "주소가 유효하지 않습니다.",
     "alert-send-failed": "HYCON 전송에 실패했습니다.",
+    "alert-abnormal-fee-title": "수수료 금액 확인 필요",
+    "alert-abnormal-fee-description": "입력하신 수수료 금액이 송금액보다 큽니다. 송금을 계속하시겠습니까?",
     "wallet-type-select": "트랜잭션 전송할 때에 사용하실 지갑을 선택해 주세요.",
     "local-wallet": "지갑 목록",
     "Hardware-wallet": "하드웨어 지갑 (Ledger)",
