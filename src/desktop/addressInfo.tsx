@@ -22,6 +22,7 @@ interface IAddressView {
     currencyPrice: number
     rest: IRest
     redirectTxView: boolean
+    redirectWalletList: boolean
     hash: string
     txs: ITxProp[],
     pendings: ITxProp[]
@@ -55,6 +56,7 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
             pendings: [],
             price: "",
             redirectTxView: false,
+            redirectWalletList: false,
             rest: props.rest,
             txs: [],
             walletType: props.walletType,
@@ -115,15 +117,15 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
         })
     }
 
-    public makeTransaction() {
-        this.setState({ redirectTxView: true })
-    }
     public render() {
         if (this.state.notFound) {
             return <NotFound />
         }
         if (!this.state.notFound && this.state.address === undefined) {
             return null
+        }
+        if (this.state.redirectWalletList) {
+            return <Redirect to={`/wallet`} />
         }
         if (this.state.redirectTxView) {
             if (this.state.walletType === "hdwallet") {
@@ -137,7 +139,9 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
             <div>
                 <button onClick={() => { this.makeTransaction() }} className="mdl-button" style={{ display: `${this.state.accountIndex === undefined ? ("none") : ("block")}`, float: "right" }}>
                     <i className="material-icons">send</i>{this.props.language["button-transfer"]}</button>
-                    {(this.state.accountIndex === undefined) ? (<div className="contentTitle">{this.props.language["hycon-address"]}</div>) : (<div className="contentTitle">{this.state.name}</div>)}
+                <button onClick={() => { this.deleteHDwallet() }} className="mdl-button" style={{ display: `${this.state.accountIndex === undefined ? ("none") : ("block")}`, float: "right" }}>
+                    <i className="material-icons">delete</i>{this.props.language["button-forget"]}</button>
+                {(this.state.accountIndex === undefined) ? (<div className="contentTitle">{this.props.language["hycon-address"]}</div>) : (<div className="contentTitle">{this.state.name}</div>)}
                 <div className="sumTablesDiv">
                     <table className="tablesInRow twoTablesInRow">
                         <thead>
@@ -215,6 +219,25 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
             </div>
         )
     }
+
+    private makeTransaction() {
+        this.setState({ redirectTxView: true })
+    }
+
+    private deleteHDwallet() {
+        if (!confirm(`This action is to delete the HD wallet. Do you want to proceed with the deletion?`)) {
+            return
+        }
+        this.state.rest.deleteWallet(this.state.name).then((result: boolean) => {
+            if (result) {
+                alert(`Wallet was successfully removed. The screen switches to the wallet list screen.`)
+                this.setState({ redirectWalletList: true })
+            } else {
+                alert(`Failed to delete Wallet.`)
+            }
+        })
+    }
+
     private fetchNextTxs() {
         this.state.rest.getNextTxs(this.state.hash, this.state.txs[0].hash, this.state.index).then((result: ITxProp[]) => {
             if (result.length === 0) { this.setState({ hasMore: false }) }

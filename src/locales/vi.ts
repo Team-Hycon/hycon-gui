@@ -10,6 +10,7 @@ export default {
     "button-close": "Đóng",
     "button-submit": "Xác nhận",
     "button-download": "DOWNLOAD",
+    "button-continue": "TIẾP TỤC",
 
     "wallet-list": "Danh sách Ví",
     "load-key-from-file": "Tải chìa khoá từ tệp tin",
@@ -118,6 +119,8 @@ export default {
     "alert-invalid-password": "Mật khẩu không hợp lệ",
     "alert-invalid-address": "Địa chỉ không hợp lệ",
     "alert-send-failed": "Không thể gửi HYCON",
+    "alert-abnormal-fee-title": "Phí dịch vụ lớn bất thường",
+    "alert-abnormal-fee-description": "Phí dịch vụ hiện lớn hơn số tiền bạn muốn gửi. Bạn có chắc chắn muốn tiếp tục thực hiện giao dịch này?",
     "wallet-type-select": "Mời bạn chọn ví để sử dụng",
     "local-wallet": "Danh sách Ví",
     "Hardware-wallet": "Ví cứng (Ledger)",

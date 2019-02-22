@@ -10,6 +10,7 @@ export default {
     "button-close": "关闭",
     "button-submit": "提交",
     "button-download": "DOWNLOAD",
+    "button-continue": "继续",
 
     "wallet-list": "钱包列表",
     "load-key-from-file": "从文件载入密匙",
@@ -118,6 +119,8 @@ export default {
     "alert-invalid-password": "无效密码",
     "alert-invalid-address": "无效地址",
     "alert-send-failed": "转账失败",
+    "alert-abnormal-fee-title": "异常费用",
+    "alert-abnormal-fee-description": "您当前的费用高于您发送量。 您确定要继续发送这个交易吗？",
     "wallet-type-select": "选择需要使用的钱包",
     "local-wallet": "钱包列表",
     "Hardware-wallet": "硬件钱包(Ledger)",

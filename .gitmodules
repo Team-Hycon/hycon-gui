@@ -1,0 +1,3 @@
+[submodule "mobile"]
+	path = src/mobile
+	url = https://github.com/Team-Hycon/hycon-pocket.git

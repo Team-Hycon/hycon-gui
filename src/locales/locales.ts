@@ -32,6 +32,7 @@ export interface IText {
     "button-close": string,
     "button-submit": string,
     "button-download": string,
+    "button-continue": string,
 
     "wallet-list": string,
     "load-key-from-file": string,
@@ -140,6 +141,8 @@ export interface IText {
     "alert-invalid-password": string,
     "alert-invalid-address": string,
     "alert-send-failed": string,
+    "alert-abnormal-fee-title": string,
+    "alert-abnormal-fee-description": string,
     "wallet-type-select": string,
     "local-wallet": string,
     "Hardware-wallet": string,

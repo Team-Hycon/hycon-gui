@@ -10,6 +10,7 @@ export default {
     "button-close": "ХААХ",
     "button-submit": "ИЛГЭЭХ",
     "button-download": "DOWNLOAD",
+    "button-continue": "CONTINUE",
 
     "wallet-list": "Хэтэвчний жагсаалт",
     "load-key-from-file": "Түлхүүрээ файлаас уншуулах",
@@ -118,6 +119,8 @@ export default {
     "alert-invalid-password": "Нууц үг буруу байна",
     "alert-invalid-address": "Хаяг буруу байна",
     "alert-send-failed": "HYCON шилжүүлэлт амжилтгүй боллоо.",
+    "alert-abnormal-fee-title": "Abnormal Fee Amount",
+    "alert-abnormal-fee-description": "Your current fee is greater than the amount you're sending. Are you sure you want to continue sending this transaction?",
     "wallet-type-select": "Хэрэглэх хэтэвчээ сонгоно уу",
     "local-wallet": "Хэтэвчний жагсаалт",
     "Hardware-wallet": "Hardware Хэтэвч (Ledger)",
